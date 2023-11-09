@@ -28,8 +28,8 @@ public class DataVisualizationActivity extends AppCompatActivity {
         headerTitle.setText(getText(R.string.data_viz_header));
 
         this.textDate = findViewById(R.id.textDate);
-        this.textBudget = findViewById(R.id.textBudget);
-        this.textRemaining = findViewById(R.id.textRemaining);
+        this.textBudget = findViewById(R.id.textBudgetValue);
+        this.textRemaining = findViewById(R.id.textRemainingValue);
         this.categoryViewPager = findViewById(R.id.categoryViewPager);
         this.expensesRecyclerView = findViewById(R.id.expensesRecyclerView);
 
@@ -39,6 +39,7 @@ public class DataVisualizationActivity extends AppCompatActivity {
     }
 
     private void addCategoriesToPager() {
+        //TODO: This will be an API call
         this.categoryViewPager.setAdapter(new CategoryAdapter(testCategories()));
     }
 

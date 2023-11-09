@@ -82,24 +82,52 @@
     </FrameLayout>
 
     <TextView
-        android:id="@+id/textBudget"
+        android:id="@+id/textBudgetLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Budget: "
+        android:text="@string/budget"
+        android:gravity="start"
         android:layout_marginTop="16dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@id/guidelineLeft"
+        app:layout_constraintEnd_toStartOf="@id/guidelineCenter"
+        app:layout_constraintTop_toBottomOf="@id/viewPagerContainer" />
+
+    <TextView
+        android:id="@+id/textBudgetValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="$0"
+        android:gravity="start"
+        android:layout_marginTop="16dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@id/guidelineCenter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/viewPagerContainer" />
 
     <TextView
-        android:id="@+id/textRemaining"
+        android:id="@+id/textRemainingLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Remaining: "
+        android:text="@string/remaining"
+        android:gravity="start"
         android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@id/guidelineLeft"
+        app:layout_constraintEnd_toStartOf="@id/guidelineCenter"
+        app:layout_constraintTop_toBottomOf="@id/textBudgetLabel" />
+
+    <TextView
+        android:id="@+id/textRemainingValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="$0"
+        android:gravity="start"
+        android:layout_marginTop="8dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@id/guidelineCenter"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textBudget" />
+        app:layout_constraintTop_toBottomOf="@id/textBudgetLabel" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/expensesRecyclerView"
@@ -108,7 +136,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textRemaining"
+        app:layout_constraintTop_toBottomOf="@id/textRemainingLabel"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

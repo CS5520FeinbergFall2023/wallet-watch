@@ -3,4 +3,6 @@
     <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="data_viz_header">View Expenses</string>
+    <string name="remaining">Remaining:</string>
+    <string name="budget">Budget:</string>
 </resources>
