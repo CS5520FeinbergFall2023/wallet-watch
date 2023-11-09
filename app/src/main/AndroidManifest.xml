@@ -16,6 +16,9 @@
             android:name=".HomePageActivity"
             android:exported="false" />
         <activity
+            android:name=".DataVisualizationActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

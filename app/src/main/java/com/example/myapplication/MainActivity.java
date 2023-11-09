@@ -17,13 +17,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Login
-        loginButton = (Button) findViewById(R.id.loginButton);
-        loginButton.setOnClickListener((new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                homepageActivity();
-            }
-        }));
+        loginButton = findViewById(R.id.loginButton);
+        loginButton.setOnClickListener((view -> homepageActivity()));
 
     }
 
