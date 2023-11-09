@@ -43,7 +43,7 @@ public class DataVisualizationActivity extends AppCompatActivity {
     }
 
     private void updateDateDisplay() {
-        String monthYear = this.currentCalendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) +
+        String monthYear = this.currentCalendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) +
                 " " +
                 this.currentCalendar.get(Calendar.YEAR);
 
