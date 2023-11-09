@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="accordian_header">%s - Budget: $%d</string>
+    <string name="expense_item">%s - $%.2f</string>
 </resources>
