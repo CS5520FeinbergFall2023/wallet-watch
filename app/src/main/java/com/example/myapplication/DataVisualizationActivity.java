@@ -17,6 +17,7 @@ public class DataVisualizationActivity extends AppCompatActivity {
     private TextView textDate, textBudget, textRemaining;
     private ViewPager2 categoryViewPager;
     private RecyclerView expensesRecyclerView;
+    private ExpensesAdapter expensesAdapter;
     private Calendar currentCalendar = Calendar.getInstance();
 
     @Override
@@ -36,6 +37,9 @@ public class DataVisualizationActivity extends AppCompatActivity {
         addCategoriesToPager();
         updateDateDisplay();
         setupMonthIterationButtons();
+
+        this.expensesRecyclerView = findViewById(R.id.expensesRecyclerView);
+        this.expensesRecyclerView.setAdapter(new ExpensesAdapter(testExpenses()));
     }
 
     private void addCategoriesToPager() {
@@ -72,5 +76,13 @@ public class DataVisualizationActivity extends AppCompatActivity {
         categories.add(new BudgetCategory("Travel"));
 
         return categories;
+    }
+
+    private List<Expense> testExpenses() {
+        List<Expense> expensesList = new ArrayList<>();
+        expensesList.add(new Expense("Lunch", 15.00));
+        expensesList.add(new Expense("Train Ticket", 20.00));
+
+        return expensesList;
     }
 }
