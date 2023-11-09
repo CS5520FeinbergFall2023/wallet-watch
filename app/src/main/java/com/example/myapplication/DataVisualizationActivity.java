@@ -1,16 +1,23 @@
 package com.example.myapplication;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class DataVisualizationActivity extends AppCompatActivity {
+
+    private TextView textDate, textBudget, textRemaining;
+    private ViewPager2 categoryViewPager;
+    private RecyclerView expensesRecyclerView;
+    private Calendar currentCalendar = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,23 +27,49 @@ public class DataVisualizationActivity extends AppCompatActivity {
         TextView headerTitle = findViewById(R.id.headerTitle);
         headerTitle.setText(getText(R.string.data_viz_header));
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        this.textDate = findViewById(R.id.textDate);
+        this.textBudget = findViewById(R.id.textBudget);
+        this.textRemaining = findViewById(R.id.textRemaining);
+        this.categoryViewPager = findViewById(R.id.categoryViewPager);
+        this.expensesRecyclerView = findViewById(R.id.expensesRecyclerView);
 
-        Accordion accordion = new Accordion(this, TestAccordion());
-        recyclerView.setAdapter(accordion);
+        addCategoriesToPager();
+        updateDateDisplay();
+        setupMonthIterationButtons();
     }
 
-    private List<BudgetCategory> TestAccordion() {
-        return new ArrayList<BudgetCategory>() {{
-            add(new BudgetCategory("Food", 200, new ArrayList<Expense>() {{
-                add(new Expense("McDonalds", 12.57));
-                add(new Expense("Tres Gatos", 120.29));
-            }}));
-            add(new BudgetCategory("Travel", 1000, new ArrayList<Expense>() {{
-                add(new Expense("United Airlines", 842.76));
-                add(new Expense("Marriott", 488.19));
-            }}));
-        }};
+    private void addCategoriesToPager() {
+        this.categoryViewPager.setAdapter(new CategoryAdapter(testCategories()));
+    }
+
+    private void updateDateDisplay() {
+        String monthYear = this.currentCalendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()) +
+                " " +
+                this.currentCalendar.get(Calendar.YEAR);
+
+        this.textDate.setText(monthYear);
+    }
+
+    private void setupMonthIterationButtons() {
+        Button btnPreviousMonth = findViewById(R.id.btnPreviousMonth);
+        Button btnNextMonth = findViewById(R.id.btnNextMonth);
+
+        btnPreviousMonth.setOnClickListener(v -> {
+            this.currentCalendar.add(Calendar.MONTH, -1);
+            updateDateDisplay();
+        });
+
+        btnNextMonth.setOnClickListener(v -> {
+            this.currentCalendar.add(Calendar.MONTH, 1);
+            updateDateDisplay();
+        });
+    }
+
+    private List<BudgetCategory> testCategories() {
+        List<BudgetCategory> categories = new ArrayList<>();
+        categories.add(new BudgetCategory("Food"));
+        categories.add(new BudgetCategory("Travel"));
+
+        return categories;
     }
 }

@@ -1,39 +1,13 @@
 package com.example.myapplication;
 
-import java.util.List;
-
 public class BudgetCategory {
-    private String name;
-    private int budget;
-    private List<Expense> expenses;
+    private String categoryName;
 
-    public BudgetCategory(String name, int budget, List<Expense> expenses) {
-        this.name = name;
-        this.budget = budget;
-        this.expenses = expenses;
+    public BudgetCategory(String categoryName) {
+        this.categoryName = categoryName;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getBudget() {
-        return this.budget;
-    }
-
-    public void setBudget(int budget) {
-        this.budget = budget;
-    }
-
-    public List<Expense> getExpenses() {
-        return this.expenses;
-    }
-
-    public void setExpenses(List<Expense> expenses) {
-        this.expenses = expenses;
+    public String getCategoryName() {
+        return this.categoryName;
     }
 }
