@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,8 @@ public class Accordion extends RecyclerView.Adapter<Accordion.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        int FONT_SIZE = 20;
+
         BudgetCategory category = this.categories.get(position);
         holder.categoryHeader.setText(
                 this.context.getString(
@@ -46,6 +49,8 @@ public class Accordion extends RecyclerView.Adapter<Accordion.ViewHolder> {
                             R.string.expense_item,
                             expense.getName(),
                             expense.getAmount()));
+
+            expenseView.setTextSize(TypedValue.COMPLEX_UNIT_SP, FONT_SIZE);
             holder.expensesLayout.addView(expenseView);
         }
 
