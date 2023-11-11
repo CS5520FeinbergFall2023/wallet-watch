@@ -4,11 +4,7 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,12 +21,12 @@ import com.google.firebase.storage.UploadTask;
 //import com.google.firebase.storage.UploadTask;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class FirebaseHelper {
 
     private final DatabaseReference databaseReference;
     private final StorageReference storageReference;
-    int i;
 
     public FirebaseHelper() {
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -55,26 +51,20 @@ public class FirebaseHelper {
             StorageReference riversRef = storageReference.child(""+imageUri.getLastPathSegment());
             UploadTask uploadTask = riversRef.putFile(imageUri);
 
-            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
-
-                    // Continue with the task to get the download URL
-                    return riversRef.getDownloadUrl();
+            uploadTask.continueWithTask(task -> {
+                if (!task.isSuccessful()) {
+                    throw Objects.requireNonNull(task.getException());
                 }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) {
-                        Uri downloadUri = task.getResult();
-                        String imageUrl = downloadUri.toString();
-                    } else {
-                        // Handle failures
-                        // ...
-                    }
+
+                // Continue with the task to get the download URL
+                return riversRef.getDownloadUrl();
+            }).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Uri downloadUri = task.getResult();
+                    String imageUrl = downloadUri.toString();
+                } else {
+                    // Handle failures
+                    // ...
                 }
             });
         }
