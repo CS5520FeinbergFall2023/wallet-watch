@@ -1,8 +1,14 @@
 package com.example.myapplication;
 
+import android.net.Uri;
+
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -10,15 +16,25 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+//import com.google.firebase.storage.FirebaseStorage;
+//import com.google.firebase.storage.StorageReference;
+//import com.google.firebase.storage.UploadTask;
 
 import java.time.Instant;
 
 public class FirebaseHelper {
 
     private final DatabaseReference databaseReference;
+    private final StorageReference storageReference;
+    int i;
 
     public FirebaseHelper() {
         databaseReference = FirebaseDatabase.getInstance().getReference();
+        storageReference = FirebaseStorage.getInstance().getReference().child("user_images");
     }
 
     // Authentication methods
@@ -28,8 +44,41 @@ public class FirebaseHelper {
         // Create a user entry in the database
         DatabaseReference userRef = databaseReference.child("users").child(username);
         User newUser = new User(username, password, Instant.now().toEpochMilli());
+
         userRef.setValue(newUser)
                 .addOnCompleteListener(onCompleteListener);
+    }
+
+    public void uploadImage(Uri imageUri) {
+        if (imageUri != null) {
+
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+            StorageReference riversRef = storageRef.child("images/"+imageUri.getLastPathSegment());
+            UploadTask uploadTask = riversRef.putFile(imageUri);
+
+            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    // Continue with the task to get the download URL
+                    return riversRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        String imageUrl = downloadUri.toString();
+                    } else {
+                        // Handle failures
+                        // ...
+                    }
+                }
+            });
+        }
     }
 
     public void loginUser(String username, String password, OnCompleteListener<Boolean> onCompleteListener) {

@@ -21,6 +21,9 @@ public class RegisterPageActivity extends AppCompatActivity {
 
     private SharedPreferences prefs;
 
+    private static final int PICK_IMAGE_REQUEST = 1;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
