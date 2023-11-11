@@ -1,27 +1,39 @@
 package com.example.myapplication;
 
 public class User {
+
     private String username;
     private String password;
-    private String email;
+    private Long registration_date;
+    public User() {}
 
-    public User(String username, String password, String email) {
-        this.username = username;
+    public User(String username, String password, Long registrationDate) {
         this.password = password;
-        this.email = email;
-    }
-
-    public String getUsername() {
-        return username;
+        this.username = username;
+        this.registration_date = registrationDate;
     }
 
     public String getPassword() {
         return password;
     }
 
-    public String getEmail() {
-        return email;
+    public String getUsername() {
+        return username;
     }
 
-    // Add getters and setters
+    public Long getRegistration_date() {
+        return registration_date;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setRegistration_date(Long registration_date) {
+        this.registration_date = registration_date;
+    }
 }
