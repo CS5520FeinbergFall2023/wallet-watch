@@ -17,6 +17,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
 
+        android:onClick="budgetButton"
+
         />
 
     <Button
@@ -29,6 +31,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/budgetButton"
+
+        android:onClick="expenseButton"
         />
 
     <Button
@@ -42,6 +46,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/budgetButton"
 
+        android:onClick="dataButton"
         />   
 
 </androidx.constraintlayout.widget.ConstraintLayout>
