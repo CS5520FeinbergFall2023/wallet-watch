@@ -81,7 +81,7 @@ public class FirebaseHelper {
     }
 
 
-    //todo: i have created all the method definations, so i have written methods in 2 ways, one way you can see above
+    //todo: i have created all the method definitions, so i have written methods in 2 ways, one way you can see above
     // where return type is void and i am handling it through callback, or you can handle it directly in the activity
     // where these methods are being called from, i would suggest the above way.
 //    // Budget methods
