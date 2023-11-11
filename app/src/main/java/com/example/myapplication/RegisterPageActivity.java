@@ -1,0 +1,69 @@
+package com.example.myapplication;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.Objects;
+
+public class RegisterPageActivity extends AppCompatActivity {
+
+    private EditText usernameEditText, passwordEditText;
+    FirebaseHelper firebaseHelper;
+
+    private static final String PREFS_NAME = "MyPrefsFile";
+    private static final String LOGGED_IN_KEY = "isLoggedIn";
+
+    private SharedPreferences prefs;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register_page);
+
+        firebaseHelper = new FirebaseHelper();
+        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        usernameEditText = findViewById(R.id.editTextUsername);
+        passwordEditText = findViewById(R.id.editTextPassword);
+        Button registerButton = findViewById(R.id.buttonRegister);
+
+        registerButton.setOnClickListener(view -> {
+            String username = usernameEditText.getText().toString().trim();
+            String password = passwordEditText.getText().toString().trim();
+
+            if (username.isEmpty() || password.isEmpty()) {
+                Toast.makeText(RegisterPageActivity.this, "Please enter valid username and password", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            registerUser(username, password);
+        });
+    }
+
+    private void registerUser(String username, String password) {
+        firebaseHelper.registerOrLoginUser(username, password, task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(RegisterPageActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(LOGGED_IN_KEY, true);
+                editor.apply();
+
+                Intent intent = new Intent(RegisterPageActivity.this, HomePageActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                Toast.makeText(RegisterPageActivity.this, "Registration failed: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+}
+
