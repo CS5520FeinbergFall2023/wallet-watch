@@ -34,7 +34,7 @@ public class FirebaseHelper {
 
     public FirebaseHelper() {
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        storageReference = FirebaseStorage.getInstance().getReference().child("user_images");
+        storageReference = FirebaseStorage.getInstance().getReference().child("images");
     }
 
     // Authentication methods
@@ -52,8 +52,7 @@ public class FirebaseHelper {
     public void uploadImage(Uri imageUri) {
         if (imageUri != null) {
 
-            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-            StorageReference riversRef = storageRef.child("images/"+imageUri.getLastPathSegment());
+            StorageReference riversRef = storageReference.child(""+imageUri.getLastPathSegment());
             UploadTask uploadTask = riversRef.putFile(imageUri);
 
             Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
