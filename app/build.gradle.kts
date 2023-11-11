@@ -49,9 +49,8 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
     implementation("com.google.firebase:firebase-analytics")
-//    implementation ("com.google.firebase:firebase-database:20.3.0")
+    implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-messaging:23.3.1")
-//    implementation ("com.google.firebase:firebase-auth:22.2.0")
 
 }
