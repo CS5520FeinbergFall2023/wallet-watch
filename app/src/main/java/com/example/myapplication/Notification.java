@@ -26,4 +26,13 @@ public class Notification {
     }
 
     // Add getters and setters
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+
 }
