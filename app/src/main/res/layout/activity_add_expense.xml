@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AddExpenseActivity">
+
+    <TextView
+        style="@style/TextAppearance.AppCompat.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/dark_green"
+        android:paddingHorizontal="30dp"
+        android:paddingVertical="20dp"
+        android:text="@string/add_expense_header_text"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="30dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:orientation="horizontal"
+            android:paddingStart="0dp"
+            android:paddingEnd="30dp">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:contentDescription="@string/dollar_sign_icon_description"
+                android:importantForAccessibility="no"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/money_sign_24" />
+
+            <EditText
+                android:id="@+id/add_expense_budget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="number"
+                android:hint="@string/add_expense_budget_amount_hint"
+                android:inputType="number" />
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="30dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/add_expense_category"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <AutoCompleteTextView
+                    android:id="@+id/add_expense_category_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/add_expense_category_hint"
+                    android:inputType="none" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/expense_upload_button"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:paddingStart="0dp"
+                android:paddingTop="7dp"
+                android:paddingEnd="0dp"
+                app:backgroundTint="@color/dark_green"
+                app:icon="@drawable/camera_24"
+                app:iconGravity="textTop"
+                app:iconSize="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="30dp"
+            android:layout_marginTop="20dp"
+            android:hint="@string/add_expense_date_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editTextDatePicker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:inputType="none"
+                android:onClick="showDatePickerDialog" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <EditText
+            android:id="@+id/add_expense_notes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="30dp"
+            android:autofillHints="text"
+            android:hint="@string/add_expense_notes_hint"
+            android:inputType="text" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/add_expense_recurring_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:thumbTint="@color/dark_green"
+                app:trackTint="@color/green" />
+
+            <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:text="@string/add_expense_recurring" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="40dp"
+        android:text="@string/add_expense_button"
+        app:backgroundTint="@color/dark_green"
+        app:icon="@drawable/check_24"
+        app:iconSize="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

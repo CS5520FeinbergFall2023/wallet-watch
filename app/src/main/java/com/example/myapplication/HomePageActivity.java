@@ -49,6 +49,9 @@ public class HomePageActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+        final Button linkCollectorButton = findViewById(R.id.add_expense_button);
+        linkCollectorButton.setOnClickListener(v -> startActivity(new Intent(this, AddExpenseActivity.class)));
     }
 
     //code for image launcher
