@@ -80,10 +80,10 @@ public class DataVisualizationActivity extends AppCompatActivity {
         return categories;
     }
 
-    private List<Expense> testExpenses() {
-        List<Expense> expensesList = new ArrayList<>();
-        expensesList.add(new Expense("El Oriental De Cuba", 15.00));
-        expensesList.add(new Expense("Tres Gatos", 20.00));
+    private List<ExpenseItem> testExpenses() {
+        List<ExpenseItem> expensesList = new ArrayList<>();
+        expensesList.add(new ExpenseItem("El Oriental De Cuba", 15.00));
+        expensesList.add(new ExpenseItem("Tres Gatos", 20.00));
 
         return expensesList;
     }

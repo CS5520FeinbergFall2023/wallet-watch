@@ -10,9 +10,9 @@ import java.util.List;
 
 public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.ExpenseViewHolder> {
 
-    private List<Expense> expenses;
+    private List<ExpenseItem> expenses;
 
-    public ExpensesAdapter(List<Expense> expenses) {
+    public ExpensesAdapter(List<ExpenseItem> expenses) {
         this.expenses = expenses;
     }
 
@@ -25,7 +25,7 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.Expens
 
     @Override
     public void onBindViewHolder(@NonNull ExpenseViewHolder holder, int position) {
-        Expense expense = expenses.get(position);
+        ExpenseItem expense = expenses.get(position);
         holder.descriptionText.setText(expense.getName());
         holder.amountText.setText(String.valueOf(expense.getAmount()));
     }
