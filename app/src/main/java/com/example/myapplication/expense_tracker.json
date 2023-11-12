@@ -1,0 +1,44 @@
+{
+  "budgets": {
+    "kartik": {
+      "budget_id_1": {
+        "amount": 200,
+        "category": "Groceries",
+        "end_date": "1702188174000",
+        "start_date": "1699596174000"
+      },
+      "budget_id_2": {
+        "amount": 100,
+        "category": "Entertainment",
+        "end_date": "1702188174000",
+        "start_date": "1699596174000"
+      }
+    }
+  },
+  "expenses": {
+    "kartik": {
+      "expense_id_1": {
+        "amount": 50,
+        "category": "Groceries",
+        "date": "1699682574000",
+        "description": "Popeyes",
+        "image_url": "url_to_image"
+      }
+    }
+  },
+  "notifications": {
+    "kartik": {
+      "notification_id_1": {
+        "date": "1701237774000",
+        "message": "You have reached your budget for Groceries"
+      }
+    }
+  },
+  "users": {
+    "kartik": {
+      "password": "kartik",
+      "registration_date": 1699660682691,
+      "username": "kartik"
+    }
+  }
+}
