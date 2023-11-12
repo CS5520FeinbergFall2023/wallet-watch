@@ -1,6 +1,6 @@
 package com.example.myapplication;
+
 import java.time.Instant;
-import java.util.Date;
 
 public class Expense {
     private String category;
@@ -37,10 +37,6 @@ public class Expense {
 
     public double getAmount() {
         return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
     }
 
     public String getDescription() {
