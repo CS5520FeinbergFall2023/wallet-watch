@@ -18,4 +18,5 @@
     <string name="dollar_sign_icon_description">dollar sign</string>
     <string name="add_expense_header_text">Add Expense</string>
     <string name="clear_expense_button">clear</string>
+    <string name="notification_history_string">Notification History</string>
 </resources>
