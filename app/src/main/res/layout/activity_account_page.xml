@@ -5,18 +5,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ExpensePageActivity">
+    tools:context=".AccountPageActivity">
 
-
-    <TextView
+    <Button
+        android:id="@+id/buttonLogout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:text="Expense"
+        android:text="Logout"
 
         android:layout_centerInParent="true"
 
         />
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:layout_width="match_parent"
