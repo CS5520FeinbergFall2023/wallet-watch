@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -15,9 +16,11 @@ public class ExpensePageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_expense_page);
 
 
+
+
+
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setSelectedItemId(R.id.budget);
-
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.home) {
@@ -46,5 +49,9 @@ public class ExpensePageActivity extends AppCompatActivity {
 
             return false;
         });
+    }
+
+    public void showDatePickerDialog(View view) {
+
     }
 }

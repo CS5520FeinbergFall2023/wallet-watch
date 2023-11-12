@@ -37,9 +37,6 @@
             android:name=".HomePageActivity"
             android:exported="false" />
         <activity
-            android:name=".AddExpenseActivity"
-            android:exported="false" />
-        <activity
             android:name=".DataVisualizationActivity"
             android:exported="false" />
         <activity
