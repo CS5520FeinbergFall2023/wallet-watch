@@ -32,7 +32,7 @@ public class DataVisualizationActivity extends AppCompatActivity {
 
         // Bottom Navigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        bottomNavigationView.setSelectedItemId(R.id.home);
+        bottomNavigationView.setSelectedItemId(R.id.data);
 
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
