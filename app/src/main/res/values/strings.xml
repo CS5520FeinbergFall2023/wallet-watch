@@ -16,4 +16,5 @@
     <string name="add_expense_budget_amount_hint">Budget Amount</string>
     <string name="dollar_sign_icon_description">dollar sign</string>
     <string name="add_expense_header_text">Add Expense</string>
+    <string name="clear_expense_button">clear</string>
 </resources>
