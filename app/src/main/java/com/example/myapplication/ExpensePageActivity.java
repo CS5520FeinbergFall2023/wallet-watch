@@ -16,7 +16,7 @@ public class ExpensePageActivity extends AppCompatActivity {
 
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        bottomNavigationView.setSelectedItemId(R.id.budget);
+        bottomNavigationView.setSelectedItemId(R.id.expense);
 
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -26,11 +26,11 @@ public class ExpensePageActivity extends AppCompatActivity {
                 finish();
                 return true;
             } else if (item.getItemId() == R.id.budget) {
-                return true;
-            } else if (item.getItemId() == R.id.expense) {
-                startActivity(new Intent(getApplicationContext(), ExpensePageActivity.class));
+                startActivity(new Intent(getApplicationContext(), BudgetPageActivity.class));
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 finish();
+                return true;
+            } else if (item.getItemId() == R.id.expense) {
                 return true;
             } else if (item.getItemId() == R.id.data) {
                 startActivity(new Intent(getApplicationContext(), DataVisualizationActivity.class));
