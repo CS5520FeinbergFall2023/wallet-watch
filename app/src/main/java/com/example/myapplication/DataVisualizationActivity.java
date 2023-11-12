@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import android.os.Bundle;
@@ -17,7 +18,6 @@ public class DataVisualizationActivity extends AppCompatActivity {
     private TextView textDate, textBudget, textRemaining;
     private ViewPager2 categoryViewPager;
     private RecyclerView expensesRecyclerView;
-    private ExpensesAdapter expensesAdapter;
     private Calendar currentCalendar = Calendar.getInstance();
 
     @Override
@@ -39,6 +39,8 @@ public class DataVisualizationActivity extends AppCompatActivity {
         setupMonthIterationButtons();
 
         this.expensesRecyclerView = findViewById(R.id.expensesRecyclerView);
+        this.expensesRecyclerView.setHasFixedSize(true);
+        this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         this.expensesRecyclerView.setAdapter(new ExpensesAdapter(testExpenses()));
     }
 
@@ -80,8 +82,8 @@ public class DataVisualizationActivity extends AppCompatActivity {
 
     private List<Expense> testExpenses() {
         List<Expense> expensesList = new ArrayList<>();
-        expensesList.add(new Expense("Lunch", 15.00));
-        expensesList.add(new Expense("Train Ticket", 20.00));
+        expensesList.add(new Expense("El Oriental De Cuba", 15.00));
+        expensesList.add(new Expense("Tres Gatos", 20.00));
 
         return expensesList;
     }

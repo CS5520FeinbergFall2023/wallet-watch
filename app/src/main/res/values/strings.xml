@@ -5,4 +5,7 @@
     <string name="data_viz_header">View Expenses</string>
     <string name="remaining">Remaining:</string>
     <string name="budget">Budget:</string>
+    <string name="expenses">Expenses:</string>
+    <string name="dollar_zero">$0</string>
+    <string name="expense_details">Expense Details</string>
 </resources>
