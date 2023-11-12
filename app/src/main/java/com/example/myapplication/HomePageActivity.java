@@ -27,6 +27,12 @@ public class HomePageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
+        Button dataButton = findViewById(R.id.dataButton);
+            dataButton.setOnClickListener(view -> {
+            Intent intent = new Intent(HomePageActivity.this, DataVisualizationActivity.class);
+            startActivity(intent);
+        });
+
         Button logoutButton = findViewById(R.id.buttonLogout);
         Button chooseImageButton = findViewById(R.id.buttonUpload);
 
@@ -49,4 +55,5 @@ public class HomePageActivity extends AppCompatActivity {
     private void openImageChooser() {
         pickImageLauncher.launch("image/*");
     }
+
 }

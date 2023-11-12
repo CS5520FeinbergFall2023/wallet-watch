@@ -19,21 +19,19 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
-        // Check if the user is already logged in
+//         Check if the user is already logged in
         if (prefs.getBoolean(LOGGED_IN_KEY, false)) {
             Intent intent = new Intent(MainActivity.this, HomePageActivity.class);
             startActivity(intent);
             finish();
         }
 
-
         // Login
-        Button loginButton = (Button) findViewById(R.id.loginButton);
+        Button loginButton = findViewById(R.id.loginButton);
         loginButton.setOnClickListener((view -> loginPageActivity()));
 
-        Button registerButton = (Button) findViewById(R.id.registerButton);
+        Button registerButton = findViewById(R.id.registerButton);
         registerButton.setOnClickListener((view -> registerPageActivity()));
-
     }
 
     public void loginPageActivity(){
