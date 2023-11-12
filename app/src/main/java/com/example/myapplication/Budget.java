@@ -59,5 +59,15 @@ public class Budget {
     public void setEndDate(Long endDate) {
         this.endDate = endDate;
     }
+
+    @Override
+    public String toString() {
+        return "Budget{" +
+                "category='" + category + '\'' +
+                ", amount=" + amount +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                '}';
+    }
 }
 

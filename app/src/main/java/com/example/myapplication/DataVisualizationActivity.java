@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -19,6 +20,9 @@ public class DataVisualizationActivity extends AppCompatActivity {
     private ViewPager2 categoryViewPager;
     private RecyclerView expensesRecyclerView;
     private Calendar currentCalendar = Calendar.getInstance();
+    private FirebaseHelper firebaseHelper;
+    private List<Expense> expensesList;
+    private List<Budget> budgetList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +31,11 @@ public class DataVisualizationActivity extends AppCompatActivity {
 
         TextView headerTitle = findViewById(R.id.headerTitle);
         headerTitle.setText(getText(R.string.data_viz_header));
+
+        this.firebaseHelper = new FirebaseHelper();
+
+        this.expensesList = new ArrayList();
+        this.budgetList = new ArrayList();
 
         this.textDate = findViewById(R.id.textDate);
         this.textBudget = findViewById(R.id.textBudgetValue);
@@ -49,6 +58,23 @@ public class DataVisualizationActivity extends AppCompatActivity {
         this.categoryViewPager.setAdapter(new CategoryAdapter(testCategories()));
     }
 
+    private void retrieveData() {
+        String userId = "kartik";
+
+        this.firebaseHelper.getUserExpenses(userId, expensesList -> {
+            this.expensesList.clear();
+            this.expensesList.addAll(expensesList);
+        });
+
+        this.firebaseHelper.getUserBudgets(userId, budgetList -> {
+            this.budgetList.clear();
+            this.budgetList.addAll(budgetList);
+        });
+
+        Log.v("Expenses", this.expensesList.toString());
+        Log.v("Budgets", this.budgetList.toString());
+    }
+
     private void updateDateDisplay() {
         String monthYear = this.currentCalendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) +
                 " " +
@@ -64,11 +90,13 @@ public class DataVisualizationActivity extends AppCompatActivity {
         btnPreviousMonth.setOnClickListener(v -> {
             this.currentCalendar.add(Calendar.MONTH, -1);
             updateDateDisplay();
+            retrieveData();
         });
 
         btnNextMonth.setOnClickListener(v -> {
             this.currentCalendar.add(Calendar.MONTH, 1);
             updateDateDisplay();
+            retrieveData();
         });
     }
 

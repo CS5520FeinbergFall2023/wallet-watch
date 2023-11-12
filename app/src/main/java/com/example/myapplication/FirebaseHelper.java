@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -21,6 +22,8 @@ import com.google.firebase.storage.UploadTask;
 //import com.google.firebase.storage.UploadTask;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class FirebaseHelper {
@@ -122,12 +125,28 @@ public class FirebaseHelper {
     //todo: i have created all the method definitions, so i have written methods in 2 ways, one way you can see above
     // where return type is void and i am handling it through callback, or you can handle it directly in the activity
     // where these methods are being called from, i would suggest the above way.
-//    // Budget methods
-//
-//    public DatabaseReference getUserBudgetsReference(String userId) {
-//        return databaseReference.child("budgets").child(userId);
-//    }
-//
+
+    // Budget methods
+
+    public void getUserBudgets(String userId, BudgetsCallback callback) {
+        DatabaseReference userBudgetsRef = FirebaseDatabase.getInstance().getReference().child("budgets").child(userId);
+        userBudgetsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Budget> budgetList = new ArrayList<>();
+                for (DataSnapshot budgetSnapshot : dataSnapshot.getChildren()) {
+                    budgetList.add(budgetSnapshot.getValue(Budget.class));
+                }
+                callback.onCallback(budgetList);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                //TODO: Error handling
+            }
+        });
+    }
+
 //    public Task<Void> addBudget(String userId, Budget budget) {
 //        DatabaseReference budgetRef = getUserBudgetsReference(userId).push();
 //        return budgetRef.setValue(budget);
@@ -142,12 +161,28 @@ public class FirebaseHelper {
 //        DatabaseReference budgetRef = getUserBudgetsReference(userId).child(budgetId);
 //        return budgetRef.removeValue();
 //    }
-//
-//    // Expense methods
-//
-//    public DatabaseReference getUserExpensesReference(String userId) {
-//        return databaseReference.child("expenses").child(userId);
-//    }
+
+    // Expense methods
+
+    public void getUserExpenses(String userId, ExpensesCallback callback) {
+        DatabaseReference userExpensesRef = FirebaseDatabase.getInstance().getReference().child("expenses").child(userId);
+        userExpensesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Expense> expensesList = new ArrayList<>();
+                for (DataSnapshot expenseSnapshot : dataSnapshot.getChildren()) {
+                    Expense expense = expenseSnapshot.getValue(Expense.class);
+                    expensesList.add(expense);
+                }
+                callback.onCallback(expensesList);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                //TODO: Error handling
+            }
+        });
+    }
 //
 //    public Task<Void> addExpense(String userId, Expense expense) {
 //        DatabaseReference expenseRef = getUserExpensesReference(userId).push();
