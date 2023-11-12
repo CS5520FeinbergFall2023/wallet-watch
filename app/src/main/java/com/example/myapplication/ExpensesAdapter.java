@@ -35,6 +35,10 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.Expens
         return expenses.size();
     }
 
+    public void setExpenses(List<ExpenseItem> expenses) {
+        this.expenses = expenses;
+    }
+
     static class ExpenseViewHolder extends RecyclerView.ViewHolder {
         private TextView descriptionText;
         private TextView amountText;
