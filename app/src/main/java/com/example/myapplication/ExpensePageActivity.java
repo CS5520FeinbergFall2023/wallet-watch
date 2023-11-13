@@ -7,22 +7,28 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * TODO:
- * 1. API Category Dropdown Options
  * 2. API Submit & (Clear values, toast)
  */
 public class ExpensePageActivity extends AppCompatActivity {
@@ -42,10 +48,15 @@ public class ExpensePageActivity extends AppCompatActivity {
 
     private MaterialButton uploadExpenseButton;
 
+    private final String logTag = "EXP-PAGE";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_expense_page);
+
+        // Firebase helper
+        FirebaseHelper firebaseHelper = new FirebaseHelper();
 
         // Budget Field
         budgetAmountText = findViewById(R.id.add_expense_budget);
@@ -55,7 +66,25 @@ public class ExpensePageActivity extends AppCompatActivity {
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         categoriesInput.setAdapter(adapter);
 
-        updateCategoryOptions(getInitialOptions()); // will be API call later
+        firebaseHelper.getCategories(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot budgetsSnapshot) {
+                Set<String> categories = new HashSet<>();
+
+                for (DataSnapshot budgetSnapshot : budgetsSnapshot.getChildren()) {
+                    String category = budgetSnapshot.child("category").getValue(String.class);
+                    categories.add(category);
+                }
+
+                // update categories dropdown
+                updateCategoryOptions(new ArrayList<>(categories));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(ExpensePageActivity.this, "Ok", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Upload Button
         uploadExpenseButton = findViewById(R.id.add_expense_upload_button);
@@ -123,6 +152,7 @@ public class ExpensePageActivity extends AppCompatActivity {
 
     /**
      * Check if a text field is valid (non-empty). if it is invalid, set the error as "required"
+     *
      * @param textViewField text field
      * @return whether the field is valid or not (non-empty)
      */
@@ -145,7 +175,7 @@ public class ExpensePageActivity extends AppCompatActivity {
         expenses.put("notes", notesText.getText());
         expenses.put("recurring", recurringExpenseToggle.isChecked());
 
-        Log.d("EXP-PAGE", expenses.toString());
+        Log.d(logTag, expenses.toString());
     }
 
     /**
@@ -181,20 +211,14 @@ public class ExpensePageActivity extends AppCompatActivity {
         datePicker.show(getSupportFragmentManager(), "EXPENSE_PAGE_DATE_PICKER");
     }
 
-    private void updateCategoryOptions(List<BudgetCategory> options) {
+    private void updateCategoryOptions(List<String> options) {
+        List<BudgetCategory> budgetCategories = new ArrayList<>();
+
+        // convert List<String> to List<BudgetCategory>
+        options.forEach(category -> budgetCategories.add(new BudgetCategory(category)));
+
         adapter.clear();
-        adapter.addAll(options);
+        adapter.addAll(budgetCategories);
         adapter.notifyDataSetChanged();
-    }
-
-    // Will be an API call later
-    private List<BudgetCategory> getInitialOptions() {
-        List<BudgetCategory> options = new ArrayList<>();
-
-        options.add(new BudgetCategory("Food"));
-        options.add(new BudgetCategory("Travel"));
-        options.add(new BudgetCategory("School"));
-        options.add(new BudgetCategory("Other"));
-        return options;
     }
 }
