@@ -195,7 +195,7 @@ public class FirebaseHelper {
      * @param valueEventListener callback after categories is fetched
      */
     public void getCategories(ValueEventListener valueEventListener) {
-        String currentUser = "kartik";
+        String currentUser = "david";
 
         DatabaseReference budgetsRef = FirebaseDatabase.getInstance().getReference("budgets").child(currentUser);
 
@@ -209,19 +209,13 @@ public class FirebaseHelper {
      *
      * @param onCompleteListener listener for after expense is created
      */
-    public void createExpense(Map<String, Object> expenses, OnCompleteListener<Void> onCompleteListener) {
+    public void createExpense(Expense expense, OnCompleteListener<Void> onCompleteListener) {
         String currentUser = "david";
 
         DatabaseReference expensesRef = FirebaseDatabase.getInstance().getReference("expenses").child(currentUser);
 
         DatabaseReference newExpenseRef = expensesRef.push();
-
-        Map<String, Object> newExpenseAPI = new HashMap<>();
-        newExpenseAPI.put("from", "");
-        newExpenseAPI.put("stickerID", "");
-        newExpenseAPI.put("timestamp", Instant.now().toEpochMilli());
-
-        newExpenseRef.setValue(newExpenseAPI).addOnCompleteListener(onCompleteListener);
+        newExpenseRef.setValue(expense).addOnCompleteListener(onCompleteListener);
     }
 }
 
