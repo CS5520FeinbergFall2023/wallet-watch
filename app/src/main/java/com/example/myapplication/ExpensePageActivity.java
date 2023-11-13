@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -16,35 +17,31 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * TODO:
- * 3. Get Values from inputs
- * 4. Clear button
-
+ * 5. Error states, or toast for empty values
+ * <p>
  * 1. API Category Dropdown Options
- * 5. API Submit
- * 6. Clear values after submit
+ * 5. API Submit & Clear values
  */
 public class ExpensePageActivity extends AppCompatActivity {
 
-    private List<BudgetCategory> categories;
+    private AutoCompleteTextView categoriesInput;
 
-    private AutoCompleteTextView autoCompleteTextView;
     private ArrayAdapter<BudgetCategory> adapter;
 
     private EditText budgetAmountText;
 
     private TextInputEditText datePickerText;
+    private long datePickerValue;
 
     private EditText notesText;
 
     private SwitchMaterial recurringExpenseToggle;
-
-    private MaterialButton clearExpenseButton;
-
-    private MaterialButton addExpenseButton;
 
     private MaterialButton uploadExpenseButton;
 
@@ -56,17 +53,19 @@ public class ExpensePageActivity extends AppCompatActivity {
         // Budget Field
         budgetAmountText = findViewById(R.id.add_expense_budget);
 
-        // Categories Field
-        categories = getInitialOptions();
-        autoCompleteTextView = findViewById(R.id.add_expense_category_text);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, categories);
-        autoCompleteTextView.setAdapter(adapter);
+        // Categories Field, Values
+        categoriesInput = findViewById(R.id.add_expense_category_text);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        categoriesInput.setAdapter(adapter);
+
+        updateCategoryOptions(getInitialOptions()); // will be API call later
 
         // Upload Button
         uploadExpenseButton = findViewById(R.id.add_expense_upload_button);
 
         // Date Field
         datePickerText = findViewById(R.id.add_expense_date_picker);
+        datePickerValue = 0;
 
         // Notes Field
         notesText = findViewById(R.id.add_expense_notes);
@@ -75,10 +74,12 @@ public class ExpensePageActivity extends AppCompatActivity {
         recurringExpenseToggle = findViewById(R.id.add_expense_recurring_toggle);
 
         // Clear Button
-        clearExpenseButton = findViewById(R.id.add_expense_clear_button);
+        MaterialButton clearExpenseButton = findViewById(R.id.add_expense_clear_button);
+        clearExpenseButton.setOnClickListener(v -> onClear());
 
         // Submit Button
-        addExpenseButton = findViewById(R.id.add_expense_submit_button);
+        MaterialButton addExpenseButton = findViewById(R.id.add_expense_submit_button);
+        addExpenseButton.setOnClickListener(v -> onSubmit());
 
         // Nav Bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
@@ -113,15 +114,38 @@ public class ExpensePageActivity extends AppCompatActivity {
         });
     }
 
+    private void onSubmit() {
+        Map<String, Object> expenses = new HashMap<>();
+        expenses.put("budget", budgetAmountText.getText());
+        expenses.put("categories", categoriesInput.getText());
+        expenses.put("photo", "none");
+        expenses.put("date", datePickerValue);
+        expenses.put("notes", notesText.getText());
+        expenses.put("recurring", recurringExpenseToggle.isChecked());
+
+        Log.d("EXP-PAGE", expenses.toString());
+    }
+
+    private void onClear() {
+        budgetAmountText.setText("");
+        categoriesInput.setText("");
+        datePickerText.setText("");
+        datePickerValue = 0;
+        notesText.setText("");
+        recurringExpenseToggle.setChecked(false);
+    }
+
     public void showDatePickerDialog(View view) {
         MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker().build();
 
         datePicker.addOnPositiveButtonClickListener(selection -> {
+            datePickerValue = selection;
+
             // update date picker text on modal positive button click
             datePickerText.setText(datePicker.getHeaderText());
         });
 
-        // show
+        // show date picker
         datePicker.show(getSupportFragmentManager(), "EXPENSE_PAGE_DATE_PICKER");
     }
 
@@ -137,6 +161,7 @@ public class ExpensePageActivity extends AppCompatActivity {
 
         options.add(new BudgetCategory("Food"));
         options.add(new BudgetCategory("Travel"));
+        options.add(new BudgetCategory("School"));
         options.add(new BudgetCategory("Other"));
         return options;
     }
