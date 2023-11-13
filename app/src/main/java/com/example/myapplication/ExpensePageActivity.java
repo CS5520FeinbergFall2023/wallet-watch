@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -21,10 +20,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -48,7 +45,7 @@ public class ExpensePageActivity extends AppCompatActivity {
 
     private MaterialButton uploadExpenseButton;
 
-    private final String logTag = "EXP-PAGE";
+    private FirebaseHelper firebaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +53,7 @@ public class ExpensePageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_expense_page);
 
         // Firebase helper
-        FirebaseHelper firebaseHelper = new FirebaseHelper();
+        firebaseHelper = new FirebaseHelper();
 
         // Budget Field
         budgetAmountText = findViewById(R.id.add_expense_budget);
@@ -167,15 +164,19 @@ public class ExpensePageActivity extends AppCompatActivity {
     }
 
     private void onSubmit() {
-        Map<String, Object> expenses = new HashMap<>();
-        expenses.put("budget", budgetAmountText.getText());
-        expenses.put("categories", categoriesInput.getText());
-        expenses.put("photo", "none");
-        expenses.put("date", datePickerValue);
-        expenses.put("notes", notesText.getText());
-        expenses.put("recurring", recurringExpenseToggle.isChecked());
+        String category = categoriesInput.getText().toString();
+        double amount = Double.parseDouble(budgetAmountText.getText().toString());
+        String description = notesText.getText().toString();
+        Long date = datePickerValue;
+        String imageUrl = "";
 
-        Log.d(logTag, expenses.toString());
+        // create valid expense
+        Expense expense = new Expense(category, amount, description, date, imageUrl);
+
+        firebaseHelper.createExpense(expense, v -> {
+            Toast.makeText(this, "Expense Created!", Toast.LENGTH_SHORT).show();
+            onClear();
+        });
     }
 
     /**
