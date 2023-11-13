@@ -14,7 +14,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,10 +22,8 @@ import java.util.Map;
 
 /**
  * TODO:
- * 5. Error states, or toast for empty values
- * <p>
  * 1. API Category Dropdown Options
- * 5. API Submit & Clear values
+ * 2. API Submit & (Clear values, toast)
  */
 public class ExpensePageActivity extends AppCompatActivity {
 
@@ -36,7 +33,7 @@ public class ExpensePageActivity extends AppCompatActivity {
 
     private EditText budgetAmountText;
 
-    private TextInputEditText datePickerText;
+    private EditText datePickerText;
     private long datePickerValue;
 
     private EditText notesText;
@@ -79,7 +76,7 @@ public class ExpensePageActivity extends AppCompatActivity {
 
         // Submit Button
         MaterialButton addExpenseButton = findViewById(R.id.add_expense_submit_button);
-        addExpenseButton.setOnClickListener(v -> onSubmit());
+        addExpenseButton.setOnClickListener(v -> checkValues());
 
         // Nav Bar
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
@@ -114,6 +111,31 @@ public class ExpensePageActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Check appropriate fields for validity. Submit if all valid.
+     */
+    private void checkValues() {
+        if (checkValidField(budgetAmountText) && checkValidField(categoriesInput) &&
+                checkValidField(datePickerText) && checkValidField(notesText)) {
+            onSubmit();
+        }
+    }
+
+    /**
+     * Check if a text field is valid (non-empty). if it is invalid, set the error as "required"
+     * @param textViewField text field
+     * @return whether the field is valid or not (non-empty)
+     */
+    private boolean checkValidField(EditText textViewField) {
+        if (textViewField.getText().toString().trim().isEmpty()) {
+            textViewField.setError("required");
+            return false;
+        } else {
+            textViewField.setError(null);
+            return true;
+        }
+    }
+
     private void onSubmit() {
         Map<String, Object> expenses = new HashMap<>();
         expenses.put("budget", budgetAmountText.getText());
@@ -126,6 +148,9 @@ public class ExpensePageActivity extends AppCompatActivity {
         Log.d("EXP-PAGE", expenses.toString());
     }
 
+    /**
+     * Clear/reset values. Clears errors as well.
+     */
     private void onClear() {
         budgetAmountText.setText("");
         categoriesInput.setText("");
@@ -133,6 +158,13 @@ public class ExpensePageActivity extends AppCompatActivity {
         datePickerValue = 0;
         notesText.setText("");
         recurringExpenseToggle.setChecked(false);
+
+
+        // clear errors
+        budgetAmountText.setError(null);
+        categoriesInput.setError(null);
+        datePickerText.setError(null);
+        notesText.setError(null);
     }
 
     public void showDatePickerDialog(View view) {
