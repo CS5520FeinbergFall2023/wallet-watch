@@ -10,12 +10,19 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 
 public class DataVisualizationActivity extends AppCompatActivity {
+
+    private static final List<String> CATEGORIES = Collections.unmodifiableList(
+            Arrays.asList("Food", "Entertainment", "Travel", "School", "Utilities")
+    );
 
     private TextView textDate, textBudget, textRemaining, textExpenses;
     private ViewPager2 categoryViewPager;
@@ -25,7 +32,6 @@ public class DataVisualizationActivity extends AppCompatActivity {
     private List<Expense> expensesList;
     private List<ExpenseItem> expensesForMonth;
     private List<Budget> budgetList;
-    private List<BudgetCategory> budgetCategoriesList;
     private ExpensesAdapter expensesAdapter;
 
     @Override
@@ -41,7 +47,6 @@ public class DataVisualizationActivity extends AppCompatActivity {
         this.expensesList = new ArrayList();
         this.expensesForMonth = new ArrayList<>();
         this.budgetList = new ArrayList();
-        this.budgetCategoriesList = new ArrayList();
 
         this.textDate = findViewById(R.id.textDate);
         this.textBudget = findViewById(R.id.textBudgetValue);
@@ -52,62 +57,111 @@ public class DataVisualizationActivity extends AppCompatActivity {
         this.expensesRecyclerView = findViewById(R.id.expensesRecyclerView);
         this.expensesRecyclerView.setHasFixedSize(true);
         this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        this.expensesAdapter = new ExpensesAdapter(testExpenses());
+        this.expensesAdapter = new ExpensesAdapter(new ArrayList<>());
         this.expensesRecyclerView.setAdapter(this.expensesAdapter);
 
-        retrieveData();
         addCategoriesToPager();
-        updateVisualValues();
+        retrieveData();
         setupMonthIterationButtons();
+        updateDateDisplay();
     }
 
     private void addCategoriesToPager() {
-        this.categoryViewPager.setAdapter(new CategoryAdapter(this.budgetCategoriesList));
+        this.categoryViewPager.setAdapter(new CategoryAdapter(CATEGORIES));
+
+        this.categoryViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                retrieveData();
+            }
+        });
     }
 
-    private void updateVisualValues() {
+    private double updateBudget() {
+        double budget = 0;
 
-        for (Budget budget : this.budgetList) {
-            if (Objects.equals(budget.getCategory(), this.budgetCategoriesList.get(this.categoryViewPager.getCurrentItem()).getCategoryName())) {
-                this.textBudget.setText(String.valueOf(budget.getAmount()));
+        for (Budget categoryBudget : this.budgetList) {
+            if (Objects.equals(categoryBudget.getCategory(),
+                    CATEGORIES.get(this.categoryViewPager.getCurrentItem()))) {
+
+                budget = categoryBudget.getAmount();
+                String formattedBudget = String.format(getResources().getString(R.string.formatted_currency), budget);
+                this.textBudget.setText(formattedBudget);
+                break;
             }
         }
 
+        return budget;
+    }
+
+    private double updateExpenses() {
+        double totalExpenses = 0;
+
+        for (Expense expense : this.expensesList) {
+            if (inCurrentMonth(expense.getDate())) {
+                totalExpenses += expense.getAmount();
+            }
+        }
+
+        String formattedExpenses = String.format(getResources().getString(R.string.formatted_currency), totalExpenses);
+        this.textExpenses.setText(formattedExpenses);
+        return totalExpenses;
+    }
+
+    private void updateRemaining(double remaining) {
+        String formattedRemaining = String.format(getResources().getString(R.string.formatted_currency), remaining);
+        this.textRemaining.setText(formattedRemaining);
+    }
+
+    private void updateExpenseDetails() {
         this.expensesForMonth.clear();
-        double total = 0;
 
         for (Expense expense : this.expensesList) {
             if (inCurrentMonth(expense.getDate())) {
                 this.expensesForMonth.add(new ExpenseItem(expense.getDescription(), expense.getAmount()));
-                total += expense.getAmount();
             }
         }
 
         this.expensesAdapter.setExpenses(this.expensesForMonth);
         this.expensesAdapter.notifyDataSetChanged();
-
-        this.textExpenses.setText(String.valueOf(total));
-
-        updateDateDisplay();
     }
 
+    private void updateMonetaryValues() {
+        double budget = updateBudget();
+        double expense = updateExpenses();
+        updateRemaining(budget - expense);
+        updateExpenseDetails();
+    }
+
+    /*
+    Forcing synchronization here, based on:
+    https://stackoverflow.com/questions/44548932/grab-data-from-firebase-with-java
+     */
     private void retrieveData() {
+        CountDownLatch latch = new CountDownLatch(2);
         String userId = "kartik";
 
         this.firebaseHelper.getUserExpenses(userId, expensesList -> {
             this.expensesList.clear();
             this.expensesList.addAll(expensesList);
+            latch.countDown();
         });
 
         this.firebaseHelper.getUserBudgets(userId, budgetList -> {
             this.budgetList.clear();
             this.budgetList.addAll(budgetList);
+            latch.countDown();
         });
 
-        testCategories();
-
-        Log.v("Expenses", this.expensesList.toString());
-        Log.v("Budgets", this.budgetList.toString());
+        new Thread(() -> {
+            try {
+                latch.await();
+                runOnUiThread(this::updateMonetaryValues);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private void updateDateDisplay() {
@@ -127,21 +181,15 @@ public class DataVisualizationActivity extends AppCompatActivity {
 
         btnPreviousMonth.setOnClickListener(v -> {
             this.currentCalendar.add(Calendar.MONTH, -1);
+            updateDateDisplay();
             retrieveData();
-            updateVisualValues();
         });
 
         btnNextMonth.setOnClickListener(v -> {
             this.currentCalendar.add(Calendar.MONTH, 1);
+            updateDateDisplay();
             retrieveData();
-            updateVisualValues();
         });
-    }
-
-    private void testCategories() {
-        this.budgetCategoriesList.add(new BudgetCategory("Food"));
-        this.budgetCategoriesList.add(new BudgetCategory("Travel"));
-        this.budgetCategoriesList.add(new BudgetCategory("Entertainment"));
     }
 
     private boolean inCurrentMonth(long epochTime) {
@@ -155,13 +203,5 @@ public class DataVisualizationActivity extends AppCompatActivity {
         int currentYear = this.currentCalendar.get(Calendar.YEAR);
 
         return epochMonth == currentMonth && epochYear == currentYear;
-    }
-
-    private List<ExpenseItem> testExpenses() {
-        List<ExpenseItem> expensesList = new ArrayList<>();
-        expensesList.add(new ExpenseItem("El Oriental De Cuba", 15.00));
-        expensesList.add(new ExpenseItem("Tres Gatos", 20.00));
-
-        return expensesList;
     }
 }

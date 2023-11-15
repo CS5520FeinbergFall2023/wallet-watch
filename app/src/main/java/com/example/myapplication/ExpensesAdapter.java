@@ -7,6 +7,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+import java.util.Locale;
 
 public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.ExpenseViewHolder> {
 
@@ -27,7 +28,7 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.Expens
     public void onBindViewHolder(@NonNull ExpenseViewHolder holder, int position) {
         ExpenseItem expense = expenses.get(position);
         holder.descriptionText.setText(expense.getName());
-        holder.amountText.setText(String.valueOf(expense.getAmount()));
+        holder.amountText.setText(formatCurrency(expense.getAmount()));
     }
 
     @Override
@@ -37,6 +38,10 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.Expens
 
     public void setExpenses(List<ExpenseItem> expenses) {
         this.expenses = expenses;
+    }
+
+    private String formatCurrency(double value) {
+        return String.format(Locale.getDefault(), "$%.2f", value);
     }
 
     static class ExpenseViewHolder extends RecyclerView.ViewHolder {

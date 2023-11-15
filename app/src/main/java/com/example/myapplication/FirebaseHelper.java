@@ -209,5 +209,29 @@ public class FirebaseHelper {
 //        DatabaseReference notificationRef = getUserNotificationsReference(userId).push();
 //        return notificationRef.setValue(notification);
 //    }
+
+    // Categories
+
+    public void getCategories(CategoriesCallback callback) {
+        DatabaseReference userBudgetsRef = FirebaseDatabase.getInstance().getReference().child("categories");
+        userBudgetsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Category> categoryList = new ArrayList<>();
+                for (DataSnapshot categorySnapshot : dataSnapshot.getChildren()) {
+                    String categoryName = categorySnapshot.getValue(String.class);
+                    if (categoryName != null) {
+                        categoryList.add(new Category(categoryName));
+                    }
+                }
+                callback.onCallback(categoryList);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                //TODO: Error handling
+            }
+        });
+    }
 }
 
