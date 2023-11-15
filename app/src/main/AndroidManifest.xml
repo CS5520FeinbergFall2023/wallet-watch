@@ -36,6 +36,7 @@
             android:exported="false" />
         <activity
             android:name=".DataVisualizationActivity"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

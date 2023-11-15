@@ -140,6 +140,8 @@ public class DataVisualizationActivity extends AppCompatActivity {
      */
     private void retrieveData() {
         CountDownLatch latch = new CountDownLatch(2);
+
+        //TODO: Replace with current user
         String userId = "kartik";
 
         this.firebaseHelper.getUserExpenses(userId, expensesList -> {
