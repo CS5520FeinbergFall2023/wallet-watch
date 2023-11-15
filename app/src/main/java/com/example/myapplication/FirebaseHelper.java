@@ -24,12 +24,24 @@ import com.google.firebase.storage.UploadTask;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public class FirebaseHelper {
 
     private final DatabaseReference databaseReference;
     private final StorageReference storageReference;
+
+    // Define a callback interface
+    public interface CategoriesCallback {
+        void onCategoriesLoaded(Set<String> categories);
+
+        void onCancelled(DatabaseError databaseError);
+    }
 
     public FirebaseHelper() {
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -51,7 +63,7 @@ public class FirebaseHelper {
     public void uploadImage(Uri imageUri) {
         if (imageUri != null) {
 
-            StorageReference riversRef = storageReference.child(""+imageUri.getLastPathSegment());
+            StorageReference riversRef = storageReference.child("" + imageUri.getLastPathSegment());
             UploadTask uploadTask = riversRef.putFile(imageUri);
 
             uploadTask.continueWithTask(task -> {
@@ -212,26 +224,55 @@ public class FirebaseHelper {
 
     // Categories
 
-    public void getCategories(CategoriesCallback callback) {
-        DatabaseReference userBudgetsRef = FirebaseDatabase.getInstance().getReference().child("categories");
-        userBudgetsRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                List<Category> categoryList = new ArrayList<>();
-                for (DataSnapshot categorySnapshot : dataSnapshot.getChildren()) {
-                    String categoryName = categorySnapshot.getValue(String.class);
-                    if (categoryName != null) {
-                        categoryList.add(new Category(categoryName));
-                    }
-                }
-                callback.onCallback(categoryList);
-            }
+//    public void getCategories(CategoriesCallback callback) {
+//        DatabaseReference userBudgetsRef = FirebaseDatabase.getInstance().getReference().child("categories");
+//        userBudgetsRef.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                List<Category> categoryList = new ArrayList<>();
+//                for (DataSnapshot categorySnapshot : dataSnapshot.getChildren()) {
+//                    String categoryName = categorySnapshot.getValue(String.class);
+//                    if (categoryName != null) {
+//                        categoryList.add(new Category(categoryName));
+//                    }
+//                }
+//                callback.onCallback(categoryList);
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//                //TODO: Error handling
+//            }
+//        });
+//    }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                //TODO: Error handling
-            }
-        });
+    /**
+     * Get the categories of a user from each category in their budget.
+     *
+     * @param valueEventListener callback after categories is fetched
+     */
+    public void getCategories(ValueEventListener valueEventListener) {
+        String currentUser = "david";
+
+        DatabaseReference budgetsRef = FirebaseDatabase.getInstance().getReference("budgets").child(currentUser);
+
+        budgetsRef.addListenerForSingleValueEvent(valueEventListener);
+    }
+
+
+    /**
+     * Create an expense.
+     * TODO: current user will be populated dynamically here
+     *
+     * @param onCompleteListener listener for after expense is created
+     */
+    public void createExpense(Expense expense, OnCompleteListener<Void> onCompleteListener) {
+        String currentUser = "david";
+
+        DatabaseReference expensesRef = FirebaseDatabase.getInstance().getReference("expenses").child(currentUser);
+
+        DatabaseReference newExpenseRef = expensesRef.push();
+        newExpenseRef.setValue(expense).addOnCompleteListener(onCompleteListener);
     }
 }
 
