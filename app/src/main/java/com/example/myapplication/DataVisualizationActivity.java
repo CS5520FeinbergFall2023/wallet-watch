@@ -1,18 +1,19 @@
 package com.example.myapplication;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.Button;
-import android.widget.TextView;
-
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -117,13 +118,24 @@ public class DataVisualizationActivity extends AppCompatActivity {
         });
     }
 
+    private boolean isCategorySame(Object obj) {
+        try {
+            // Get current category from swiper
+            String category = CATEGORIES.get(this.categoryViewPager.getCurrentItem());
+            Method getCategoryMethod = obj.getClass().getMethod("getCategory");
+            return Objects.equals(getCategoryMethod.invoke(obj), category);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     private double updateBudget() {
         double budget = 0;
 
         for (Budget categoryBudget : this.budgetList) {
-            if (Objects.equals(categoryBudget.getCategory(),
-                    CATEGORIES.get(this.categoryViewPager.getCurrentItem()))) {
-
+            if (isCategorySame(categoryBudget)) {
                 budget = categoryBudget.getAmount();
                 String formattedBudget = String.format(getResources().getString(R.string.formatted_currency), budget);
                 this.textBudget.setText(formattedBudget);
@@ -138,7 +150,7 @@ public class DataVisualizationActivity extends AppCompatActivity {
         double totalExpenses = 0;
 
         for (Expense expense : this.expensesList) {
-            if (inCurrentMonth(expense.getDate())) {
+            if (inCurrentMonth(expense.getDate()) && isCategorySame(expense)) {
                 totalExpenses += expense.getAmount();
             }
         }
@@ -157,7 +169,7 @@ public class DataVisualizationActivity extends AppCompatActivity {
         this.expensesForMonth.clear();
 
         for (Expense expense : this.expensesList) {
-            if (inCurrentMonth(expense.getDate())) {
+            if (inCurrentMonth(expense.getDate()) && isCategorySame(expense)) {
                 this.expensesForMonth.add(new ExpenseItem(expense.getDescription(), expense.getAmount()));
             }
         }
