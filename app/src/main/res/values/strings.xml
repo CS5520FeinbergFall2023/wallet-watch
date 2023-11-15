@@ -12,4 +12,13 @@
     <string name="header_rv_row_string">Header</string>
     <string name="notification_message_rv_string">Notification Message</string>
     <string name="date_rv_row_string">Date</string>
+    <string name="add_expense_button">Add Expense</string>
+    <string name="add_expense_recurring">Recurring ?</string>
+    <string name="add_expense_notes_hint">Notes</string>
+    <string name="add_expense_date_hint">Date</string>
+    <string name="add_expense_category_hint">Category</string>
+    <string name="add_expense_budget_amount_hint">Budget Amount</string>
+    <string name="dollar_sign_icon_description">dollar sign</string>
+    <string name="add_expense_header_text">Add Expense</string>
+    <string name="clear_expense_button">clear</string>
 </resources>

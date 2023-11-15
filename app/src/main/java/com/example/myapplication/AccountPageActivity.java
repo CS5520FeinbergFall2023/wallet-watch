@@ -19,7 +19,7 @@ public class AccountPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_account_page);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        bottomNavigationView.setSelectedItemId(R.id.budget);
+        bottomNavigationView.setSelectedItemId(R.id.account);
 
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
