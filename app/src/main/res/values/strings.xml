@@ -9,4 +9,7 @@
     <string name="expense_details">Expense Details</string>
     <string name="app_name">Expense Tracker</string>
     <string name="notification_history_string">Notification History</string>
+    <string name="header_rv_row_string">Header</string>
+    <string name="notification_message_rv_string">Notification Message</string>
+    <string name="date_rv_row_string">Date</string>
 </resources>
