@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 public class HomePageActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "MyPrefsFile";
     private static final String LOGGED_IN_KEY = "isLoggedIn";
@@ -22,33 +24,50 @@ public class HomePageActivity extends AppCompatActivity {
                 }
             }
     );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-        Button dataButton = findViewById(R.id.dataButton);
-            dataButton.setOnClickListener(view -> {
-            Intent intent = new Intent(HomePageActivity.this, DataVisualizationActivity.class);
-            startActivity(intent);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView.setSelectedItemId(R.id.home);
+
+
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.home) {
+                return true;
+            } else if (item.getItemId() == R.id.budget) {
+                startActivity(new Intent(getApplicationContext(), BudgetPageActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                finish();
+                return true;
+            } else if (item.getItemId() == R.id.expense) {
+                startActivity(new Intent(getApplicationContext(), ExpensePageActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                finish();
+                return true;
+            } else if (item.getItemId() == R.id.data) {
+                startActivity(new Intent(getApplicationContext(), DataVisualizationActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                finish();
+                return true;
+            }
+            else if (item.getItemId() == R.id.account) {
+                startActivity(new Intent(getApplicationContext(), AccountPageActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                finish();
+                return true;
+            }
+            return false;
         });
 
-        Button logoutButton = findViewById(R.id.buttonLogout);
+
         Button chooseImageButton = findViewById(R.id.buttonUpload);
 
         chooseImageButton.setOnClickListener(v -> openImageChooser());
 
-        logoutButton.setOnClickListener(v -> {
 
-            getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                    .edit()
-                    .putBoolean(LOGGED_IN_KEY, false)
-                    .apply();
-
-            Intent intent = new Intent(HomePageActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        });
     }
 
     //code for image launcher
