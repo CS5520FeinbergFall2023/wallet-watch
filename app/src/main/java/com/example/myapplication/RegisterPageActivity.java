@@ -56,7 +56,7 @@ public class RegisterPageActivity extends AppCompatActivity {
                 editor.putBoolean(LOGGED_IN_KEY, true);
                 editor.apply();
 
-                Intent intent = new Intent(RegisterPageActivity.this, HomePageActivity.class);
+                Intent intent = new Intent(RegisterPageActivity.this, MainFragmentActivity.class);
                 startActivity(intent);
                 finish();
             } else {

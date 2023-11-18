@@ -1,16 +1,16 @@
 package com.example.myapplication;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-public class DataVisualizationActivity extends AppCompatActivity {
+public class DataVisualizationFragment extends Fragment {
 
     private static final List<String> CATEGORIES = Collections.unmodifiableList(
             Arrays.asList("Food", "Entertainment", "Travel", "School", "Utilities")
@@ -40,70 +40,36 @@ public class DataVisualizationActivity extends AppCompatActivity {
     private ExpensesAdapter expensesAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_data_visualization);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_data_visualization, container, false);
 
-
-        // Bottom Navigation
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        bottomNavigationView.setSelectedItemId(R.id.data);
-
-
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.home) {
-                startActivity(new Intent(getApplicationContext(), HomePageActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
-                return true;
-            } else if (item.getItemId() == R.id.budget) {
-                startActivity(new Intent(getApplicationContext(), BudgetPageActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
-                return true;
-            } else if (item.getItemId() == R.id.expense) {
-                startActivity(new Intent(getApplicationContext(), ExpensePageActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
-                return true;
-            } else if (item.getItemId() == R.id.data) {
-                return true;
-            }
-            else if (item.getItemId() == R.id.account) {
-                startActivity(new Intent(getApplicationContext(), AccountPageActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
-                return true;
-            }
-            return false;
-        });
-
-
-        TextView headerTitle = findViewById(R.id.headerTitle);
+        TextView headerTitle = view.findViewById(R.id.headerTitle);
         headerTitle.setText(getText(R.string.data_viz_header));
 
         this.firebaseHelper = new FirebaseHelper();
 
-        this.expensesList = new ArrayList();
+        this.expensesList = new ArrayList<>();
         this.expensesForMonth = new ArrayList<>();
-        this.budgetList = new ArrayList();
+        this.budgetList = new ArrayList<>();
 
-        this.textDate = findViewById(R.id.textDate);
-        this.textBudget = findViewById(R.id.textBudgetValue);
-        this.textRemaining = findViewById(R.id.textRemainingValue);
-        this.textExpenses = findViewById(R.id.textExpenseValue);
-        this.categoryViewPager = findViewById(R.id.categoryViewPager);
+        this.textDate = view.findViewById(R.id.textDate);
+        this.textBudget = view.findViewById(R.id.textBudgetValue);
+        this.textRemaining = view.findViewById(R.id.textRemainingValue);
+        this.textExpenses = view.findViewById(R.id.textExpenseValue);
+        this.categoryViewPager = view.findViewById(R.id.categoryViewPager);
 
-        this.expensesRecyclerView = findViewById(R.id.expensesRecyclerView);
+        this.expensesRecyclerView = view.findViewById(R.id.expensesRecyclerView);
         this.expensesRecyclerView.setHasFixedSize(true);
-        this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         this.expensesAdapter = new ExpensesAdapter(new ArrayList<>());
         this.expensesRecyclerView.setAdapter(this.expensesAdapter);
 
         addCategoriesToPager();
         retrieveData();
-        setupMonthIterationButtons();
+        setupMonthIterationButtons(view);
         updateDateDisplay();
+
+        return view;
     }
 
     private void addCategoriesToPager() {
@@ -120,7 +86,6 @@ public class DataVisualizationActivity extends AppCompatActivity {
 
     private boolean isCategorySame(Object obj) {
         try {
-            // Get current category from swiper
             String category = CATEGORIES.get(this.categoryViewPager.getCurrentItem());
             Method getCategoryMethod = obj.getClass().getMethod("getCategory");
             return Objects.equals(getCategoryMethod.invoke(obj), category);
@@ -210,7 +175,9 @@ public class DataVisualizationActivity extends AppCompatActivity {
         new Thread(() -> {
             try {
                 latch.await();
-                runOnUiThread(this::updateMonetaryValues);
+                if (isAdded()) {
+                    getActivity().runOnUiThread(this::updateMonetaryValues);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -228,9 +195,9 @@ public class DataVisualizationActivity extends AppCompatActivity {
         this.textDate.setText(monthYear);
     }
 
-    private void setupMonthIterationButtons() {
-        Button btnPreviousMonth = findViewById(R.id.btnPreviousMonth);
-        Button btnNextMonth = findViewById(R.id.btnNextMonth);
+    private void setupMonthIterationButtons(View view) {
+        Button btnPreviousMonth = view.findViewById(R.id.btnPreviousMonth);
+        Button btnNextMonth = view.findViewById(R.id.btnNextMonth);
 
         btnPreviousMonth.setOnClickListener(v -> {
             this.currentCalendar.add(Calendar.MONTH, -1);
