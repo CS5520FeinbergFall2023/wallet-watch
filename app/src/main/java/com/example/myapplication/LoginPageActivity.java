@@ -48,7 +48,7 @@ public class LoginPageActivity extends AppCompatActivity {
                     editor.putBoolean(LOGGED_IN_KEY, true);
                     editor.apply();
 
-                    Intent intent = new Intent(LoginPageActivity.this, HomePageActivity.class);
+                    Intent intent = new Intent(LoginPageActivity.this, MainFragmentActivity.class);
                     startActivity(intent);
                     finish();
                 } else {
