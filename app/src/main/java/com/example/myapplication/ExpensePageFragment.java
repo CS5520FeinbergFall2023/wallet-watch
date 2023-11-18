@@ -1,7 +1,10 @@
 package com.example.myapplication;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.myapplication.MainActivity.PREFS_NAME;
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,10 +37,15 @@ public class ExpensePageFragment extends Fragment {
     private SwitchMaterial recurringExpenseToggle;
     private MaterialButton uploadExpenseButton;
     private FirebaseHelper firebaseHelper;
+    private String username;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_expense_page, container, false);
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        // Get username from local storage
+        username = prefs.getString("username","NONE");
 
         // Firebase helper
         firebaseHelper = new FirebaseHelper();
@@ -50,7 +58,7 @@ public class ExpensePageFragment extends Fragment {
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         categoriesInput.setAdapter(adapter);
 
-        firebaseHelper.getCategories(new ValueEventListener() {
+        firebaseHelper.getCategories(username, new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot budgetsSnapshot) {
                 Set<String> categories = new HashSet<>();
@@ -66,7 +74,7 @@ public class ExpensePageFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Ok", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -133,9 +141,7 @@ public class ExpensePageFragment extends Fragment {
         // create an Expense
         Expense expense = new Expense(category, amount, description, date, imageUrl, recurring);
 
-        Log.d("EX-P", expense.toString());
-
-        firebaseHelper.createExpense(expense, v -> {
+        firebaseHelper.createExpense(username, expense, v -> {
             Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
             onClear();
         });
