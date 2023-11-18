@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,10 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * TODO:
- * 2. API Submit & (Clear values, toast)
- */
 public class ExpensePageFragment extends Fragment {
 
     private AutoCompleteTextView categoriesInput;
@@ -130,9 +127,13 @@ public class ExpensePageFragment extends Fragment {
         String description = descriptionText.getText().toString();
         Long date = datePickerValue;
         String imageUrl = "";
+        boolean recurring = recurringExpenseToggle.isChecked();
 
-        // create valid expense
-        Expense expense = new Expense(category, amount, description, date, imageUrl);
+
+        // create an Expense
+        Expense expense = new Expense(category, amount, description, date, imageUrl, recurring);
+
+        Log.d("EX-P", expense.toString());
 
         firebaseHelper.createExpense(expense, v -> {
             Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
