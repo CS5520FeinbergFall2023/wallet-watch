@@ -32,7 +32,7 @@ public class ExpensePageActivity extends AppCompatActivity {
 
     private AutoCompleteTextView categoriesInput;
 
-    private ArrayAdapter<BudgetCategory> adapter;
+    private ArrayAdapter<Category> adapter;
 
     private EditText budgetAmountText;
 
@@ -213,10 +213,10 @@ public class ExpensePageActivity extends AppCompatActivity {
     }
 
     private void updateCategoryOptions(List<String> options) {
-        List<BudgetCategory> budgetCategories = new ArrayList<>();
+        List<Category> budgetCategories = new ArrayList<>();
 
         // convert List<String> to List<BudgetCategory>
-        options.forEach(category -> budgetCategories.add(new BudgetCategory(category)));
+        options.forEach(category -> budgetCategories.add(new Category(category)));
 
         adapter.clear();
         adapter.addAll(budgetCategories);

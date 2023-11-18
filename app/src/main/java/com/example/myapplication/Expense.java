@@ -62,4 +62,15 @@ public class Expense {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+    @Override
+    public String toString() {
+        return "Expense{" +
+                "category='" + category + '\'' +
+                ", amount=" + amount +
+                ", description='" + description + '\'' +
+                ", date='" + date + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                '}';
+    }
 }

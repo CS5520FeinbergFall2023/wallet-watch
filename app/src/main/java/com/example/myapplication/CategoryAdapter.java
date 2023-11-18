@@ -10,9 +10,9 @@ import java.util.List;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
-    private List<BudgetCategory> categories;
+    private List<String> categories;
 
-    public CategoryAdapter(List<BudgetCategory> categories) {
+    public CategoryAdapter(List<String> categories) {
         this.categories = categories;
     }
 
@@ -25,8 +25,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
     @Override
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
-        BudgetCategory category = categories.get(position);
-        holder.categoryNameTextView.setText(category.getCategoryName());
+        String category = categories.get(position);
+        holder.categoryNameTextView.setText(category);
     }
 
     @Override
