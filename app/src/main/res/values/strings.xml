@@ -5,9 +5,10 @@
     <string name="remaining">Remaining:</string>
     <string name="budget">Budget:</string>
     <string name="expenses">Expenses:</string>
-    <string name="dollar_zero">$0</string>
+    <string name="formatted_currency_zero">$0.00</string>
     <string name="expense_details">Expense Details</string>
     <string name="app_name">Expense Tracker</string>
+    <string name="formatted_currency">$%.2f</string>
     <string name="add_expense_button">Add Expense</string>
     <string name="add_expense_recurring">Recurring ?</string>
     <string name="add_expense_notes_hint">Notes</string>

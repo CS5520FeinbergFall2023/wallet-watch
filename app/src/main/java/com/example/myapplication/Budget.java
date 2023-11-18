@@ -1,9 +1,6 @@
 package com.example.myapplication;
 
 import java.time.Instant;
-import java.util.List;
-
-import java.util.Date;
 
 public class Budget {
     private String category;
@@ -58,6 +55,16 @@ public class Budget {
 
     public void setEndDate(Long endDate) {
         this.endDate = endDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Budget{" +
+                "category='" + category + '\'' +
+                ", amount=" + amount +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                '}';
     }
 }
 
