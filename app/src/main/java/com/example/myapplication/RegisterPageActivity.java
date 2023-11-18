@@ -18,6 +18,8 @@ public class RegisterPageActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "MyPrefsFile";
     private static final String LOGGED_IN_KEY = "isLoggedIn";
+    private static final String USERNAME = "username";
+
 
     private SharedPreferences prefs;
 
@@ -54,6 +56,7 @@ public class RegisterPageActivity extends AppCompatActivity {
 
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putBoolean(LOGGED_IN_KEY, true);
+                editor.putString(USERNAME,username);
                 editor.apply();
 
                 Intent intent = new Intent(RegisterPageActivity.this, MainFragmentActivity.class);
