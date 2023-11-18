@@ -32,7 +32,7 @@ public class ExpensePageFragment extends Fragment {
 
     private AutoCompleteTextView categoriesInput;
     private ArrayAdapter<Category> adapter;
-    private EditText budgetAmountText, datePickerText, notesText;
+    private EditText expenseAmountText, datePickerText, descriptionText;
     private long datePickerValue;
     private SwitchMaterial recurringExpenseToggle;
     private MaterialButton uploadExpenseButton;
@@ -45,12 +45,12 @@ public class ExpensePageFragment extends Fragment {
         // Firebase helper
         firebaseHelper = new FirebaseHelper();
 
-        // Budget Field
-        budgetAmountText = view.findViewById(R.id.add_expense_budget);
+        // Expense Field
+        expenseAmountText = view.findViewById(R.id.add_expense_amount);
 
         // Categories Field, Values
         categoriesInput = view.findViewById(R.id.add_expense_category_text);
-        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         categoriesInput.setAdapter(adapter);
 
         firebaseHelper.getCategories(new ValueEventListener() {
@@ -81,8 +81,8 @@ public class ExpensePageFragment extends Fragment {
         datePickerText.setOnClickListener(v -> showDatePickerDialog());
         datePickerValue = 0;
 
-        // Notes Field
-        notesText = view.findViewById(R.id.add_expense_notes);
+        // Description Field
+        descriptionText = view.findViewById(R.id.add_expense_description);
 
         // Recurring Toggle Field
         recurringExpenseToggle = view.findViewById(R.id.add_expense_recurring_toggle);
@@ -102,8 +102,8 @@ public class ExpensePageFragment extends Fragment {
      * Check appropriate fields for validity. Submit if all valid.
      */
     private void checkValues() {
-        if (checkValidField(budgetAmountText) && checkValidField(categoriesInput) &&
-                checkValidField(datePickerText) && checkValidField(notesText)) {
+        if (checkValidField(expenseAmountText) && checkValidField(categoriesInput) &&
+                checkValidField(datePickerText) && checkValidField(descriptionText)) {
             onSubmit();
         }
     }
@@ -126,8 +126,8 @@ public class ExpensePageFragment extends Fragment {
 
     private void onSubmit() {
         String category = categoriesInput.getText().toString();
-        double amount = Double.parseDouble(budgetAmountText.getText().toString());
-        String description = notesText.getText().toString();
+        double amount = Double.parseDouble(expenseAmountText.getText().toString());
+        String description = descriptionText.getText().toString();
         Long date = datePickerValue;
         String imageUrl = "";
 
@@ -144,18 +144,18 @@ public class ExpensePageFragment extends Fragment {
      * Clear/reset values. Clears errors as well.
      */
     private void onClear() {
-        budgetAmountText.setText("");
+        expenseAmountText.setText("");
         categoriesInput.setText("");
         datePickerText.setText("");
         datePickerValue = 0;
-        notesText.setText("");
+        descriptionText.setText("");
         recurringExpenseToggle.setChecked(false);
 
         // clear errors
-        budgetAmountText.setError(null);
+        expenseAmountText.setError(null);
         categoriesInput.setError(null);
         datePickerText.setError(null);
-        notesText.setError(null);
+        descriptionText.setError(null);
     }
 
     public void showDatePickerDialog() {
