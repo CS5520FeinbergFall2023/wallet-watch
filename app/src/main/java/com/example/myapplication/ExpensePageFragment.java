@@ -45,7 +45,7 @@ public class ExpensePageFragment extends Fragment {
 
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         // Get username from local storage
-        username = prefs.getString("username","NONE");
+        username = prefs.getString("username","");
 
         // Firebase helper
         firebaseHelper = new FirebaseHelper();
