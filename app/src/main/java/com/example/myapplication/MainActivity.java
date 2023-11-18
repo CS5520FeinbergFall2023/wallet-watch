@@ -19,6 +19,9 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
+        // Get username from local storage
+        String username = prefs.getString("username","");
+
         // Check if the user is already logged in
         if (prefs.getBoolean(LOGGED_IN_KEY, false)) {
             Intent intent = new Intent(MainActivity.this, MainFragmentActivity.class);
