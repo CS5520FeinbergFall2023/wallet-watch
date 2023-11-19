@@ -9,7 +9,7 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String PREFS_NAME = "MyPrefsFile";
+    public static final String PREFS_NAME = "MyPrefsFile";
     private static final String LOGGED_IN_KEY = "isLoggedIn";
 
     @Override
@@ -19,9 +19,12 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 
-//         Check if the user is already logged in
+        // Get username from local storage
+        String username = prefs.getString("username","");
+
+        // Check if the user is already logged in
         if (prefs.getBoolean(LOGGED_IN_KEY, false)) {
-            Intent intent = new Intent(MainActivity.this, HomePageActivity.class);
+            Intent intent = new Intent(MainActivity.this, MainFragmentActivity.class);
             startActivity(intent);
             finish();
         }
@@ -30,21 +33,18 @@ public class MainActivity extends AppCompatActivity {
         Button loginButton = findViewById(R.id.loginButton);
         loginButton.setOnClickListener((view -> loginPageActivity()));
 
+        // Register
         Button registerButton = findViewById(R.id.registerButton);
         registerButton.setOnClickListener((view -> registerPageActivity()));
     }
 
     public void loginPageActivity(){
-
         Intent intent = new Intent(this, LoginPageActivity.class);
         startActivity(intent);
-
     }
 
     public void registerPageActivity(){
-
         Intent intent = new Intent(this, RegisterPageActivity.class);
         startActivity(intent);
-
     }
 }

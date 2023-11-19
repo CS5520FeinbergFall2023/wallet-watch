@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.dao;
 
 import java.time.Instant;
 
@@ -23,7 +23,6 @@ public class Budget {
         this.startDate = startDate;
         this.endDate = endDate;
     }
-
 
     public String getCategory() {
         return category;

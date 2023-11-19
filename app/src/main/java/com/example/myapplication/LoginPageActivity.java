@@ -14,6 +14,7 @@ public class LoginPageActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "MyPrefsFile";
     private static final String LOGGED_IN_KEY = "isLoggedIn";
+    private static final String USERNAME = "username";
     private EditText usernameEditText, passwordEditText;
     private FirebaseHelper firebaseHelper;
 
@@ -46,9 +47,10 @@ public class LoginPageActivity extends AppCompatActivity {
 
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putBoolean(LOGGED_IN_KEY, true);
+                    editor.putString(USERNAME,username);
                     editor.apply();
 
-                    Intent intent = new Intent(LoginPageActivity.this, HomePageActivity.class);
+                    Intent intent = new Intent(LoginPageActivity.this, MainFragmentActivity.class);
                     startActivity(intent);
                     finish();
                 } else {

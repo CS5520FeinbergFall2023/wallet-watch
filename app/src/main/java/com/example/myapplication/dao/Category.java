@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.dao;
 
 public class Category {
     private String category;
@@ -21,8 +21,6 @@ public class Category {
 
     @Override
     public String toString() {
-        return "Category{" +
-                "category='" + category + '\'' +
-                '}';
+        return this.category;
     }
 }

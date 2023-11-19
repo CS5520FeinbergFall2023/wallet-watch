@@ -7,19 +7,26 @@
     <string name="expenses">Expenses:</string>
     <string name="formatted_currency_zero">$0.00</string>
     <string name="expense_details">Expense Details</string>
-    <string name="app_name">Expense Tracker</string>
+    <string name="app_name">Wallet Watch</string>
     <string name="formatted_currency">$%.2f</string>
     <string name="add_expense_button">Add Expense</string>
-    <string name="add_expense_recurring">Recurring ?</string>
-    <string name="add_expense_notes_hint">Notes</string>
+    <string name="add_expense_recurring">Recurring ? (Monthly)</string>
+    <string name="add_expense_description_hint">Description</string>
     <string name="add_expense_date_hint">Date</string>
     <string name="add_expense_category_hint">Category</string>
-    <string name="add_expense_budget_amount_hint">Budget Amount</string>
+    <string name="add_expense_amount_hint">Expense Amount</string>
     <string name="dollar_sign_icon_description">dollar sign</string>
     <string name="add_expense_header_text">Add Expense</string>
     <string name="clear_expense_button">clear</string>
+
+    <string name="logout_button">Logout</string>
+    <string name="budget_text">Budget</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="register_button">Register</string>
     <string name="notification_history_string">Notification History</string>
     <string name="header_rv_row_string">Header</string>
     <string name="notification_message_rv_string">Notification Message</string>
     <string name="date_rv_row_string">Date</string>
+
 </resources>
