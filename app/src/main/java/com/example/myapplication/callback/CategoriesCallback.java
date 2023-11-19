@@ -1,4 +1,6 @@
-package com.example.myapplication;
+package com.example.myapplication.callback;
+
+import com.example.myapplication.dao.Category;
 
 import java.util.List;
 
