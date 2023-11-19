@@ -3,8 +3,14 @@ package com.example.myapplication;
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.myapplication.MainActivity.PREFS_NAME;
 
+import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,16 +19,21 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,13 +50,18 @@ public class ExpensePageFragment extends Fragment {
     private FirebaseHelper firebaseHelper;
     private String username;
 
+    private ActivityResultLauncher<String> photoPermissionRequest;
+    private ActivityResultLauncher<Uri> takePictureLauncher;
+
+    private final String logTag = "EXP-PAGE";
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_expense_page, container, false);
 
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         // Get username from local storage
-        username = prefs.getString("username","");
+        username = prefs.getString("username", "");
 
         // Firebase helper
         firebaseHelper = new FirebaseHelper();
@@ -78,8 +94,31 @@ public class ExpensePageFragment extends Fragment {
             }
         });
 
+        // Initialize the launchers in your onCreate or onCreateView method:
+        photoPermissionRequest = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
+            if (result) {
+                // Camera permission granted, proceed with taking a picture
+                launchCamera();
+            } else {
+                Snackbar.make(requireView(), "Camera permission is required!", Snackbar.LENGTH_SHORT).show();
+            }
+        });
+
+        takePictureLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
+            // This callback is called after taking a picture
+            if (result) {
+                // Picture taken successfully
+                Log.d(logTag, "Picture taken successfully");
+            } else {
+                // Picture taking canceled or encountered an error
+                Log.d(logTag, "Picture taking canceled or encountered an error");
+            }
+        });
+
         // Upload Button
         uploadExpenseButton = view.findViewById(R.id.add_expense_upload_button);
+        uploadExpenseButton.setOnClickListener(v -> dispatchTakePictureIntent());
+
 
         // Date Field
         datePickerText = view.findViewById(R.id.add_expense_date_picker);
@@ -101,6 +140,55 @@ public class ExpensePageFragment extends Fragment {
         addExpenseButton.setOnClickListener(v -> checkValues());
 
         return view;
+    }
+
+    private void dispatchTakePictureIntent() {
+        requestCameraPermissionAndLaunchCamera();
+    }
+
+    // Function to request camera permission and launch the camera
+    private void requestCameraPermissionAndLaunchCamera() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Camera permission is already granted, proceed with taking a picture
+            launchCamera();
+        } else {
+            // Request camera permission
+            photoPermissionRequest.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    // Function to launch the camera
+    private void launchCamera() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(requireContext().getPackageManager()) != null) {
+            // Start the camera
+            takePictureLauncher.launch(null); // You can pass a Uri for saving the image, or null for the default behavior
+        } else {
+            Log.d(logTag, "No camera app available");
+        }
+    }
+
+    private Uri createImageUri() {
+        return Uri.fromFile(createImageFile());
+    }
+
+
+    private File createImageFile() {
+        // Define a constant filename
+        String imageFileName = "temp_expense_photo.jpg";
+
+        // Get the app's cache directory
+        File storageDir = requireContext().getCacheDir();
+
+        // Create the temporary file
+        File imageFile = new File(storageDir, imageFileName);
+
+        // Save a file: path for use with ACTION_VIEW intents or other app-related logic
+        String currentPhotoPath = imageFile.getAbsolutePath();
+        Log.d(logTag, "Image path: " + currentPhotoPath);
+
+        return imageFile;
     }
 
     /**
