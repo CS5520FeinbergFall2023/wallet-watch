@@ -24,7 +24,6 @@ public class Budget {
         this.endDate = endDate;
     }
 
-
     public String getCategory() {
         return category;
     }
