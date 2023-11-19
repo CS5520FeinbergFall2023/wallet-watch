@@ -52,7 +52,7 @@ public class RegisterPageActivity extends AppCompatActivity {
     private void registerUser(String username, String password) {
         firebaseHelper.registerOrLoginUser(username, password, task -> {
             if (task.isSuccessful()) {
-                Toast.makeText(RegisterPageActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterPageActivity.this, "User registration successful.", Toast.LENGTH_SHORT).show();
 
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putBoolean(LOGGED_IN_KEY, true);

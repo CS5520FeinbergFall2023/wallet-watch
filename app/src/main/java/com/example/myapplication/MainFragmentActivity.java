@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -13,11 +14,18 @@ public class MainFragmentActivity extends AppCompatActivity {
     // Home activity is the default activity
     private int selectedFragment = R.id.home;
     private BottomNavigationView bottomNavigationView;
+    private FirebaseHelper firebaseHelper;
+    private CategoriesViewModel categoriesViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_fragment);
+
+        this.firebaseHelper = new FirebaseHelper();
+
+        this.categoriesViewModel = new ViewModelProvider(this).get(CategoriesViewModel.class);
+        getCategories();
 
         this.bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
@@ -33,6 +41,12 @@ public class MainFragmentActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(this.CURRENT_FRAGMENT, this.selectedFragment);
+    }
+
+    private void getCategories() {
+        this.firebaseHelper.getCategories(categoryList -> {
+            this.categoriesViewModel.setCategoryList(categoryList);
+        });
     }
 
     private void setupBottomNavigation() {
