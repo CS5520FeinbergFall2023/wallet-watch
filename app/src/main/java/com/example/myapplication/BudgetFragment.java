@@ -57,6 +57,9 @@ public class BudgetFragment extends Fragment {
         firebaseHelper = new FirebaseHelper();
 
 
+        // Initialize categoryRecyclerView
+        RecyclerView categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
+
         // RecyclerView
         categoryAdapter = new CategoryAdapter();
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -75,7 +78,7 @@ public class BudgetFragment extends Fragment {
         @Override
         public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_category, parent, false);
+                    .inflate(R.layout.item_category_card, parent, false);
             return new CategoryViewHolder(itemView);
         }
 
@@ -100,7 +103,7 @@ public class BudgetFragment extends Fragment {
                         }
                     }
 
-                    holder.totalBudgetTextView.setText("Total: $" + totalAmount);
+                    holder.totalBudgetTextView.setText("$" + totalAmount);
                 }
 
                 @Override
@@ -118,6 +121,7 @@ public class BudgetFragment extends Fragment {
             });
         }
 
+
         @Override
         public int getItemCount() {
             return categories.length;
@@ -134,7 +138,7 @@ public class BudgetFragment extends Fragment {
             builder.setView(input);
 
             // Fetch existing amount for the selected category
-            String existingAmount = holder.totalBudgetTextView.getText().toString().replace("Total: $", "");
+            String existingAmount = holder.totalBudgetTextView.getText().toString().replace("$", "");
             input.setText(existingAmount);
 
             // Set up the OK button
@@ -145,7 +149,7 @@ public class BudgetFragment extends Fragment {
                     int amount = TextUtils.isEmpty(amountStr) ? 0 : Integer.parseInt(amountStr);
 
                     // Update the total budget TextView
-                    holder.totalBudgetTextView.setText("Total: $" + amount);
+                    holder.totalBudgetTextView.setText("$" + amount);
 
                     // Update the Firebase database
                     firebaseHelper.updateBudgetAmount(username, category, amount);
