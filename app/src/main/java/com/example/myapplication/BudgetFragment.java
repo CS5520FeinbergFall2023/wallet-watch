@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,21 +49,15 @@ public class BudgetFragment extends Fragment {
         // Inflate the layout
         View view = inflater.inflate(R.layout.fragment_budget_page, container, false);
 
+
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         // Get username from local storage
         username = prefs.getString("username","");
 
         firebaseHelper = new FirebaseHelper();
 
-        // Find views
-        monthYearTextView = view.findViewById(R.id.monthYearTextView);
-        RecyclerView categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
 
-        // Set up the initial month and year
-        currentMonth = Calendar.getInstance();
-        updateMonthYear(currentMonth);
-
-        // Set up the RecyclerView
+        // RecyclerView
         categoryAdapter = new CategoryAdapter();
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         categoryRecyclerView.setAdapter(categoryAdapter);
@@ -70,13 +65,8 @@ public class BudgetFragment extends Fragment {
         return view;
     }
 
-    private void updateMonthYear(Calendar calendar) {
-        SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", Locale.getDefault());
-        String formattedMonthYear = sdf.format(calendar.getTime());
-        monthYearTextView.setText(formattedMonthYear);
-    }
 
-    // Create a custom adapter for the RecyclerView
+    // Custom adapter for the RecyclerView
     private class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
         private String[] categories = {"Food", "Entertainment", "Travel", "School", "Utilities"};
