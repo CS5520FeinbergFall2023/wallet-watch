@@ -6,13 +6,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.myapplication.dao.Category;
+
 import java.util.List;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
-    private List<String> categories;
+    private List<Category> categories;
 
-    public CategoryAdapter(List<String> categories) {
+    public CategoryAdapter(List<Category> categories) {
         this.categories = categories;
     }
 
@@ -25,7 +28,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.Catego
 
     @Override
     public void onBindViewHolder(@NonNull CategoryViewHolder holder, int position) {
-        String category = categories.get(position);
+        String category = this.categories.get(position).getCategory();
         holder.categoryNameTextView.setText(category);
     }
 

@@ -1,33 +1,38 @@
 package com.example.myapplication;
 
-import android.content.Intent;
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.myapplication.MainActivity.PREFS_NAME;
+
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.myapplication.dao.Budget;
+import com.example.myapplication.dao.Category;
+import com.example.myapplication.dao.Expense;
+import com.example.myapplication.dao.ExpenseItem;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-public class DataVisualizationActivity extends AppCompatActivity {
-
-    private static final List<String> CATEGORIES = Collections.unmodifiableList(
-            Arrays.asList("Food", "Entertainment", "Travel", "School", "Utilities")
-    );
+public class DataVisualizationFragment extends Fragment {
 
     private TextView textDate, textBudget, textRemaining, textExpenses;
     private ViewPager2 categoryViewPager;
@@ -37,77 +42,55 @@ public class DataVisualizationActivity extends AppCompatActivity {
     private List<Expense> expensesList;
     private List<ExpenseItem> expensesForMonth;
     private List<Budget> budgetList;
+    private List<Category> categoryList;
     private ExpensesAdapter expensesAdapter;
+    private String username;
+    private CategoriesViewModel viewModel;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_data_visualization);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_data_visualization, container, false);
 
-
-        // Bottom Navigation
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        bottomNavigationView.setSelectedItemId(R.id.data);
-
-
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.home) {
-                startActivity(new Intent(getApplicationContext(), HomePageActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
-                return true;
-            } else if (item.getItemId() == R.id.budget) {
-                startActivity(new Intent(getApplicationContext(), BudgetPageActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
-                return true;
-            } else if (item.getItemId() == R.id.expense) {
-                startActivity(new Intent(getApplicationContext(), ExpensePageActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
-                return true;
-            } else if (item.getItemId() == R.id.data) {
-                return true;
-            }
-            else if (item.getItemId() == R.id.account) {
-                startActivity(new Intent(getApplicationContext(), AccountPageActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
-                return true;
-            }
-            return false;
-        });
-
-
-        TextView headerTitle = findViewById(R.id.headerTitle);
+        TextView headerTitle = view.findViewById(R.id.headerTitle);
         headerTitle.setText(getText(R.string.data_viz_header));
+
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        this.username = prefs.getString("username","");
 
         this.firebaseHelper = new FirebaseHelper();
 
-        this.expensesList = new ArrayList();
+        this.viewModel = new ViewModelProvider(requireActivity()).get(CategoriesViewModel.class);
+
+        this.expensesList = new ArrayList<>();
         this.expensesForMonth = new ArrayList<>();
-        this.budgetList = new ArrayList();
+        this.budgetList = new ArrayList<>();
 
-        this.textDate = findViewById(R.id.textDate);
-        this.textBudget = findViewById(R.id.textBudgetValue);
-        this.textRemaining = findViewById(R.id.textRemainingValue);
-        this.textExpenses = findViewById(R.id.textExpenseValue);
-        this.categoryViewPager = findViewById(R.id.categoryViewPager);
+        this.textDate = view.findViewById(R.id.textDate);
+        this.textBudget = view.findViewById(R.id.textBudgetValue);
+        this.textRemaining = view.findViewById(R.id.textRemainingValue);
+        this.textExpenses = view.findViewById(R.id.textExpenseValue);
+        this.categoryViewPager = view.findViewById(R.id.categoryViewPager);
 
-        this.expensesRecyclerView = findViewById(R.id.expensesRecyclerView);
+        this.expensesRecyclerView = view.findViewById(R.id.expensesRecyclerView);
         this.expensesRecyclerView.setHasFixedSize(true);
-        this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         this.expensesAdapter = new ExpensesAdapter(new ArrayList<>());
         this.expensesRecyclerView.setAdapter(this.expensesAdapter);
 
-        addCategoriesToPager();
+        this.viewModel.getCategoryList().observe(getViewLifecycleOwner(), categories -> {
+            this.categoryList = categories;
+            addCategoriesToPager();
+        });
+
         retrieveData();
-        setupMonthIterationButtons();
+        setupMonthIterationButtons(view);
         updateDateDisplay();
+
+        return view;
     }
 
     private void addCategoriesToPager() {
-        this.categoryViewPager.setAdapter(new CategoryAdapter(CATEGORIES));
+        this.categoryViewPager.setAdapter(new CategoryAdapter(this.categoryList));
 
         this.categoryViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -120,8 +103,7 @@ public class DataVisualizationActivity extends AppCompatActivity {
 
     private boolean isCategorySame(Object obj) {
         try {
-            // Get current category from swiper
-            String category = CATEGORIES.get(this.categoryViewPager.getCurrentItem());
+            String category = this.categoryList.get(this.categoryViewPager.getCurrentItem()).getCategory();
             Method getCategoryMethod = obj.getClass().getMethod("getCategory");
             return Objects.equals(getCategoryMethod.invoke(obj), category);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -192,8 +174,7 @@ public class DataVisualizationActivity extends AppCompatActivity {
     private void retrieveData() {
         CountDownLatch latch = new CountDownLatch(2);
 
-        //TODO: Replace with current user
-        String userId = "kartik";
+        String userId = this.username;
 
         this.firebaseHelper.getUserExpenses(userId, expensesList -> {
             this.expensesList.clear();
@@ -210,7 +191,9 @@ public class DataVisualizationActivity extends AppCompatActivity {
         new Thread(() -> {
             try {
                 latch.await();
-                runOnUiThread(this::updateMonetaryValues);
+                if (isAdded()) {
+                    getActivity().runOnUiThread(this::updateMonetaryValues);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -228,9 +211,9 @@ public class DataVisualizationActivity extends AppCompatActivity {
         this.textDate.setText(monthYear);
     }
 
-    private void setupMonthIterationButtons() {
-        Button btnPreviousMonth = findViewById(R.id.btnPreviousMonth);
-        Button btnNextMonth = findViewById(R.id.btnNextMonth);
+    private void setupMonthIterationButtons(View view) {
+        Button btnPreviousMonth = view.findViewById(R.id.btnPreviousMonth);
+        Button btnNextMonth = view.findViewById(R.id.btnNextMonth);
 
         btnPreviousMonth.setOnClickListener(v -> {
             this.currentCalendar.add(Calendar.MONTH, -1);

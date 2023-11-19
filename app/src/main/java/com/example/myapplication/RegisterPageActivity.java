@@ -18,6 +18,8 @@ public class RegisterPageActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "MyPrefsFile";
     private static final String LOGGED_IN_KEY = "isLoggedIn";
+    private static final String USERNAME = "username";
+
 
     private SharedPreferences prefs;
 
@@ -50,13 +52,14 @@ public class RegisterPageActivity extends AppCompatActivity {
     private void registerUser(String username, String password) {
         firebaseHelper.registerOrLoginUser(username, password, task -> {
             if (task.isSuccessful()) {
-                Toast.makeText(RegisterPageActivity.this, "Registration successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterPageActivity.this, "User registration successful.", Toast.LENGTH_SHORT).show();
 
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putBoolean(LOGGED_IN_KEY, true);
+                editor.putString(USERNAME,username);
                 editor.apply();
 
-                Intent intent = new Intent(RegisterPageActivity.this, HomePageActivity.class);
+                Intent intent = new Intent(RegisterPageActivity.this, MainFragmentActivity.class);
                 startActivity(intent);
                 finish();
             } else {

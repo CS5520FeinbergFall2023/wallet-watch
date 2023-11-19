@@ -1,4 +1,6 @@
-package com.example.myapplication;
+package com.example.myapplication.dao;
+
+import androidx.annotation.NonNull;
 
 import java.time.Instant;
 
@@ -8,6 +10,7 @@ public class Expense {
     private String description;
     private Long date;
     private String imageUrl;
+    private boolean recurring;
 
 
     public Expense() {
@@ -17,6 +20,7 @@ public class Expense {
         this.description = "";
         this.date = Instant.now().toEpochMilli();
         this.imageUrl = "";
+        this.recurring = false;
     }
 
     public Expense(String category, double amount, String description, Long date, String imageUrl) {
@@ -25,6 +29,16 @@ public class Expense {
         this.description = description;
         this.date = date;
         this.imageUrl = imageUrl;
+        this.recurring = false;
+    }
+
+    public Expense(String category, double amount, String description, Long date, String imageUrl, boolean recurring) {
+        this.category = category;
+        this.amount = amount;
+        this.description = description;
+        this.date = date;
+        this.imageUrl = imageUrl;
+        this.recurring = recurring;
     }
 
     public String getCategory() {
@@ -63,6 +77,15 @@ public class Expense {
         this.imageUrl = imageUrl;
     }
 
+    public boolean getRecurring() {
+        return recurring;
+    }
+
+    public void setRecurring(boolean recurring) {
+        this.recurring = recurring;
+    }
+
+    @NonNull
     @Override
     public String toString() {
         return "Expense{" +
@@ -71,6 +94,7 @@ public class Expense {
                 ", description='" + description + '\'' +
                 ", date='" + date + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", recurring='" + recurring + '\'' +
                 '}';
     }
 }
