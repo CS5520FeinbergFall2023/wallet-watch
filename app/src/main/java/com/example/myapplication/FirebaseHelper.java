@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -169,6 +170,51 @@ public class FirebaseHelper {
 //        return budgetRef.removeValue();
 //    }
 
+    // Add Budgets
+    public void updateBudgetAmount(String username, String category, int amount) {
+        // Navigate to the correct node in the Firebase database for the user
+        DatabaseReference userBudgetRef = FirebaseDatabase.getInstance().getReference()
+                .child("budgets")
+                .child(username);
+
+        // Find the correct budget entry for the specified category
+        Query categoryQuery = userBudgetRef.orderByChild("category").equalTo(category);
+        categoryQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // Category exists, update the existing entry
+                    for (DataSnapshot budgetSnapshot : snapshot.getChildren()) {
+                        budgetSnapshot.getRef().child("amount").setValue(amount);
+                    }
+                } else {
+                    // Category doesn't exist, create a new budget entry
+                    String budgetId = userBudgetRef.push().getKey();
+                    DatabaseReference newBudgetRef = userBudgetRef.child(budgetId);
+                    newBudgetRef.child("category").setValue(category);
+                    newBudgetRef.child("amount").setValue(amount);
+                    // You can set start_date and end_date if needed
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle the error
+            }
+        });
+    }
+
+
+    public void getBudgetAmount(String username, String category, ValueEventListener valueEventListener) {
+        DatabaseReference userBudgetRef = FirebaseDatabase.getInstance().getReference()
+                .child("budgets")
+                .child(username);
+
+        Query categoryQuery = userBudgetRef.orderByChild("category").equalTo(category);
+        categoryQuery.addListenerForSingleValueEvent(valueEventListener);
+    }
+
+
     // Expense methods
 
     public void getUserExpenses(String userId, ExpensesCallback callback) {
@@ -216,6 +262,7 @@ public class FirebaseHelper {
 //        DatabaseReference notificationRef = getUserNotificationsReference(userId).push();
 //        return notificationRef.setValue(notification);
 //    }
+
 
     // Categories
 
