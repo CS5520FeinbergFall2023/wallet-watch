@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -11,7 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.dao.User;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
     private Context context;
@@ -27,15 +30,26 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     @NonNull
     @Override
     public NotificationAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.notifications_rv_row, parent, false);
+        return new ViewHolder(view);
         //inflating the layout (ie giving a look to our our items/rows)
-        return null;
+        //return null;
     }
 
     @Override
     public void onBindViewHolder(@NonNull NotificationAdapter.ViewHolder holder, int position) {
         //assigning values to the views we created in the recycler view layout file based on the
         //position of the recycler view
+        Notification notification = notificationsReceived.get(position);
+        //holder.header.setText()
 
+    }
+
+    private String formatDate(long timestamp) {
+        Date date = new Date(timestamp);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+        return dateFormat.format(date);
     }
 
     @Override
@@ -54,6 +68,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             imageView = itemView.findViewById(R.id.categoryImageIcon);
             header = itemView.findViewById(R.id.header_rv_text);
             message = itemView.findViewById(R.id.notifications_rv);
+            date = itemView.findViewById(R.id.date_rv_text);
         }
     }
 }
