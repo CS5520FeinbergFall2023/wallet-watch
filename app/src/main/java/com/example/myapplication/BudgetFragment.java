@@ -94,22 +94,23 @@ public class BudgetFragment extends Fragment {
             String category = categories[position];
             holder.categoryNameTextView.setText(category);
 
-            // Fetch and display the existing budget amount for the category
-            firebaseHelper.getBudgetAmount(username, category, new ValueEventListener() {
+            // Fetch and display the existing budget amounts for the category
+            firebaseHelper.getBudgetAmount(username, new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        Integer existingAmount = snapshot.child("amount").getValue(Integer.class);
-                        if (existingAmount != null) {
-                            holder.totalBudgetTextView.setText("Total: $" + existingAmount);
-                        } else {
-                            // Handle the case where existingAmount is null
-                            holder.totalBudgetTextView.setText("Total: $0");
+                    int totalAmount = 0;
+
+                    for (DataSnapshot budgetSnapshot : snapshot.getChildren()) {
+                        String budgetCategory = budgetSnapshot.child("category").getValue(String.class);
+                        if (category.equals(budgetCategory)) {
+                            Integer amount = budgetSnapshot.child("amount").getValue(Integer.class);
+                            if (amount != null) {
+                                totalAmount += amount;
+                            }
                         }
-                    } else {
-                        // Handle the case where the category doesn't exist
-                        holder.totalBudgetTextView.setText("Total: $0");
                     }
+
+                    holder.totalBudgetTextView.setText("Total: $" + totalAmount);
                 }
 
                 @Override

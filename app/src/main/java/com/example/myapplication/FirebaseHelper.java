@@ -205,13 +205,12 @@ public class FirebaseHelper {
     }
 
 
-    public void getBudgetAmount(String username, String category, ValueEventListener valueEventListener) {
+    public void getBudgetAmount(String username, ValueEventListener valueEventListener) {
         DatabaseReference userBudgetRef = FirebaseDatabase.getInstance().getReference()
                 .child("budgets")
                 .child(username);
 
-        Query categoryQuery = userBudgetRef.orderByChild("category").equalTo(category);
-        categoryQuery.addListenerForSingleValueEvent(valueEventListener);
+        userBudgetRef.addListenerForSingleValueEvent(valueEventListener);
     }
 
 
