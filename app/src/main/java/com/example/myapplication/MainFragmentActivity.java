@@ -1,6 +1,10 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -16,6 +20,7 @@ public class MainFragmentActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private FirebaseHelper firebaseHelper;
     private CategoriesViewModel categoriesViewModel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +40,12 @@ public class MainFragmentActivity extends AppCompatActivity {
 
         setupBottomNavigation();
         this.bottomNavigationView.setSelectedItemId(this.selectedFragment);
+
+
+
     }
+
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -76,5 +86,22 @@ public class MainFragmentActivity extends AppCompatActivity {
             }
             return true;
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_top_toolbar, menu);
+        return  true;
+    }
+
+
+    public void onClickNotification(View view) {
+        int clickedId = view.getId();
+        if (clickedId == R.id.button_notifications_center) {
+            startActivity(new Intent(MainFragmentActivity.this, NotificationPageActivity.class));
+        }
+
+
     }
 }

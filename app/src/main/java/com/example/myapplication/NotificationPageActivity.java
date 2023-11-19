@@ -32,25 +32,31 @@ public class NotificationPageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_notification_page);
 
         TextView headerTitle = findViewById(R.id.headerTitle);
+        //may change string to Notification Center
         headerTitle.setText(R.string.notification_history_string);
 
         FirebaseHelper helper = new FirebaseHelper();
         DatabaseReference budgetDatabaseRef = FirebaseDatabase.getInstance().getReference()
                 .child("budgets")
-                .child(user.getUsername());
+                .child("kartik");
         DatabaseReference expensesDatabaseRef = FirebaseDatabase.getInstance().getReference()
                 .child("expenses")
-                .child(user.getUsername());
+                //.child(user.getUsername)
+                .child("kartik");
 
         budgetDatabaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                //for (int i = 0; i < dataSnapshot.getChildren().size() {
-                    if (snapshot.getValue() == "Food" ) {
+                    for (DataSnapshot shot : snapshot.getChildren()) {
+                        //for (int i = 0; i < dataSnapshot.getChildren().size() {
+                        System.out.println(snapshot.getKey());
+                        if (snapshot.getValue() == "Food") {
+                            System.out.println(snapshot.getValue());
 
 
-                        //dictBudget.put("Food", dataSnapshot.getValue());
+                            //dictBudget.put("Food", dataSnapshot.getValue());
+                        }
                     }
 
                     for (DataSnapshot shot : snapshot.getChildren()) {
