@@ -18,9 +18,15 @@
     <string name="dollar_sign_icon_description">dollar sign</string>
     <string name="add_expense_header_text">Add Expense</string>
     <string name="clear_expense_button">clear</string>
+
     <string name="logout_button">Logout</string>
     <string name="budget_text">Budget</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="register_button">Register</string>
+    <string name="notification_history_string">Notification History</string>
+    <string name="header_rv_row_string">Header</string>
+    <string name="notification_message_rv_string">Notification Message</string>
+    <string name="date_rv_row_string">Date</string>
+
 </resources>
