@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.dao;
 
 public class User {
 
@@ -8,8 +8,8 @@ public class User {
     public User() {}
 
     public User(String username, String password, Long registrationDate) {
-        this.password = password;
         this.username = username;
+        this.password = password;
         this.registration_date = registrationDate;
     }
 
