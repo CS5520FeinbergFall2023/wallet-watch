@@ -1,10 +1,16 @@
 package com.example.myapplication;
 
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.myapplication.callback.BudgetsCallback;
+import com.example.myapplication.callback.ExpensesCallback;
+import com.example.myapplication.callback.CategoriesCallback;
+import com.example.myapplication.dao.Budget;
+import com.example.myapplication.dao.Category;
+import com.example.myapplication.dao.Expense;
+import com.example.myapplication.dao.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DataSnapshot;
@@ -24,10 +30,6 @@ import com.google.firebase.storage.UploadTask;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -35,13 +37,6 @@ public class FirebaseHelper {
 
     private final DatabaseReference databaseReference;
     private final StorageReference storageReference;
-
-    // Define a callback interface
-    public interface CategoriesCallback {
-        void onCategoriesLoaded(Set<String> categories);
-
-        void onCancelled(DatabaseError databaseError);
-    }
 
     public FirebaseHelper() {
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -122,7 +117,7 @@ public class FirebaseHelper {
                 if (dataSnapshot.exists()) {
                     onCompleteListener.onComplete(Tasks.forException(new Exception("Username already exists")));
                 } else {
-                    registerUser(password, username, onCompleteListener);
+                    registerUser(username, password, onCompleteListener);
                 }
             }
 
@@ -224,27 +219,25 @@ public class FirebaseHelper {
 
     // Categories
 
-//    public void getCategories(CategoriesCallback callback) {
-//        DatabaseReference userBudgetsRef = FirebaseDatabase.getInstance().getReference().child("categories");
-//        userBudgetsRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                List<Category> categoryList = new ArrayList<>();
-//                for (DataSnapshot categorySnapshot : dataSnapshot.getChildren()) {
-//                    String categoryName = categorySnapshot.getValue(String.class);
-//                    if (categoryName != null) {
-//                        categoryList.add(new Category(categoryName));
-//                    }
-//                }
-//                callback.onCallback(categoryList);
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//                //TODO: Error handling
-//            }
-//        });
-//    }
+    public void getCategories(CategoriesCallback callback) {
+        DatabaseReference categoriesRef = FirebaseDatabase.getInstance().getReference("categories");
+        categoriesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Category> categories = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String categoryName = snapshot.getValue(String.class);
+                    categories.add(new Category(categoryName));
+                }
+                callback.onCallback(categories);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle possible errors.
+            }
+        });
+    }
 
     /**
      * Get the categories of a user from each category in their budget.
