@@ -6,6 +6,7 @@ import static com.example.myapplication.MainActivity.PREFS_NAME;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -219,9 +220,13 @@ public class BudgetFragment extends Fragment {
         // PieChart Config
 
         // Create a PieDataSet
-        PieDataSet dataSet = new PieDataSet(pieEntries, "Budget Categories");
-        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
-        dataSet.setValueTextSize(12f);
+        PieDataSet dataSet = new PieDataSet(pieEntries, "");
+
+        // Set custom colors for each entry
+        dataSet.setColors(new int[]{Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.BLACK});
+
+//        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+//        dataSet.setValueTextSize(12f);
 
         // Create a PieData object
         PieData data = new PieData(dataSet);
@@ -229,16 +234,26 @@ public class BudgetFragment extends Fragment {
 
         pieChart.setData(data);
 
+        // Remove description label text on the side
+        pieChart.getDescription().setEnabled(false);
+
         pieChart.invalidate();
     }
 
     private void updatePieChart() {
-        PieDataSet dataSet = new PieDataSet(pieEntries, "Budget Categories");
-        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
-        dataSet.setValueTextSize(12f);
+        PieDataSet dataSet = new PieDataSet(pieEntries, "");
+        dataSet.setColors(new int[]{Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.GRAY});
+//        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+//        dataSet.setValueTextSize(9f);
 
         PieData data = new PieData(dataSet);
+
+
         pieChart.setData(data);
+
+        // Remove description label text on the side
+        pieChart.getDescription().setEnabled(false);
+
         pieChart.invalidate();
     }
 }
