@@ -155,22 +155,8 @@ public class FirebaseHelper {
         });
     }
 
-//    public Task<Void> addBudget(String userId, Budget budget) {
-//        DatabaseReference budgetRef = getUserBudgetsReference(userId).push();
-//        return budgetRef.setValue(budget);
-//    }
-//
-//    public Task<Void> updateBudget(String userId, String budgetId, Budget updatedBudget) {
-//        DatabaseReference budgetRef = getUserBudgetsReference(userId).child(budgetId);
-//        return budgetRef.setValue(updatedBudget);
-//    }
-//
-//    public Task<Void> deleteBudget(String userId, String budgetId) {
-//        DatabaseReference budgetRef = getUserBudgetsReference(userId).child(budgetId);
-//        return budgetRef.removeValue();
-//    }
 
-    // Add Budgets
+    // Budgets
     public void updateBudgetAmount(String username, String category, int amount) {
         // Navigate to the correct node in the Firebase database for the user
         DatabaseReference userBudgetRef = FirebaseDatabase.getInstance().getReference()
@@ -193,7 +179,6 @@ public class FirebaseHelper {
                     DatabaseReference newBudgetRef = userBudgetRef.child(budgetId);
                     newBudgetRef.child("category").setValue(category);
                     newBudgetRef.child("amount").setValue(amount);
-                    // You can set start_date and end_date if needed
                 }
             }
 
@@ -203,7 +188,6 @@ public class FirebaseHelper {
             }
         });
     }
-
 
     public void getBudgetAmount(String username, ValueEventListener valueEventListener) {
         DatabaseReference userBudgetRef = FirebaseDatabase.getInstance().getReference()
