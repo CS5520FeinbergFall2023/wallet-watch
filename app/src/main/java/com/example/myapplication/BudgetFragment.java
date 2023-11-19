@@ -1,18 +1,19 @@
 package com.example.myapplication;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.myapplication.MainActivity.PREFS_NAME;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,18 +21,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.dao.Category;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 public class BudgetFragment extends Fragment {
 
@@ -42,7 +38,7 @@ public class BudgetFragment extends Fragment {
     private CategoryAdapter categoryAdapter;
 
     private FirebaseHelper firebaseHelper;
-    private ArrayAdapter<Category> adapter;
+    private String username;
 
     @Nullable
     @Override
@@ -52,42 +48,24 @@ public class BudgetFragment extends Fragment {
         // Inflate the layout
         View view = inflater.inflate(R.layout.fragment_budget_page, container, false);
 
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        // Get username from local storage
+        username = prefs.getString("username","");
+
         firebaseHelper = new FirebaseHelper();
 
         // Find views
         monthYearTextView = view.findViewById(R.id.monthYearTextView);
-        Button prevMonthButton = view.findViewById(R.id.prevMonthButton);
-        Button nextMonthButton = view.findViewById(R.id.nextMonthButton);
+        RecyclerView categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
 
         // Set up the initial month and year
         currentMonth = Calendar.getInstance();
         updateMonthYear(currentMonth);
 
-        // Set up button click listeners
-        prevMonthButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentMonth.add(Calendar.MONTH, -1);
-                updateMonthYear(currentMonth);
-            }
-        });
-
-        nextMonthButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                currentMonth.add(Calendar.MONTH, 1);
-                updateMonthYear(currentMonth);
-            }
-        });
-
         // Set up the RecyclerView
-        categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
         categoryAdapter = new CategoryAdapter();
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         categoryRecyclerView.setAdapter(categoryAdapter);
-
-
-
 
         return view;
     }
@@ -116,14 +94,35 @@ public class BudgetFragment extends Fragment {
             String category = categories[position];
             holder.categoryNameTextView.setText(category);
 
-            // Set the initial total budget
-            holder.totalBudgetTextView.setText("Total: $0");
+            // Fetch and display the existing budget amount for the category
+            firebaseHelper.getBudgetAmount(username, category, new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        Integer existingAmount = snapshot.child("amount").getValue(Integer.class);
+                        if (existingAmount != null) {
+                            holder.totalBudgetTextView.setText("Total: $" + existingAmount);
+                        } else {
+                            // Handle the case where existingAmount is null
+                            holder.totalBudgetTextView.setText("Total: $0");
+                        }
+                    } else {
+                        // Handle the case where the category doesn't exist
+                        holder.totalBudgetTextView.setText("Total: $0");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Handle the error
+                }
+            });
 
             // Handle item click
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showChangeAmountDialog(category, holder);
+                    showChangeAmountDialog(username, category, holder);
                 }
             });
         }
@@ -134,7 +133,7 @@ public class BudgetFragment extends Fragment {
         }
 
         // Show a dialog for changing the amount
-        private void showChangeAmountDialog(String category, CategoryViewHolder holder) {
+        private void showChangeAmountDialog(String username, String category, CategoryViewHolder holder) {
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle("Change Amount");
 
@@ -142,6 +141,10 @@ public class BudgetFragment extends Fragment {
             final EditText input = new EditText(requireContext());
             input.setInputType(InputType.TYPE_CLASS_NUMBER);
             builder.setView(input);
+
+            // Fetch existing amount for the selected category
+            String existingAmount = holder.totalBudgetTextView.getText().toString().replace("Total: $", "");
+            input.setText(existingAmount);
 
             // Set up the OK button
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -153,7 +156,8 @@ public class BudgetFragment extends Fragment {
                     // Update the total budget TextView
                     holder.totalBudgetTextView.setText("Total: $" + amount);
 
-                    // TODO: Save the amount to your data structure or perform other actions
+                    // Update the Firebase database
+                    firebaseHelper.updateBudgetAmount(username, category, amount);
                 }
             });
 
@@ -180,18 +184,5 @@ public class BudgetFragment extends Fragment {
                 totalBudgetTextView = itemView.findViewById(R.id.totalBudgetTextView);
             }
         }
-    }
-
-
-
-    private void updateCategoryOptions(List<String> options) {
-        List<Category> budgetCategories = new ArrayList<>();
-
-        // convert List<String> to List<BudgetCategory>
-        options.forEach(category -> budgetCategories.add(new Category(category)));
-
-        adapter.clear();
-        adapter.addAll(budgetCategories);
-        adapter.notifyDataSetChanged();
     }
 }
