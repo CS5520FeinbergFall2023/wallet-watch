@@ -22,24 +22,30 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BudgetFragment extends Fragment {
 
     private TextView monthYearTextView;
-    private Calendar currentMonth;
 
     private RecyclerView categoryRecyclerView;
     private CategoryAdapter categoryAdapter;
 
     private FirebaseHelper firebaseHelper;
     private String username;
+
+    private List<PieEntry> pieEntries = new ArrayList<>();
+    private PieChart pieChart;
 
     @Nullable
     @Override
@@ -49,16 +55,20 @@ public class BudgetFragment extends Fragment {
         // Inflate the layout
         View view = inflater.inflate(R.layout.fragment_budget_page, container, false);
 
-
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         // Get username from local storage
         username = prefs.getString("username","");
 
         firebaseHelper = new FirebaseHelper();
 
+        // Pie Chart
+        pieChart = view.findViewById(R.id.pieChart);
+
+        // Initialize PieChart
+        setupPieChart();
 
         // Initialize categoryRecyclerView
-        RecyclerView categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
+        categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
 
         // RecyclerView
         categoryAdapter = new CategoryAdapter();
@@ -67,7 +77,6 @@ public class BudgetFragment extends Fragment {
 
         return view;
     }
-
 
     // Custom adapter for the RecyclerView
     private class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
@@ -104,6 +113,12 @@ public class BudgetFragment extends Fragment {
                     }
 
                     holder.totalBudgetTextView.setText("$" + totalAmount);
+
+                    // Update the PieChart entries
+                    updatePieChartEntries(categories, snapshot);
+
+                    // Update PieChart with the new entries
+                    updatePieChart();
                 }
 
                 @Override
@@ -120,7 +135,6 @@ public class BudgetFragment extends Fragment {
                 }
             });
         }
-
 
         @Override
         public int getItemCount() {
@@ -179,5 +193,52 @@ public class BudgetFragment extends Fragment {
                 totalBudgetTextView = itemView.findViewById(R.id.totalBudgetTextView);
             }
         }
+    }
+
+    private void updatePieChartEntries(String[] categories, DataSnapshot budgetSnapshot) {
+        pieEntries.clear();
+
+        for (String category : categories) {
+            int totalAmount = 0;
+
+            for (DataSnapshot snapshot : budgetSnapshot.getChildren()) {
+                String budgetCategory = snapshot.child("category").getValue(String.class);
+                if (category.equals(budgetCategory)) {
+                    Integer amount = snapshot.child("amount").getValue(Integer.class);
+                    if (amount != null) {
+                        totalAmount += amount;
+                    }
+                }
+            }
+
+            pieEntries.add(new PieEntry(totalAmount, category));
+        }
+    }
+
+    private void setupPieChart() {
+        // PieChart Config
+
+        // Create a PieDataSet
+        PieDataSet dataSet = new PieDataSet(pieEntries, "Budget Categories");
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setValueTextSize(12f);
+
+        // Create a PieData object
+        PieData data = new PieData(dataSet);
+
+
+        pieChart.setData(data);
+
+        pieChart.invalidate();
+    }
+
+    private void updatePieChart() {
+        PieDataSet dataSet = new PieDataSet(pieEntries, "Budget Categories");
+        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setValueTextSize(12f);
+
+        PieData data = new PieData(dataSet);
+        pieChart.setData(data);
+        pieChart.invalidate();
     }
 }
