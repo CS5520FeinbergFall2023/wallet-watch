@@ -248,13 +248,11 @@ public class FirebaseHelper {
 
     /**
      * Get the categories of a user from each category in their budget.
-     *
+     * @param  username username to get categories
      * @param valueEventListener callback after categories is fetched
      */
-    public void getCategories(ValueEventListener valueEventListener) {
-        String currentUser = "david";
-
-        DatabaseReference budgetsRef = FirebaseDatabase.getInstance().getReference("budgets").child(currentUser);
+    public void getCategories(String username,ValueEventListener valueEventListener) {
+        DatabaseReference budgetsRef = FirebaseDatabase.getInstance().getReference("budgets").child(username);
 
         budgetsRef.addListenerForSingleValueEvent(valueEventListener);
     }
@@ -262,14 +260,12 @@ public class FirebaseHelper {
 
     /**
      * Create an expense.
-     * TODO: current user will be populated dynamically here
-     *
+     * @param expense Expense
+     * @param username user to create the expense for
      * @param onCompleteListener listener for after expense is created
      */
-    public void createExpense(Expense expense, OnCompleteListener<Void> onCompleteListener) {
-        String currentUser = "david";
-
-        DatabaseReference expensesRef = FirebaseDatabase.getInstance().getReference("expenses").child(currentUser);
+    public void createExpense(String username, Expense expense, OnCompleteListener<Void> onCompleteListener) {
+        DatabaseReference expensesRef = FirebaseDatabase.getInstance().getReference("expenses").child(username);
 
         DatabaseReference newExpenseRef = expensesRef.push();
         newExpenseRef.setValue(expense).addOnCompleteListener(onCompleteListener);

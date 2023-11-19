@@ -9,7 +9,7 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String PREFS_NAME = "MyPrefsFile";
+    public static final String PREFS_NAME = "MyPrefsFile";
     private static final String LOGGED_IN_KEY = "isLoggedIn";
 
     @Override
