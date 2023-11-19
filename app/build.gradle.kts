@@ -3,6 +3,7 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+
 android {
     namespace = "com.example.myapplication"
     compileSdk = 34
@@ -31,6 +32,8 @@ android {
     buildFeatures{
         viewBinding = true
     }
+
+
 }
 
 dependencies {
@@ -51,5 +54,8 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-messaging:23.3.1")
+
+
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }
