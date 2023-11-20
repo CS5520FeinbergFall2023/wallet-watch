@@ -17,16 +17,20 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.dao.Category;
 import com.example.myapplication.dao.Expense;
+import com.example.myapplication.wallet_watch_util.WalletWatchStorageUtil;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.snackbar.Snackbar;
@@ -48,12 +52,17 @@ public class ExpensePageFragment extends Fragment {
     private EditText expenseAmountText, datePickerText, descriptionText;
     private long datePickerValue;
     private SwitchMaterial recurringExpenseToggle;
-    private MaterialButton uploadExpenseButton;
     private FirebaseHelper firebaseHelper;
     private String username;
 
     private ActivityResultLauncher<String> photoPermissionRequest;
+    private ActivityResultLauncher<Intent> takePictureLauncherIntent;
     private ActivityResultLauncher<Uri> takePictureLauncher;
+    private Uri tempUri;
+
+    private Expense expense;
+
+//    private final LinearLayout loadingMessage;
 
     private final String logTag = "EXP-PAGE";
 
@@ -61,8 +70,11 @@ public class ExpensePageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_expense_page, container, false);
 
-        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        // Expense Model
+        expense = new Expense();
+
         // Get username from local storage
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         username = prefs.getString("username", "");
 
         // Firebase helper
@@ -106,19 +118,28 @@ public class ExpensePageFragment extends Fragment {
             }
         });
 
+//        takePictureLauncherIntent = registerForActivityResult(
+//                new ActivityResultContracts.StartActivityForResult(),
+//                result -> {
+//                    if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
+//                        Log.d(logTag, "Here 1");
+//                        Log.d(logTag, result.toString());
+//                    }
+//                }
+//        );
+
         takePictureLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
-            // This callback is called after taking a picture
-            if (result) {
-                // Picture taken successfully
-                Log.d(logTag, "Picture taken successfully");
-            } else {
-                // Picture taking canceled or encountered an error
-                Log.d(logTag, "Picture taking canceled or encountered an error");
+            if(result) {
+                Log.d(logTag, "URI to be used: " + tempUri);
+                firebaseHelper.uploadImage(tempUri, v -> {
+                    Toast.makeText(getContext(), "Image Uploaded!", Toast.LENGTH_SHORT).show();
+                    Log.d(logTag, "Done with: " + v);
+                });
             }
         });
 
         // Upload Button
-        uploadExpenseButton = view.findViewById(R.id.add_expense_upload_button);
+        MaterialButton uploadExpenseButton = view.findViewById(R.id.add_expense_upload_button);
         uploadExpenseButton.setOnClickListener(v -> dispatchTakePictureIntent());
 
 
@@ -160,25 +181,38 @@ public class ExpensePageFragment extends Fragment {
         }
     }
 
-    // Function to launch the camera
-    private void launchCamera() {
+    private void launchCameraIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(requireContext().getPackageManager()) != null) {
-            // Start the camera
-            takePictureLauncher.launch(null); // You can pass a Uri for saving the image, or null for the default behavior
+        tempUri = createImageUri();
+
+        if (tempUri != null) {
+            takePictureIntent.putExtra("uri", tempUri);
+            takePictureLauncherIntent.launch(takePictureIntent);
         } else {
-            Log.d(logTag, "No camera app available");
+            // Handle the case where creating the URI failed
+            Log.e(logTag, "Failed to create image URI");
+        }
+    }
+
+    private void launchCamera() {
+        tempUri = createImageUri();
+
+        if (tempUri != null) {
+            takePictureLauncher.launch(tempUri);
+        } else {
+            // Handle the case where creating the URI failed
+            Log.e(logTag, "Failed to create image URI");
         }
     }
 
     private Uri createImageUri() {
-        return Uri.fromFile(createImageFile());
+        File imageFile = createImageFile();
+        return FileProvider.getUriForFile(requireContext(), "com.example.myapplication.fileprovider", imageFile);
     }
 
-
     private File createImageFile() {
-        // Define a constant filename
-        String imageFileName = "temp_expense_photo.jpg";
+        // Generate an image filename from an Expense id
+        String imageFileName = WalletWatchStorageUtil.expenseImageFileName(expense);
 
         // Get the app's cache directory
         File storageDir = requireContext().getCacheDir();
@@ -188,7 +222,7 @@ public class ExpensePageFragment extends Fragment {
 
         // Save a file: path for use with ACTION_VIEW intents or other app-related logic
         String currentPhotoPath = imageFile.getAbsolutePath();
-        Log.d(logTag, "Image path: " + currentPhotoPath);
+        Log.d(logTag, "Creating file at image path: " + currentPhotoPath);
 
         return imageFile;
     }
@@ -227,9 +261,8 @@ public class ExpensePageFragment extends Fragment {
         String imageUrl = "";
         boolean recurring = recurringExpenseToggle.isChecked();
 
-
-        // create an Expense
-        Expense expense = new Expense(category, amount, description, date, imageUrl, recurring);
+        // set expense values
+        expense.setValues(category, amount, description, date, imageUrl, recurring);
 
         firebaseHelper.createExpense(username, expense, v -> {
             Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
@@ -253,6 +286,9 @@ public class ExpensePageFragment extends Fragment {
         categoriesInput.setError(null);
         datePickerText.setError(null);
         descriptionText.setError(null);
+
+        // new Expense object
+        expense = new Expense();
     }
 
     public void showDatePickerDialog() {
