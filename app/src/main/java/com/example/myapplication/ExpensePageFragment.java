@@ -21,10 +21,10 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.myapplication.dao.Category;
 import com.example.myapplication.dao.Expense;
@@ -33,15 +33,10 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ExpensePageFragment extends Fragment {
 
@@ -87,25 +82,9 @@ public class ExpensePageFragment extends Fragment {
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         categoriesInput.setAdapter(adapter);
 
-        firebaseHelper.getCategories(username, new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot budgetsSnapshot) {
-                Set<String> categories = new HashSet<>();
+        CategoriesViewModel categoriesViewModel = new ViewModelProvider(requireActivity()).get(CategoriesViewModel.class);
 
-                for (DataSnapshot budgetSnapshot : budgetsSnapshot.getChildren()) {
-                    String category = budgetSnapshot.child("category").getValue(String.class);
-                    categories.add(category);
-                }
-
-                // update categories dropdown
-                updateCategoryOptions(new ArrayList<>(categories));
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
-            }
-        });
+        categoriesViewModel.getCategoryList().observe(getViewLifecycleOwner(), this::updateCategoryOptions);
 
         // Initialize the launchers in your onCreate or onCreateView method:
         photoPermissionRequest = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
@@ -243,7 +222,7 @@ public class ExpensePageFragment extends Fragment {
         boolean recurring = recurringExpenseToggle.isChecked();
         String imageUrl = "";
 
-        if(isExpenseImageUploaded) {
+        if (isExpenseImageUploaded) {
             imageUrl = WalletWatchStorageUtil.expenseImageFileName(expense);
         }
 
@@ -254,7 +233,7 @@ public class ExpensePageFragment extends Fragment {
         loadingMessage.setVisibility(View.VISIBLE);
 
         firebaseHelper.createExpense(username, expense, v -> {
-            if(isExpenseImageUploaded) {
+            if (isExpenseImageUploaded) {
                 firebaseHelper.uploadImage(tempUri, e -> {
                     Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
                     onClear();
@@ -310,14 +289,9 @@ public class ExpensePageFragment extends Fragment {
         datePicker.show(getParentFragmentManager(), "EXPENSE_PAGE_DATE_PICKER");
     }
 
-    private void updateCategoryOptions(List<String> options) {
-        List<Category> budgetCategories = new ArrayList<>();
-
-        // convert List<String> to List<BudgetCategory>
-        options.forEach(category -> budgetCategories.add(new Category(category)));
-
+    private void updateCategoryOptions(List<Category> options) {
         adapter.clear();
-        adapter.addAll(budgetCategories);
+        adapter.addAll(options);
         adapter.notifyDataSetChanged();
     }
 }
