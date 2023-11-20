@@ -21,4 +21,13 @@ public final class WalletWatchStorageUtil {
     public static String expenseImageFileName(String id) {
         return String.format("expense-%s.jpg", id);
     }
+
+    /**
+     * Get the Expense id from an Expense image filename
+     * @param fileName Expense filename
+     * @return Expense id
+     */
+    public static String idFromExpenseImageFileName(String fileName) {
+        return fileName.substring(0,8);
+    }
 }

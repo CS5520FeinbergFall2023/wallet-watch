@@ -23,4 +23,6 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="register_button">Register</string>
+    <string name="add_expense_loading_msg">Creating Expense…</string>
+    <string name="add_expense_image_captured_msg">Image captured!</string>
 </resources>
