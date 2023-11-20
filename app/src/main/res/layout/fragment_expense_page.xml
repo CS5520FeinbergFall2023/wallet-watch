@@ -9,6 +9,7 @@
     <TextView
         style="@style/TextAppearance.AppCompat.Title"
         android:layout_width="match_parent"
+        android:id="@+id/expense_title_header"
         android:layout_height="wrap_content"
         android:background="@color/dark_green"
         android:paddingHorizontal="30dp"
@@ -17,175 +18,199 @@
         android:textColor="@color/white"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ScrollView
+    <LinearLayout
+        app:layout_constraintTop_toBottomOf="@id/expense_title_header"
+        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_width="match_parent"
-        android:layout_marginTop="100dp"
-        android:layout_marginBottom="120dp"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingHorizontal="30dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="vertical"
-            android:paddingHorizontal="30dp">
+            android:layout_marginBottom="30dp"
+            android:orientation="horizontal"
+            android:paddingStart="0dp"
+            android:paddingEnd="30dp">
 
-            <LinearLayout
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:contentDescription="@string/dollar_sign_icon_description"
+                android:importantForAccessibility="no"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/money_sign_24" />
+
+            <EditText
+                android:id="@+id/add_expense_amount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
-                android:orientation="horizontal"
-                android:paddingStart="0dp"
-                android:paddingEnd="30dp">
+                android:autofillHints="number"
+                android:hint="@string/add_expense_amount_hint"
+                android:inputType="number" />
+        </LinearLayout>
 
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:contentDescription="@string/dollar_sign_icon_description"
-                    android:importantForAccessibility="no"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/money_sign_24" />
-
-                <EditText
-                    android:id="@+id/add_expense_amount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:autofillHints="number"
-                    android:hint="@string/add_expense_amount_hint"
-                    android:inputType="number" />
-            </LinearLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="30dp">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/add_expense_category"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <AutoCompleteTextView
-                        android:id="@+id/add_expense_category_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:hint="@string/add_expense_category_hint"
-                        android:inputType="none" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/add_expense_upload_button"
-                    style="@style/Widget.MaterialComponents.Button.Icon"
-                    android:layout_width="60dp"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center"
-                    android:paddingStart="0dp"
-                    android:paddingTop="7dp"
-                    android:paddingEnd="0dp"
-                    app:backgroundTint="@color/dark_green"
-                    app:icon="@drawable/camera_24"
-                    app:iconGravity="textTop"
-                    app:iconSize="24dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="30dp">
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/add_expense_category"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="30dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-                android:layout_marginTop="20dp"
-                android:hint="@string/add_expense_date_hint">
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/add_expense_date_picker"
+                <AutoCompleteTextView
+                    android:id="@+id/add_expense_category_text"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:inputType="none"
-                    android:onClick="showDatePickerDialog" />
-
+                    android:layout_height="match_parent"
+                    android:hint="@string/add_expense_category_hint"
+                    android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/add_expense_upload_button"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:paddingStart="0dp"
+                android:paddingTop="7dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginEnd="30dp">
+                android:paddingEnd="0dp"
+                app:backgroundTint="@color/dark_green"
+                app:icon="@drawable/camera_24"
+                app:iconGravity="textTop"
+                app:iconSize="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/add_expense_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:autofillHints="text"
-                    android:hint="@string/add_expense_description_hint"
-                    android:imeOptions="actionDone"
-                    android:inputType="textMultiLine" />
+            <TextView
+                android:id="@+id/add_expense_image_captured_msg"
+                app:layout_constraintTop_toBottomOf="@id/add_expense_upload_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="@id/add_expense_upload_button"
+                android:text="@string/add_expense_image_captured_msg"/>
 
-            </com.google.android.material.textfield.TextInputLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="30dp"
+            android:layout_marginTop="20dp"
+            android:hint="@string/add_expense_date_hint">
 
-            <LinearLayout
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/add_expense_date_picker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
+                android:focusable="false"
+                android:inputType="none"
+                android:onClick="showDatePickerDialog" />
 
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/add_expense_recurring_toggle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:thumbTint="@color/dark_green"
-                    app:trackTint="@color/green" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    style="@style/TextAppearance.MaterialComponents.Subtitle1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
-                    android:text="@string/add_expense_recurring" />
-            </LinearLayout>
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="30dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/add_expense_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:gravity="center"
-                android:orientation="horizontal">
+                android:autofillHints="text"
+                android:hint="@string/add_expense_description_hint"
+                android:imeOptions="actionDone"
+                android:inputType="textMultiLine" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/add_expense_clear_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:text="@string/clear_expense_button"
-                    app:backgroundTint="@color/dark_green" />
+        </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/add_expense_submit_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/add_expense_button"
-                    app:backgroundTint="@color/dark_green"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:icon="@drawable/check_24"
-                    app:iconSize="24dp" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/add_expense_recurring_toggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:thumbTint="@color/dark_green"
+                app:trackTint="@color/green" />
+
+            <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:text="@string/add_expense_recurring" />
         </LinearLayout>
-    </ScrollView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/add_expense_clear_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/clear_expense_button"
+                app:backgroundTint="@color/dark_green"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/add_expense_submit_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_expense_button"
+                app:backgroundTint="@color/dark_green"
+                app:icon="@drawable/check_24"
+                app:iconSize="24dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:id="@+id/expense_progress_layout"
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="visible" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_expense_loading_msg" />
+
+        </LinearLayout>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

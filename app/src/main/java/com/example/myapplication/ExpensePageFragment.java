@@ -4,12 +4,10 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.example.myapplication.MainActivity.PREFS_NAME;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,12 +16,12 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
@@ -51,18 +49,19 @@ public class ExpensePageFragment extends Fragment {
     private ArrayAdapter<Category> adapter;
     private EditText expenseAmountText, datePickerText, descriptionText;
     private long datePickerValue;
+    private TextView imageCapturedMsgView;
     private SwitchMaterial recurringExpenseToggle;
     private FirebaseHelper firebaseHelper;
     private String username;
 
     private ActivityResultLauncher<String> photoPermissionRequest;
-    private ActivityResultLauncher<Intent> takePictureLauncherIntent;
     private ActivityResultLauncher<Uri> takePictureLauncher;
     private Uri tempUri;
+    private boolean isExpenseImageUploaded;
 
     private Expense expense;
 
-//    private final LinearLayout loadingMessage;
+    private LinearLayout loadingMessage;
 
     private final String logTag = "EXP-PAGE";
 
@@ -118,23 +117,10 @@ public class ExpensePageFragment extends Fragment {
             }
         });
 
-//        takePictureLauncherIntent = registerForActivityResult(
-//                new ActivityResultContracts.StartActivityForResult(),
-//                result -> {
-//                    if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
-//                        Log.d(logTag, "Here 1");
-//                        Log.d(logTag, result.toString());
-//                    }
-//                }
-//        );
-
         takePictureLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
-            if(result) {
-                Log.d(logTag, "URI to be used: " + tempUri);
-                firebaseHelper.uploadImage(tempUri, v -> {
-                    Toast.makeText(getContext(), "Image Uploaded!", Toast.LENGTH_SHORT).show();
-                    Log.d(logTag, "Done with: " + v);
-                });
+            if (result) {
+                isExpenseImageUploaded = true;
+                imageCapturedMsgView.setVisibility(View.VISIBLE);
             }
         });
 
@@ -142,6 +128,10 @@ public class ExpensePageFragment extends Fragment {
         MaterialButton uploadExpenseButton = view.findViewById(R.id.add_expense_upload_button);
         uploadExpenseButton.setOnClickListener(v -> dispatchTakePictureIntent());
 
+        // Upload Msg
+        imageCapturedMsgView = view.findViewById(R.id.add_expense_image_captured_msg);
+        imageCapturedMsgView.setVisibility(View.INVISIBLE);
+        isExpenseImageUploaded = false;
 
         // Date Field
         datePickerText = view.findViewById(R.id.add_expense_date_picker);
@@ -162,6 +152,10 @@ public class ExpensePageFragment extends Fragment {
         MaterialButton addExpenseButton = view.findViewById(R.id.add_expense_submit_button);
         addExpenseButton.setOnClickListener(v -> checkValues());
 
+        // Loading Message
+        loadingMessage = view.findViewById(R.id.expense_progress_layout);
+        loadingMessage.setVisibility(View.INVISIBLE);
+
         return view;
     }
 
@@ -181,21 +175,9 @@ public class ExpensePageFragment extends Fragment {
         }
     }
 
-    private void launchCameraIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        tempUri = createImageUri();
-
-        if (tempUri != null) {
-            takePictureIntent.putExtra("uri", tempUri);
-            takePictureLauncherIntent.launch(takePictureIntent);
-        } else {
-            // Handle the case where creating the URI failed
-            Log.e(logTag, "Failed to create image URI");
-        }
-    }
-
     private void launchCamera() {
         tempUri = createImageUri();
+
 
         if (tempUri != null) {
             takePictureLauncher.launch(tempUri);
@@ -258,15 +240,25 @@ public class ExpensePageFragment extends Fragment {
         double amount = Double.parseDouble(expenseAmountText.getText().toString());
         String description = descriptionText.getText().toString();
         Long date = datePickerValue;
-        String imageUrl = "";
         boolean recurring = recurringExpenseToggle.isChecked();
+        String imageUrl = "";
+
+        if(isExpenseImageUploaded) {
+            imageUrl = WalletWatchStorageUtil.expenseImageFileName(expense);
+        }
 
         // set expense values
         expense.setValues(category, amount, description, date, imageUrl, recurring);
 
+        // set loading spinner
+        loadingMessage.setVisibility(View.VISIBLE);
+
         firebaseHelper.createExpense(username, expense, v -> {
-            Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
-            onClear();
+            firebaseHelper.uploadImage(tempUri, e -> {
+                Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
+                loadingMessage.setVisibility(View.INVISIBLE);
+                onClear();
+            });
         });
     }
 
@@ -286,6 +278,13 @@ public class ExpensePageFragment extends Fragment {
         categoriesInput.setError(null);
         datePickerText.setError(null);
         descriptionText.setError(null);
+
+        // clear upload msg
+        imageCapturedMsgView.setVisibility(View.INVISIBLE);
+
+        // clear temp uri
+        tempUri = null;
+        isExpenseImageUploaded = false;
 
         // new Expense object
         expense = new Expense();
