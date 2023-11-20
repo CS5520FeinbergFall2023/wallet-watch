@@ -254,11 +254,15 @@ public class ExpensePageFragment extends Fragment {
         loadingMessage.setVisibility(View.VISIBLE);
 
         firebaseHelper.createExpense(username, expense, v -> {
-            firebaseHelper.uploadImage(tempUri, e -> {
+            if(isExpenseImageUploaded) {
+                firebaseHelper.uploadImage(tempUri, e -> {
+                    Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
+                    onClear();
+                });
+            } else {
                 Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
-                loadingMessage.setVisibility(View.INVISIBLE);
                 onClear();
-            });
+            }
         });
     }
 
@@ -281,6 +285,9 @@ public class ExpensePageFragment extends Fragment {
 
         // clear upload msg
         imageCapturedMsgView.setVisibility(View.INVISIBLE);
+
+        // clear loading msg
+        loadingMessage.setVisibility(View.INVISIBLE);
 
         // clear temp uri
         tempUri = null;
