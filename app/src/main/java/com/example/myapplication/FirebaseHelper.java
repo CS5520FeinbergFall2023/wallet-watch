@@ -44,7 +44,6 @@ public class FirebaseHelper {
     }
 
     // Authentication methods
-
     public void registerUser(String username, String password, OnCompleteListener<Void> onCompleteListener) {
 
         // Create a user entry in the database
@@ -55,29 +54,20 @@ public class FirebaseHelper {
                 .addOnCompleteListener(onCompleteListener);
     }
 
-    public void uploadImage(Uri imageUri) {
-        if (imageUri != null) {
-
-            StorageReference riversRef = storageReference.child("" + imageUri.getLastPathSegment());
-            UploadTask uploadTask = riversRef.putFile(imageUri);
-
-            uploadTask.continueWithTask(task -> {
-                if (!task.isSuccessful()) {
-                    throw Objects.requireNonNull(task.getException());
-                }
-
-                // Continue with the task to get the download URL
-                return riversRef.getDownloadUrl();
-            }).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Uri downloadUri = task.getResult();
-                    String imageUrl = downloadUri.toString();
-                } else {
-                    // Handle failures
-                    // ...
-                }
-            });
+    public void uploadImage(Uri imageUri, OnCompleteListener<Uri> onCompleteListener) {
+        if (imageUri == null) {
+            return;
         }
+
+        StorageReference riversRef = storageReference.child("" + imageUri.getLastPathSegment());
+        UploadTask uploadTask = riversRef.putFile(imageUri);
+
+        uploadTask.continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                throw Objects.requireNonNull(task.getException());
+            }
+            return riversRef.getDownloadUrl();
+        }).addOnCompleteListener(onCompleteListener);
     }
 
     public void loginUser(String username, String password, OnCompleteListener<Boolean> onCompleteListener) {
@@ -241,10 +231,11 @@ public class FirebaseHelper {
 
     /**
      * Get the categories of a user from each category in their budget.
-     * @param  username username to get categories
+     *
+     * @param username           username to get categories
      * @param valueEventListener callback after categories is fetched
      */
-    public void getCategories(String username,ValueEventListener valueEventListener) {
+    public void getCategories(String username, ValueEventListener valueEventListener) {
         DatabaseReference budgetsRef = FirebaseDatabase.getInstance().getReference("budgets").child(username);
 
         budgetsRef.addListenerForSingleValueEvent(valueEventListener);
@@ -253,8 +244,9 @@ public class FirebaseHelper {
 
     /**
      * Create an expense.
-     * @param expense Expense
-     * @param username user to create the expense for
+     *
+     * @param expense            Expense
+     * @param username           user to create the expense for
      * @param onCompleteListener listener for after expense is created
      */
     public void createExpense(String username, Expense expense, OnCompleteListener<Void> onCompleteListener) {
