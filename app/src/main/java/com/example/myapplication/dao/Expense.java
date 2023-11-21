@@ -3,6 +3,7 @@ package com.example.myapplication.dao;
 import androidx.annotation.NonNull;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public class Expense {
     private String category;
@@ -11,10 +12,11 @@ public class Expense {
     private Long date;
     private String imageUrl;
     private boolean recurring;
-
+    private final String id;
 
     public Expense() {
         // Default constructor required for Firebase
+        this.id = UUID.randomUUID().toString();
         this.category = "";
         this.amount = 0.0;
         this.description = "";
@@ -24,15 +26,20 @@ public class Expense {
     }
 
     public Expense(String category, double amount, String description, Long date, String imageUrl) {
+        this(category, amount, description, date, imageUrl, false);
+    }
+
+    public Expense(String category, double amount, String description, Long date, String imageUrl, boolean recurring) {
+        this.id = UUID.randomUUID().toString();
         this.category = category;
         this.amount = amount;
         this.description = description;
         this.date = date;
         this.imageUrl = imageUrl;
-        this.recurring = false;
+        this.recurring = recurring;
     }
 
-    public Expense(String category, double amount, String description, Long date, String imageUrl, boolean recurring) {
+    public void setValues(String category, double amount, String description, Long date, String imageUrl, boolean recurring) {
         this.category = category;
         this.amount = amount;
         this.description = description;
@@ -85,11 +92,16 @@ public class Expense {
         this.recurring = recurring;
     }
 
+    public String getId() {
+        return this.id;
+    }
+
     @NonNull
     @Override
     public String toString() {
         return "Expense{" +
-                "category='" + category + '\'' +
+                "id='" + id + '\'' +
+                ", category='" + category + '\'' +
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
                 ", date='" + date + '\'' +
