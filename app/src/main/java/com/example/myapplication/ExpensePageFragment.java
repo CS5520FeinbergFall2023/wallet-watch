@@ -3,32 +3,40 @@ package com.example.myapplication;
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.myapplication.MainActivity.PREFS_NAME;
 
+import android.Manifest;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.myapplication.dao.Category;
 import com.example.myapplication.dao.Expense;
+import com.example.myapplication.wallet_watch_util.WalletWatchStorageUtil;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.switchmaterial.SwitchMaterial;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ExpensePageFragment extends Fragment {
 
@@ -36,18 +44,32 @@ public class ExpensePageFragment extends Fragment {
     private ArrayAdapter<Category> adapter;
     private EditText expenseAmountText, datePickerText, descriptionText;
     private long datePickerValue;
+    private TextView imageCapturedMsgView;
     private SwitchMaterial recurringExpenseToggle;
-    private MaterialButton uploadExpenseButton;
     private FirebaseHelper firebaseHelper;
     private String username;
+
+    private ActivityResultLauncher<String> photoPermissionRequest;
+    private ActivityResultLauncher<Uri> takePictureLauncher;
+    private Uri tempUri;
+    private boolean isExpenseImageUploaded;
+
+    private Expense expense;
+
+    private LinearLayout loadingMessage;
+
+    private final String logTag = "EXP-PAGE";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_expense_page, container, false);
 
-        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        // Expense Model
+        expense = new Expense();
+
         // Get username from local storage
-        username = prefs.getString("username","");
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        username = prefs.getString("username", "");
 
         // Firebase helper
         firebaseHelper = new FirebaseHelper();
@@ -60,28 +82,35 @@ public class ExpensePageFragment extends Fragment {
         adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         categoriesInput.setAdapter(adapter);
 
-        firebaseHelper.getCategories(username, new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot budgetsSnapshot) {
-                Set<String> categories = new HashSet<>();
+        CategoriesViewModel categoriesViewModel = new ViewModelProvider(requireActivity()).get(CategoriesViewModel.class);
 
-                for (DataSnapshot budgetSnapshot : budgetsSnapshot.getChildren()) {
-                    String category = budgetSnapshot.child("category").getValue(String.class);
-                    categories.add(category);
-                }
+        categoriesViewModel.getCategoryList().observe(getViewLifecycleOwner(), this::updateCategoryOptions);
 
-                // update categories dropdown
-                updateCategoryOptions(new ArrayList<>(categories));
+        // Initialize the launchers in your onCreate or onCreateView method:
+        photoPermissionRequest = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
+            if (result) {
+                // Camera permission granted, proceed with taking a picture
+                launchCamera();
+            } else {
+                Snackbar.make(requireView(), "Camera permission is required!", Snackbar.LENGTH_SHORT).show();
             }
+        });
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
+        takePictureLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
+            if (result) {
+                isExpenseImageUploaded = true;
+                imageCapturedMsgView.setVisibility(View.VISIBLE);
             }
         });
 
         // Upload Button
-        uploadExpenseButton = view.findViewById(R.id.add_expense_upload_button);
+        MaterialButton uploadExpenseButton = view.findViewById(R.id.add_expense_upload_button);
+        uploadExpenseButton.setOnClickListener(v -> dispatchTakePictureIntent());
+
+        // Upload Msg
+        imageCapturedMsgView = view.findViewById(R.id.add_expense_image_captured_msg);
+        imageCapturedMsgView.setVisibility(View.INVISIBLE);
+        isExpenseImageUploaded = false;
 
         // Date Field
         datePickerText = view.findViewById(R.id.add_expense_date_picker);
@@ -102,7 +131,61 @@ public class ExpensePageFragment extends Fragment {
         MaterialButton addExpenseButton = view.findViewById(R.id.add_expense_submit_button);
         addExpenseButton.setOnClickListener(v -> checkValues());
 
+        // Loading Message
+        loadingMessage = view.findViewById(R.id.expense_progress_layout);
+        loadingMessage.setVisibility(View.INVISIBLE);
+
         return view;
+    }
+
+    private void dispatchTakePictureIntent() {
+        requestCameraPermissionAndLaunchCamera();
+    }
+
+    // Function to request camera permission and launch the camera
+    private void requestCameraPermissionAndLaunchCamera() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Camera permission is already granted, proceed with taking a picture
+            launchCamera();
+        } else {
+            // Request camera permission
+            photoPermissionRequest.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void launchCamera() {
+        tempUri = createImageUri();
+
+
+        if (tempUri != null) {
+            takePictureLauncher.launch(tempUri);
+        } else {
+            // Handle the case where creating the URI failed
+            Log.e(logTag, "Failed to create image URI");
+        }
+    }
+
+    private Uri createImageUri() {
+        File imageFile = createImageFile();
+        return FileProvider.getUriForFile(requireContext(), "com.example.myapplication.fileprovider", imageFile);
+    }
+
+    private File createImageFile() {
+        // Generate an image filename from an Expense id
+        String imageFileName = WalletWatchStorageUtil.expenseImageFileName(expense);
+
+        // Get the app's cache directory
+        File storageDir = requireContext().getCacheDir();
+
+        // Create the temporary file
+        File imageFile = new File(storageDir, imageFileName);
+
+        // Save a file: path for use with ACTION_VIEW intents or other app-related logic
+        String currentPhotoPath = imageFile.getAbsolutePath();
+        Log.d(logTag, "Creating file at image path: " + currentPhotoPath);
+
+        return imageFile;
     }
 
     /**
@@ -136,16 +219,29 @@ public class ExpensePageFragment extends Fragment {
         double amount = Double.parseDouble(expenseAmountText.getText().toString());
         String description = descriptionText.getText().toString();
         Long date = datePickerValue;
-        String imageUrl = "";
         boolean recurring = recurringExpenseToggle.isChecked();
+        String imageUrl = "";
 
+        if (isExpenseImageUploaded) {
+            imageUrl = WalletWatchStorageUtil.expenseImageFileName(expense);
+        }
 
-        // create an Expense
-        Expense expense = new Expense(category, amount, description, date, imageUrl, recurring);
+        // set expense values
+        expense.setValues(category, amount, description, date, imageUrl, recurring);
+
+        // set loading spinner
+        loadingMessage.setVisibility(View.VISIBLE);
 
         firebaseHelper.createExpense(username, expense, v -> {
-            Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
-            onClear();
+            if (isExpenseImageUploaded) {
+                firebaseHelper.uploadImage(tempUri, e -> {
+                    Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
+                    onClear();
+                });
+            } else {
+                Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
+                onClear();
+            }
         });
     }
 
@@ -165,6 +261,19 @@ public class ExpensePageFragment extends Fragment {
         categoriesInput.setError(null);
         datePickerText.setError(null);
         descriptionText.setError(null);
+
+        // clear upload msg
+        imageCapturedMsgView.setVisibility(View.INVISIBLE);
+
+        // clear loading msg
+        loadingMessage.setVisibility(View.INVISIBLE);
+
+        // clear temp uri
+        tempUri = null;
+        isExpenseImageUploaded = false;
+
+        // new Expense object
+        expense = new Expense();
     }
 
     public void showDatePickerDialog() {
@@ -180,14 +289,9 @@ public class ExpensePageFragment extends Fragment {
         datePicker.show(getParentFragmentManager(), "EXPENSE_PAGE_DATE_PICKER");
     }
 
-    private void updateCategoryOptions(List<String> options) {
-        List<Category> budgetCategories = new ArrayList<>();
-
-        // convert List<String> to List<BudgetCategory>
-        options.forEach(category -> budgetCategories.add(new Category(category)));
-
+    private void updateCategoryOptions(List<Category> options) {
         adapter.clear();
-        adapter.addAll(budgetCategories);
+        adapter.addAll(options);
         adapter.notifyDataSetChanged();
     }
 }
