@@ -15,6 +15,7 @@ import com.example.myapplication.dao.User;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
     private Context context;
@@ -56,6 +57,17 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public int getItemCount() {
         // how many notifications does a user have
         return notificationsReceived.size();
+    }
+
+    public void setNotificationsReceived(List<Notification> notifications) {
+        notificationsReceived.clear();
+        notificationsReceived.addAll(notifications);
+        notifyDataSetChanged(); // Notify the adapter that the data has changed
+    }
+
+    public void addNotification(Notification notification) {
+        notificationsReceived.add(notification);
+        notifyDataSetChanged(); // Notify the adapter that data has changed
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
