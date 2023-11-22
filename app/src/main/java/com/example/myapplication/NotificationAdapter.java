@@ -42,7 +42,8 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         //assigning values to the views we created in the recycler view layout file based on the
         //position of the recycler view
         Notification notification = notificationsReceived.get(position);
-        //holder.header.setText()
+        holder.message.setText(notification.getMessage());
+        holder.date.setText(notification.getDate().toString());
 
     }
 
