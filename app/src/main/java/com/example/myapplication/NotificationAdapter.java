@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,9 +42,31 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public void onBindViewHolder(@NonNull NotificationAdapter.ViewHolder holder, int position) {
         //assigning values to the views we created in the recycler view layout file based on the
         //position of the recycler view
+
         Notification notification = notificationsReceived.get(position);
+        Log.d("adapter", notification.getMessage());
+        holder.header.setText("Budget Alert");
         holder.message.setText(notification.getMessage());
-        holder.date.setText(notification.getDate().toString());
+        //Log.d("adapter", notification.getDate());
+        Long date = Long.valueOf(notification.getDate());
+
+        holder.date.setText(notification.formatDate(date));
+        //holder.imageView.setImageDrawable(R.drawable.budget_limit_nearing_icon);
+        /*
+        int resourceId = holder
+                .itemView
+                .getContext()
+                .getResources()
+                .getIdentifier(
+                        convertToLogoName(sticker.getStickerID()),
+                        "drawable",
+                        holder.itemView.getContext().getPackageName());
+        holder.imageView.setImageResource(resourceId);
+
+         */
+
+        //holder.imageView.setImageDrawable(R.drawable.budget_limit_nearing_icon);
+
 
     }
 
@@ -60,7 +83,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         return notificationsReceived.size();
     }
 
-    public void setNotificationsReceived(List<Notification> notifications) {
+    public void setNotificationsReceived(ArrayList<Notification> notifications) {
         notificationsReceived.clear();
         notificationsReceived.addAll(notifications);
         notifyDataSetChanged(); // Notify the adapter that the data has changed
@@ -80,7 +103,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             super(itemView);
             imageView = itemView.findViewById(R.id.categoryImageIcon);
             header = itemView.findViewById(R.id.header_rv_text);
-            message = itemView.findViewById(R.id.notifications_rv);
+            message = itemView.findViewById(R.id.notification_message_rv_text);
             date = itemView.findViewById(R.id.date_rv_text);
         }
     }
