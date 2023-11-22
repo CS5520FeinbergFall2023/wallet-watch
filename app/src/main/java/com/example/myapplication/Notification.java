@@ -15,12 +15,16 @@ public class Notification {
     private static final String CHANNEL_ID = "CHANNEL";
     private String type;
     private String message;
-    private Date date;
+    private String date;
 
-    public Notification(String type, String message, Date date) {
+    public Notification(String type, String message, String date) {
         this.type = type;
         this.message = message;
         this.date = date;
+    }
+
+    public Notification() {
+
     }
 
     public String getType() {
@@ -31,7 +35,7 @@ public class Notification {
         return message;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
@@ -44,12 +48,14 @@ public class Notification {
         this.message = message;
     }
 
-    private String formatDate(long timestamp) {
+    public String formatDate(long timestamp) {
         Date date = new Date(timestamp);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
         return dateFormat.format(date);
     }
+
+
 
     public static void showNotification(Context context, String title, String message) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
