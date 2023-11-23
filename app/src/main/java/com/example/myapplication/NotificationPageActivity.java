@@ -30,12 +30,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -56,7 +58,7 @@ public class NotificationPageActivity extends AppCompatActivity {
     private Calendar currentCalendar = Calendar.getInstance();
     private String username;
     FirebaseHelper firebaseHelper = new FirebaseHelper();
-    //counter 
+    //counter
 
     //MOVE TO HOMESCREEN
     @Override
@@ -77,13 +79,14 @@ public class NotificationPageActivity extends AppCompatActivity {
 
         adapter = new NotificationAdapter(this, receivednotifications);
         notificationRV.setAdapter(adapter);
-        String notes = "notifications/" + "kartik";
+        String notes = "notifications/" + username;
 
         DatabaseReference notificationsReference = FirebaseDatabase.getInstance().getReference(notes);
 
         notificationsReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                notificationList.clear();
                 ArrayList<Notification> newNotificationReceived = new ArrayList<>();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Log.d("notice", snapshot.toString());
@@ -102,7 +105,7 @@ public class NotificationPageActivity extends AppCompatActivity {
 
                     Notification notification = snapshot.getValue(Notification.class);
                     Log.d("notice of notification", notification.toString());
-                    notificationList.add(notification);
+                    //notificationList.add(notification);
                     Log.d("notice of notification", notificationList.toString());
                     if (notification != null) {
                         newNotificationReceived.add(notification);
@@ -132,11 +135,11 @@ public class NotificationPageActivity extends AppCompatActivity {
         FirebaseHelper helper = new FirebaseHelper();
         DatabaseReference budgetDatabaseRef = FirebaseDatabase.getInstance().getReference()
                 .child("budgets")
-                .child("david");
+                .child(username);
         DatabaseReference expensesDatabaseRef = FirebaseDatabase.getInstance().getReference()
                 .child("expenses")
                 //.child(user.getUsername)
-                .child("david");
+                .child(username);
 
 
         budgetDatabaseRef.addValueEventListener(new ValueEventListener() {
@@ -358,8 +361,9 @@ public class NotificationPageActivity extends AppCompatActivity {
                     Log.d("notice of overbudget", remaining.toString());
                     isOverBudget.put(entry.getKey(), true);
                     showNotification();
-                    String message = "You have reached your budget for" + " " + entry.getKey();
+
                     long currentTimestamp = System.currentTimeMillis();
+                    String message = "You are over-budget for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
                     Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
                     for (Notification notification : notificationList) {
                         String stringDate = notification.getDate();
@@ -373,8 +377,60 @@ public class NotificationPageActivity extends AppCompatActivity {
                     }
                    //if (newNotification.getMonth(currentTimestamp) != )
 
+
                     //return true;
-                } else {
+                }
+
+                if (remaining == 0) {
+                    Log.d("notice of overbudget", remaining.toString());
+                    isOverBudget.put(entry.getKey(), true);
+                    showNotification();
+
+                    long currentTimestamp = System.currentTimeMillis();
+                    String message = "You have reached your budget limit for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
+                    Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
+                    for (Notification notification : notificationList) {
+                        String stringDate = notification.getDate();
+                        Long longDate = Long.valueOf(stringDate);
+                        if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
+                                != notification.getMonth((longDate)) && notification.getBudgetAmount()
+                                != newNotification.getBudgetAmount()) {
+                            firebaseHelper.createNotification(username, newNotification);
+
+                        }
+                    }
+                    //if (newNotification.getMonth(currentTimestamp) != )
+
+
+                    //return true;
+                }
+
+                if (remaining <= 0.20 * (entry.getValue()) && remaining > 0) {
+                    Log.d("notice of overbudget", remaining.toString());
+                    isOverBudget.put(entry.getKey(), true);
+                    showNotification();
+
+                    long currentTimestamp = System.currentTimeMillis();
+                    String message = "You are at most 20% away from reaching your budget for " + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
+                    Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
+                    for (Notification notification : notificationList) {
+                        String stringDate = notification.getDate();
+                        Long longDate = Long.valueOf(stringDate);
+                        if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
+                                != notification.getMonth((longDate)) && notification.getBudgetAmount()
+                                != newNotification.getBudgetAmount()) {
+                            firebaseHelper.createNotification(username, newNotification);
+
+                        }
+                    }
+                    //if (newNotification.getMonth(currentTimestamp) != )
+
+
+                    //return true;
+                }
+
+
+                else {
                     isOverBudget.put(entry.getKey(), false);
 
                 }
@@ -462,6 +518,22 @@ public class NotificationPageActivity extends AppCompatActivity {
         int currentYear = this.currentCalendar.get(Calendar.YEAR);
 
         return epochMonth == currentMonth && epochYear == currentYear;
+    }
+
+    public String getMonthYearFromTimestamp(long timestamp) {
+        // Create a Calendar instance and set the time based on the provided timestamp
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+
+        // Get the month and year using the Calendar instance
+        int monthNumber = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+
+        // Convert the month number to a month name (using Locale for proper localization)
+        String monthName = new SimpleDateFormat("MMMM", Locale.getDefault()).format(calendar.getTime());
+
+        // Concatenate month and year and return as a string
+        return monthName + " " + year;
     }
 
 
