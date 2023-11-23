@@ -359,6 +359,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                     Log.d("notice of overbudget", remaining.toString());
                     isOverBudget.put(entry.getKey(), true);
                     //OLD LOCATION OF showNotification()
+                    showNotification();
 
 
                     long currentTimestamp = System.currentTimeMillis();
@@ -373,7 +374,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != notification.getMonth((longDate)) && notification.getBudgetAmount()
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
-                            showNotification();
+                            //showNotification();
 
                         }
                     }
