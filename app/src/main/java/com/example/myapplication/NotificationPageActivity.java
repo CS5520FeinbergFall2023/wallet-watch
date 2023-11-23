@@ -101,8 +101,6 @@ public class NotificationPageActivity extends AppCompatActivity {
 
                      */
                     //Notification notification = new Notification("Alert", snapshot.child("message").getValue().toString(), (Date)snapshot.child("date").getValue())
-
-
                     Notification notification = snapshot.getValue(Notification.class);
                     Log.d("notice of notification", notification.toString());
                     //notificationList.add(notification);
@@ -365,12 +363,14 @@ public class NotificationPageActivity extends AppCompatActivity {
                     long currentTimestamp = System.currentTimeMillis();
                     String message = "You are over-budget for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
                     Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
+                    NotificationType notificationType = NotificationType.OVER_BUDGET;
+                    newNotification.setNotificationType(notificationType);
                     for (Notification notification : notificationList) {
                         String stringDate = notification.getDate();
                         Long longDate = Long.valueOf(stringDate);
                         if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
                                 != notification.getMonth((longDate)) && notification.getBudgetAmount()
-                                != newNotification.getBudgetAmount()) {
+                                != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
 
                         }
@@ -389,12 +389,14 @@ public class NotificationPageActivity extends AppCompatActivity {
                     long currentTimestamp = System.currentTimeMillis();
                     String message = "You have reached your budget limit for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
                     Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
+                    NotificationType notificationType = NotificationType.AT_LIMIT;
+                    newNotification.setNotificationType(notificationType);
                     for (Notification notification : notificationList) {
                         String stringDate = notification.getDate();
                         Long longDate = Long.valueOf(stringDate);
                         if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
                                 != notification.getMonth((longDate)) && notification.getBudgetAmount()
-                                != newNotification.getBudgetAmount()) {
+                                != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
 
                         }
@@ -413,12 +415,15 @@ public class NotificationPageActivity extends AppCompatActivity {
                     long currentTimestamp = System.currentTimeMillis();
                     String message = "You are at most 20% away from reaching your budget for " + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
                     Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
+                    NotificationType notificationType = NotificationType.LIMIT_APPROACHING;
+                    newNotification.setNotificationType(notificationType);
                     for (Notification notification : notificationList) {
                         String stringDate = notification.getDate();
                         Long longDate = Long.valueOf(stringDate);
                         if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
                                 != notification.getMonth((longDate)) && notification.getBudgetAmount()
-                                != newNotification.getBudgetAmount()) {
+                                != newNotification.getBudgetAmount() && newNotification.getNotificationType()
+                                != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
 
                         }

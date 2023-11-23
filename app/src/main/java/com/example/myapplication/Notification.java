@@ -19,6 +19,7 @@ public class Notification {
     private String message;
     private String date;
     private double budgetAmount;
+    private NotificationType notificationType;
 
 
     public Notification(String type, String message, String date, double budgetAmount) {
@@ -26,6 +27,7 @@ public class Notification {
         this.message = message;
         this.date = date;
         this.budgetAmount = budgetAmount;
+        this.notificationType = null;
     }
 
     public Notification() {
@@ -52,6 +54,14 @@ public class Notification {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public void setNotificationType(NotificationType type) {
+        this.notificationType = type;
+    }
+
+    public NotificationType getNotificationType() {
+        return this.notificationType;
     }
 
     public String formatDate(long timestamp) {
