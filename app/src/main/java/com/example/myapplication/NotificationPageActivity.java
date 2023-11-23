@@ -12,7 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -353,6 +355,10 @@ public class NotificationPageActivity extends AppCompatActivity {
                     Log.d("notice of overbudget", remaining.toString());
                     isOverBudget.put(entry.getKey(), true);
                     showNotification();
+                    String message = "You have reached your budget for" + " " + entry.getKey();
+                    long currentTimestamp = System.currentTimeMillis();
+                    Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
+                    firebaseHelper.createNotification(username, newNotification);
                     //return true;
                 } else {
                     isOverBudget.put(entry.getKey(), false);
@@ -378,6 +384,14 @@ public class NotificationPageActivity extends AppCompatActivity {
     }
 
     public void showNotification() throws IllegalAccessException, InstantiationException {
+        Intent intent = new Intent (getApplicationContext(), DataVisualizationFragment.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+        //NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
+
+
+
         //NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         // Create a notification channel (required for Android Oreo and above)
@@ -396,6 +410,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                 .setContentTitle("Budget Alert")
                 .setContentText("You are overbudget")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        builder.setContentIntent(pendingIntent);
 
         // Show the notification
 
@@ -415,12 +430,12 @@ public class NotificationPageActivity extends AppCompatActivity {
         if (builder == null) {
             Log.d("isNULLBUILDER", "isNULLBUILDER ");
         }
-        /*
-        if (notificationManager == null) {
-            Log.d("notification manager", "isnull");
-        }
-        */
+
     }
+
+
+
+    //for notifications, need to keep track of month, budget limit,
 
     private boolean inCurrentMonth(long epochTime) {
         Calendar epochCalendar = Calendar.getInstance();
