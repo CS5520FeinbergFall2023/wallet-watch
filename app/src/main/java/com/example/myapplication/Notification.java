@@ -13,14 +13,17 @@ import java.util.Date;
 public class Notification {
 
     private static final String CHANNEL_ID = "CHANNEL";
-    private String type;
+    private String type; //category
     private String message;
     private String date;
+    private double budgetAmount;
 
-    public Notification(String type, String message, String date) {
+
+    public Notification(String type, String message, String date, double budgetAmount) {
         this.type = type;
         this.message = message;
         this.date = date;
+        this.budgetAmount = budgetAmount;
     }
 
     public Notification() {
@@ -38,6 +41,7 @@ public class Notification {
     public String getDate() {
         return date;
     }
+    public double getBudgetAmount() {return budgetAmount;}
 
     // Add getters and setters
     public void setType(String type) {
@@ -54,6 +58,8 @@ public class Notification {
 
         return dateFormat.format(date);
     }
+
+    public void setBudgetAmount(double budgetAmount) {this.budgetAmount = budgetAmount;}
 
 
 
