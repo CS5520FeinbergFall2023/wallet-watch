@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class Notification {
 
@@ -67,6 +68,8 @@ public class Notification {
         // Get the month using the Calendar instance
         return calendar.get(Calendar.MONTH);
     }
+
+
 
     public void setBudgetAmount(double budgetAmount) {this.budgetAmount = budgetAmount;}
 
