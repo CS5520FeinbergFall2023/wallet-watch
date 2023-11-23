@@ -358,7 +358,8 @@ public class NotificationPageActivity extends AppCompatActivity {
                 if (remaining < 0) {
                     Log.d("notice of overbudget", remaining.toString());
                     isOverBudget.put(entry.getKey(), true);
-                    showNotification();
+                    //OLD LOCATION OF showNotification()
+
 
                     long currentTimestamp = System.currentTimeMillis();
                     String message = "You are over-budget for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
@@ -372,6 +373,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != notification.getMonth((longDate)) && notification.getBudgetAmount()
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
+                            showNotification();
 
                         }
                     }
@@ -384,7 +386,8 @@ public class NotificationPageActivity extends AppCompatActivity {
                 if (remaining == 0) {
                     Log.d("notice of overbudget", remaining.toString());
                     isOverBudget.put(entry.getKey(), true);
-                    showNotification();
+                    //OLD LOCATION OF showNotification()
+
 
                     long currentTimestamp = System.currentTimeMillis();
                     String message = "You have reached your budget limit for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
@@ -398,6 +401,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != notification.getMonth((longDate)) && notification.getBudgetAmount()
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
+                            showNotification();
 
                         }
                     }
@@ -410,7 +414,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                 if (remaining <= 0.20 * (entry.getValue()) && remaining > 0) {
                     Log.d("notice of overbudget", remaining.toString());
                     isOverBudget.put(entry.getKey(), true);
-                    showNotification();
+                    //OLD LOCATION OF showNotification()
 
                     long currentTimestamp = System.currentTimeMillis();
                     String message = "You are at most 20% away from reaching your budget for " + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
@@ -425,6 +429,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType()
                                 != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
+                            showNotification();
 
                         }
                     }
