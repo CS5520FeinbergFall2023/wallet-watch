@@ -8,6 +8,7 @@ import android.os.Build;
 import androidx.core.app.NotificationCompat;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class Notification {
@@ -57,6 +58,14 @@ public class Notification {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
         return dateFormat.format(date);
+    }
+
+    public int getMonth(long timestamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+
+        // Get the month using the Calendar instance
+        return calendar.get(Calendar.MONTH);
     }
 
     public void setBudgetAmount(double budgetAmount) {this.budgetAmount = budgetAmount;}

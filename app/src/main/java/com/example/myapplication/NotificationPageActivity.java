@@ -44,6 +44,7 @@ import com.example.myapplication.dao.Category;
 public class NotificationPageActivity extends AppCompatActivity {
     RecyclerView notificationRV;
     NotificationManager notificationManager;
+
     private static final String CHANNEL_ID = "CHANNEL";
     private NotificationAdapter adapter;
     ArrayList<Notification> notificationList = new ArrayList<>();
@@ -55,6 +56,7 @@ public class NotificationPageActivity extends AppCompatActivity {
     private Calendar currentCalendar = Calendar.getInstance();
     private String username;
     FirebaseHelper firebaseHelper = new FirebaseHelper();
+    //counter 
 
     //MOVE TO HOMESCREEN
     @Override
@@ -78,6 +80,7 @@ public class NotificationPageActivity extends AppCompatActivity {
         String notes = "notifications/" + "kartik";
 
         DatabaseReference notificationsReference = FirebaseDatabase.getInstance().getReference(notes);
+
         notificationsReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -358,7 +361,18 @@ public class NotificationPageActivity extends AppCompatActivity {
                     String message = "You have reached your budget for" + " " + entry.getKey();
                     long currentTimestamp = System.currentTimeMillis();
                     Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
-                    firebaseHelper.createNotification(username, newNotification);
+                    for (Notification notification : notificationList) {
+                        String stringDate = notification.getDate();
+                        Long longDate = Long.valueOf(stringDate);
+                        if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
+                                != notification.getMonth((longDate)) && notification.getBudgetAmount()
+                                != newNotification.getBudgetAmount()) {
+                            firebaseHelper.createNotification(username, newNotification);
+
+                        }
+                    }
+                   //if (newNotification.getMonth(currentTimestamp) != )
+
                     //return true;
                 } else {
                     isOverBudget.put(entry.getKey(), false);
