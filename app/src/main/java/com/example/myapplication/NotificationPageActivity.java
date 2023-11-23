@@ -10,6 +10,7 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -46,6 +47,8 @@ import com.example.myapplication.dao.Category;
 public class NotificationPageActivity extends AppCompatActivity {
     RecyclerView notificationRV;
     NotificationManager notificationManager;
+
+    private static final int NOTIFICATION_PERMISSION_CODE = 5520;
 
     private static final String CHANNEL_ID = "CHANNEL";
     private NotificationAdapter adapter;
@@ -499,7 +502,10 @@ public class NotificationPageActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
+            //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS});
             // here to request the missing permissions, and then overriding
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_CODE);
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
@@ -513,6 +519,24 @@ public class NotificationPageActivity extends AppCompatActivity {
         }
 
     }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Notification permission granted
+                // You can perform actions related to notifications here
+            } else {
+                Toast.makeText(this, "Notification permission is required to receive updates.", Toast.LENGTH_SHORT).show();
+                // Notification permission denied
+                // Handle if permission is denied, possibly show a message
+            }
+        }
+    }
+
+
 
 
 
