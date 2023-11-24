@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class HomePageFragment extends Fragment {
 
@@ -47,7 +48,9 @@ public class HomePageFragment extends Fragment {
             result -> {
                 if (result != null) {
                     FirebaseHelper firebaseHelper = new FirebaseHelper();
-                    firebaseHelper.uploadImage(result);
+                    firebaseHelper.uploadImage(result, v -> {
+                        Toast.makeText(getContext(), "Image Uploaded!", Toast.LENGTH_SHORT).show();
+                    });
                 }
             }
     );

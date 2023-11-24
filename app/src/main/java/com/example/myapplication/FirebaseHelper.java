@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.net.Uri;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -44,7 +45,6 @@ public class FirebaseHelper {
     }
 
     // Authentication methods
-
     public void registerUser(String username, String password, OnCompleteListener<Void> onCompleteListener) {
 
         // Create a user entry in the database
@@ -55,29 +55,20 @@ public class FirebaseHelper {
                 .addOnCompleteListener(onCompleteListener);
     }
 
-    public void uploadImage(Uri imageUri) {
-        if (imageUri != null) {
-
-            StorageReference riversRef = storageReference.child("" + imageUri.getLastPathSegment());
-            UploadTask uploadTask = riversRef.putFile(imageUri);
-
-            uploadTask.continueWithTask(task -> {
-                if (!task.isSuccessful()) {
-                    throw Objects.requireNonNull(task.getException());
-                }
-
-                // Continue with the task to get the download URL
-                return riversRef.getDownloadUrl();
-            }).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Uri downloadUri = task.getResult();
-                    String imageUrl = downloadUri.toString();
-                } else {
-                    // Handle failures
-                    // ...
-                }
-            });
+    public void uploadImage(Uri imageUri, OnCompleteListener<Uri> onCompleteListener) {
+        if (imageUri == null) {
+            return;
         }
+
+        StorageReference riversRef = storageReference.child("" + imageUri.getLastPathSegment());
+        UploadTask uploadTask = riversRef.putFile(imageUri);
+
+        uploadTask.continueWithTask(task -> {
+            if (!task.isSuccessful()) {
+                throw Objects.requireNonNull(task.getException());
+            }
+            return riversRef.getDownloadUrl();
+        }).addOnCompleteListener(onCompleteListener);
     }
 
     public void loginUser(String username, String password, OnCompleteListener<Boolean> onCompleteListener) {
@@ -154,20 +145,48 @@ public class FirebaseHelper {
         });
     }
 
-//    public Task<Void> addBudget(String userId, Budget budget) {
-//        DatabaseReference budgetRef = getUserBudgetsReference(userId).push();
-//        return budgetRef.setValue(budget);
-//    }
-//
-//    public Task<Void> updateBudget(String userId, String budgetId, Budget updatedBudget) {
-//        DatabaseReference budgetRef = getUserBudgetsReference(userId).child(budgetId);
-//        return budgetRef.setValue(updatedBudget);
-//    }
-//
-//    public Task<Void> deleteBudget(String userId, String budgetId) {
-//        DatabaseReference budgetRef = getUserBudgetsReference(userId).child(budgetId);
-//        return budgetRef.removeValue();
-//    }
+
+    // Budgets
+    public void updateBudgetAmount(String username, String category, int amount) {
+        // Navigate to the correct node in the Firebase database for the user
+        DatabaseReference userBudgetRef = FirebaseDatabase.getInstance().getReference()
+                .child("budgets")
+                .child(username);
+
+        // Find the correct budget entry for the specified category
+        Query categoryQuery = userBudgetRef.orderByChild("category").equalTo(category);
+        categoryQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // Category exists, update the existing entry
+                    for (DataSnapshot budgetSnapshot : snapshot.getChildren()) {
+                        budgetSnapshot.getRef().child("amount").setValue(amount);
+                    }
+                } else {
+                    // Category doesn't exist, create a new budget entry
+                    String budgetId = userBudgetRef.push().getKey();
+                    DatabaseReference newBudgetRef = userBudgetRef.child(budgetId);
+                    newBudgetRef.child("category").setValue(category);
+                    newBudgetRef.child("amount").setValue(amount);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle the error
+            }
+        });
+    }
+
+    public void getBudgetAmount(String username, ValueEventListener valueEventListener) {
+        DatabaseReference userBudgetRef = FirebaseDatabase.getInstance().getReference()
+                .child("budgets")
+                .child(username);
+
+        userBudgetRef.addListenerForSingleValueEvent(valueEventListener);
+    }
+
 
     // Expense methods
 
@@ -217,6 +236,7 @@ public class FirebaseHelper {
 //        return notificationRef.setValue(notification);
 //    }
 
+
     // Categories
 
     public void getCategories(CategoriesCallback callback) {
@@ -241,10 +261,11 @@ public class FirebaseHelper {
 
     /**
      * Get the categories of a user from each category in their budget.
-     * @param  username username to get categories
+     *
+     * @param username           username to get categories
      * @param valueEventListener callback after categories is fetched
      */
-    public void getCategories(String username,ValueEventListener valueEventListener) {
+    public void getCategories(String username, ValueEventListener valueEventListener) {
         DatabaseReference budgetsRef = FirebaseDatabase.getInstance().getReference("budgets").child(username);
 
         budgetsRef.addListenerForSingleValueEvent(valueEventListener);
@@ -253,8 +274,9 @@ public class FirebaseHelper {
 
     /**
      * Create an expense.
-     * @param expense Expense
-     * @param username user to create the expense for
+     *
+     * @param expense            Expense
+     * @param username           user to create the expense for
      * @param onCompleteListener listener for after expense is created
      */
     public void createExpense(String username, Expense expense, OnCompleteListener<Void> onCompleteListener) {
