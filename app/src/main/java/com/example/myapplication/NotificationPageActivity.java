@@ -93,20 +93,10 @@ public class NotificationPageActivity extends AppCompatActivity {
                 ArrayList<Notification> newNotificationReceived = new ArrayList<>();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Log.d("notice", snapshot.toString());
-                    /*
-                    for (DataSnapshot shot : snapshot.getChildren()) {
-                        Log.d("notice of notificatoin", shot.getValue().toString());
-                        if ("date".equalsIgnoreCase(shot.getKey())) {
 
-                        }
-
-                    }
-
-                     */
-                    //Notification notification = new Notification("Alert", snapshot.child("message").getValue().toString(), (Date)snapshot.child("date").getValue())
                     Notification notification = snapshot.getValue(Notification.class);
                     Log.d("notice of notification", notification.toString());
-                    //notificationList.add(notification);
+
                     Log.d("notice of notification", notificationList.toString());
                     if (notification != null) {
                         newNotificationReceived.add(notification);
@@ -153,50 +143,30 @@ public class NotificationPageActivity extends AppCompatActivity {
                 Long schoolAmount = 0L;
                 Long travelAmount = 0L;
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    //Log.d("notice of budget", snapshot.getValue().toString());
-                    //Log.d("notice of budget", snapshot.child("amount").getValue().toString());
-                    //Log.d("notice of budget", snapshot.child("category").getValue().toString());
-                    //dictBudget.put(snapshot.child("category").getValue().toString(),
-                    //(Long) snapshot.child("amount").getValue());
-
-
                     for (DataSnapshot shot : snapshot.getChildren()) {
-                        //for (int i = 0; i < dataSnapshot.getChildren().size() {
-                        //System.out.println(snapshot.getKey());
                         if (Objects.requireNonNull(shot.getKey()).equalsIgnoreCase("amount")) {
                             amount = (Long) shot.getValue();
                         }
                         if ("category".equalsIgnoreCase(shot.getKey()) && "Food".equalsIgnoreCase(shot.getValue().toString())) {
-                            //System.out.println(shot.getValue());
+
                             foodAmount += amount;
                             dictBudget.put((String) shot.getValue(), foodAmount);
-                            continue;
                         }
-                        if ("category".equalsIgnoreCase(shot.getKey()) && "Entertainment".equalsIgnoreCase(shot.getValue().toString())) {
-                            //System.out.println(shot.getValue());
+                        else if ("category".equalsIgnoreCase(shot.getKey()) && "Entertainment".equalsIgnoreCase(shot.getValue().toString())) {
                             entertainmentAmount += amount;
                             dictBudget.put((String) shot.getValue(), entertainmentAmount);
-                            continue;
                         }
-                        if ("category".equalsIgnoreCase(shot.getKey()) && "Travel".equalsIgnoreCase(shot.getValue().toString())) {
-                            //System.out.println(shot.getValue());
+                        else if ("category".equalsIgnoreCase(shot.getKey()) && "Travel".equalsIgnoreCase(shot.getValue().toString())) {
                             travelAmount += amount;
                             dictBudget.put((String) shot.getValue(), travelAmount);
-                            continue;
                         }
-                        if ("category".equalsIgnoreCase(shot.getKey()) && "School".equalsIgnoreCase(shot.getValue().toString())) {
-                            //System.out.println(shot.getValue());
+                        else if ("category".equalsIgnoreCase(shot.getKey()) && "School".equalsIgnoreCase(shot.getValue().toString())) {
                             schoolAmount += amount;
                             dictBudget.put((String) shot.getValue(), schoolAmount);
-                            continue;
                         }
-                        if ("category".equalsIgnoreCase(shot.getKey()) && "Utilities".equalsIgnoreCase(shot.getValue().toString())) {
-                            //System.out.println(shot.getValue());
+                        else if ("category".equalsIgnoreCase(shot.getKey()) && "Utilities".equalsIgnoreCase(shot.getValue().toString())) {
                             utilitiesAmount += amount;
-                            //utilitiesAmount += (Long) snapshot.child("amount").getValue();
-
                             dictBudget.put((String) shot.getValue(), utilitiesAmount);
-                            continue;
                         }
 
 
@@ -227,42 +197,15 @@ public class NotificationPageActivity extends AppCompatActivity {
                 Long amount = 0L;
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    /*
-                    if ("Food".equalsIgnoreCase((String) snapshot.child("category").getValue())) {
-                        foodAmount += (Long) snapshot.child("amount").getValue();
-                        dictExpense.put(snapshot.child("category").getValue().toString(),
-                                (Long) snapshot.child("amount").getValue());
-                        continue;
-                    }
-                    if (snapshot.child("category").getValue() == "Entertainment") {
-                        entertainmentAmount += (Long) snapshot.child("amount").getValue();
-                        dictExpense.put(snapshot.child("category").getValue().toString(),
-                                (Long) snapshot.child("amount").getValue());
-                    }
-                    if (snapshot.child("category").getValue() == "Utilities") {
-                        utilitiesAmount += (Long) snapshot.child("amount").getValue();
-                        dictExpense.put(snapshot.child("category").getValue().toString(),
-                                (Long) snapshot.child("amount").getValue());
-                    }
 
-                    */
                     for (DataSnapshot shot : snapshot.getChildren()) {
-                        //for (int i = 0; i < dataSnapshot.getChildren().size() {
-                        //System.out.println(shot.getKey());
-                        //Log.d("notice", shot.getKey().toString());
+
                         if ("amount".equalsIgnoreCase(shot.getKey())) {
                             //Log.d("amountKEY", shot.getValue().toString());
                             amount = (Long) shot.getValue();
 
                         }
-                        /*
-                        if (Objects.equals(shot.getKey(), "category")) {
-                            System.out.println(shot.getValue());
-                            dictExpense.put((String) shot.getValue(), amount);
-                            continue;
-                        }
 
-                         */
                         if ("category".equalsIgnoreCase(shot.getKey()) && "Entertainment".equalsIgnoreCase(shot.getValue().toString())) {
                             //System.out.println(shot.getValue());
                             if (inCurrentMonth((Long) snapshot.child("date").getValue())) {
@@ -316,8 +259,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                     }
 
                 }
-                //System.out.println(dictExpense);
-                //Log.d("notice of dict Expense", dictExpense.toString());
+
 
                 try {
                     overBudget(dictBudget, dictExpense);
@@ -326,8 +268,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                 } catch (InstantiationException e) {
                     throw new RuntimeException(e);
                 }
-                //Log.d("notice of overbudget", "GOT HERE");
-                //Log.d("notice", overBudget(dictBudget, dictExpense));
+
 
 
             }
@@ -341,10 +282,6 @@ public class NotificationPageActivity extends AppCompatActivity {
 
     }
 
-    private void addNotification() {
-
-
-    }
 
     private HashMap<String, Boolean> overBudget(HashMap<String, Long> dictBudget, HashMap<String, Long> dictExpense) throws IllegalAccessException, InstantiationException {
         HashMap<String, Boolean> isOverBudget = new HashMap<>();
@@ -383,10 +320,7 @@ public class NotificationPageActivity extends AppCompatActivity {
 
                         }
                     }
-                   //if (newNotification.getMonth(currentTimestamp) != )
 
-
-                    //return true;
                 }
 
                 if (remaining == 0) {
@@ -411,10 +345,7 @@ public class NotificationPageActivity extends AppCompatActivity {
 
                         }
                     }
-                    //if (newNotification.getMonth(currentTimestamp) != )
 
-
-                    //return true;
                 }
 
                 if (remaining <= 0.20 * (entry.getValue()) && remaining > 0) {
@@ -458,16 +389,7 @@ public class NotificationPageActivity extends AppCompatActivity {
         return isOverBudget;
     }
 
-    public boolean isOverBudget(Long budget, Long expense) throws IllegalAccessException, InstantiationException {
-        Long remaining = budget - expense;
-        if (remaining < 0) {
-            showNotification("You are overbudget");
 
-
-            return true;
-        }
-        return false;
-    }
 
     public void showNotification(String message) throws IllegalAccessException, InstantiationException {
         Intent intent = new Intent (getApplicationContext(), DataVisualizationFragment.class);
