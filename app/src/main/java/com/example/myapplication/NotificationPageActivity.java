@@ -362,11 +362,12 @@ public class NotificationPageActivity extends AppCompatActivity {
                     Log.d("notice of overbudget", remaining.toString());
                     isOverBudget.put(entry.getKey(), true);
                     //OLD LOCATION OF showNotification()
-                    showNotification();
+
 
 
                     long currentTimestamp = System.currentTimeMillis();
                     String message = "You are over-budget for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
+                    showNotification(message);
                     Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
                     NotificationType notificationType = NotificationType.OVER_BUDGET;
                     newNotification.setNotificationType(notificationType);
@@ -378,6 +379,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
                             //showNotification();
+                            showNotification(message); //IF ONLY CALLED HERE WILL ALERT USER ONLY ONCE
 
                         }
                     }
@@ -405,7 +407,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != notification.getMonth((longDate)) && notification.getBudgetAmount()
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
-                            showNotification();
+                            showNotification(message);
 
                         }
                     }
@@ -433,7 +435,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType()
                                 != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
-                            showNotification();
+                            showNotification(message);
 
                         }
                     }
@@ -459,7 +461,7 @@ public class NotificationPageActivity extends AppCompatActivity {
     public boolean isOverBudget(Long budget, Long expense) throws IllegalAccessException, InstantiationException {
         Long remaining = budget - expense;
         if (remaining < 0) {
-            showNotification();
+            showNotification("You are overbudget");
 
 
             return true;
@@ -467,7 +469,7 @@ public class NotificationPageActivity extends AppCompatActivity {
         return false;
     }
 
-    public void showNotification() throws IllegalAccessException, InstantiationException {
+    public void showNotification(String message) throws IllegalAccessException, InstantiationException {
         Intent intent = new Intent (getApplicationContext(), DataVisualizationFragment.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
@@ -492,7 +494,7 @@ public class NotificationPageActivity extends AppCompatActivity {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle("Budget Alert")
-                .setContentText("You are overbudget")
+                .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
         builder.setContentIntent(pendingIntent);
 
