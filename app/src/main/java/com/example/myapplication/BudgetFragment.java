@@ -19,16 +19,18 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -44,8 +46,9 @@ public class BudgetFragment extends Fragment {
     private FirebaseHelper firebaseHelper;
     private String username;
 
-    private List<PieEntry> pieEntries = new ArrayList<>();
-    private PieChart pieChart;
+    private List<BarEntry> barEntries = new ArrayList<>();
+    private BarChart barChart;
+    private String[] categories = {"Food", "Entertainment", "Travel", "School", "Utilities"};
 
     @Nullable
     @Override
@@ -57,15 +60,15 @@ public class BudgetFragment extends Fragment {
 
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         // Get username from local storage
-        username = prefs.getString("username","");
+        username = prefs.getString("username", "");
 
         firebaseHelper = new FirebaseHelper();
 
-        // Pie Chart
-        pieChart = view.findViewById(R.id.pieChart);
+        // Bar Chart
+        barChart = view.findViewById(R.id.barChart);
 
-        // Initialize PieChart
-        setupPieChart();
+        // Initialize BarChart
+        setupBarChart();
 
         // Initialize categoryRecyclerView
         categoryRecyclerView = view.findViewById(R.id.categoryRecyclerView);
@@ -81,7 +84,7 @@ public class BudgetFragment extends Fragment {
     // Custom adapter for the RecyclerView
     private class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
 
-        private String[] categories = {"Food", "Entertainment", "Travel", "School", "Utilities"};
+
 
         @NonNull
         @Override
@@ -114,11 +117,11 @@ public class BudgetFragment extends Fragment {
 
                     holder.totalBudgetTextView.setText("$" + totalAmount);
 
-                    // Update the PieChart entries
-                    updatePieChartEntries(categories, snapshot);
+                    // Update the BarChart entries
+                    updateBarChartEntries(categories, snapshot);
 
-                    // Update PieChart with the new entries
-                    updatePieChart();
+                    // Update BarChart with the new entries
+                    updateBarChart();
                 }
 
                 @Override
@@ -162,17 +165,8 @@ public class BudgetFragment extends Fragment {
                     String amountStr = input.getText().toString();
                     int amount = TextUtils.isEmpty(amountStr) ? 0 : Integer.parseInt(amountStr);
 
-                    // Update the total budget TextView
-                    holder.totalBudgetTextView.setText("$" + amount);
-
                     // Update the Firebase database
                     firebaseHelper.updateBudgetAmount(username, category, amount);
-
-                    // Toast to notify the user
-                    Toast.makeText(requireContext(), "Budget updated for " + category, Toast.LENGTH_SHORT).show();
-
-                    // Update the PieChart after updating the data
-                    setupPieChart();
                 }
             });
 
@@ -188,6 +182,8 @@ public class BudgetFragment extends Fragment {
             builder.show();
         }
 
+
+
         // ViewHolder class
         class CategoryViewHolder extends RecyclerView.ViewHolder {
             TextView categoryNameTextView;
@@ -201,8 +197,8 @@ public class BudgetFragment extends Fragment {
         }
     }
 
-    private void updatePieChartEntries(String[] categories, DataSnapshot budgetSnapshot) {
-        pieEntries.clear();
+    private void updateBarChartEntries(String[] categories, DataSnapshot budgetSnapshot) {
+        barEntries.clear();
 
         for (String category : categories) {
             int totalAmount = 0;
@@ -217,48 +213,77 @@ public class BudgetFragment extends Fragment {
                 }
             }
 
-            pieEntries.add(new PieEntry(totalAmount, category));
+            barEntries.add(new BarEntry((float) barEntries.size(), totalAmount));
         }
     }
 
-    private void setupPieChart() {
-        // PieChart Config
+    private void setupBarChart() {
+        // BarChart Config
 
-        // Create a PieDataSet
-        PieDataSet dataSet = new PieDataSet(pieEntries, "");
+        // Create a BarDataSet
+        BarDataSet dataSet = new BarDataSet(barEntries, "");
 
         // Set custom colors for each entry
         dataSet.setColors(new int[]{Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.BLACK});
 
-//        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
-//        dataSet.setValueTextSize(12f);
+        dataSet.setValueTextColor(Color.TRANSPARENT);
 
-        // Create a PieData object
-        PieData data = new PieData(dataSet);
+        // Create a BarData object
+        BarData data = new BarData(dataSet);
 
+        barChart.setData(data);
 
-        pieChart.setData(data);
+        // Customize X-axis
+        XAxis xAxis = barChart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(getCategoryLabels()));
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1);
+        xAxis.setCenterAxisLabels(false);
+        xAxis.setLabelCount(categories.length); // Set the number of labels
+        //xAxis.setLabelRotationAngle(-45); // Rotate labels for better visibility
+        xAxis.setXOffset(-10f); // Set a custom offset to adjust the position of labels
+
 
         // Remove description label text on the side
-        pieChart.getDescription().setEnabled(false);
+        barChart.getDescription().setEnabled(false);
 
-        pieChart.invalidate();
+        // Set up legends
+        Legend legend = barChart.getLegend();
+        legend.setForm(Legend.LegendForm.SQUARE);
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+        legend.setTextSize(12f);
+
+        barChart.invalidate();
     }
 
-    private void updatePieChart() {
-        PieDataSet dataSet = new PieDataSet(pieEntries, "");
+    private void updateBarChart() {
+        BarDataSet dataSet = new BarDataSet(barEntries, "");
         dataSet.setColors(new int[]{Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.GRAY});
-//        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
-//        dataSet.setValueTextSize(9f);
 
-        PieData data = new PieData(dataSet);
+        BarData data = new BarData(dataSet);
 
-
-        pieChart.setData(data);
+        barChart.setData(data);
 
         // Remove description label text on the side
-        pieChart.getDescription().setEnabled(false);
+        barChart.getDescription().setEnabled(false);
 
-        pieChart.invalidate();
+        // Set up legends
+        Legend legend = barChart.getLegend();
+        legend.setForm(Legend.LegendForm.SQUARE);
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+        legend.setTextSize(12f);
+
+        barChart.invalidate();
+    }
+
+    // Helper method to get category labels
+    private List<String> getCategoryLabels() {
+        List<String> labels = new ArrayList<>();
+        for (String category : categories) {
+            labels.add(category);
+        }
+        return labels;
     }
 }
