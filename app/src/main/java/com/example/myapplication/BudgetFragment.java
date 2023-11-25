@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,8 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BudgetFragment extends Fragment {
-
-    private TextView monthYearTextView;
 
     private RecyclerView categoryRecyclerView;
     private CategoryAdapter categoryAdapter;
@@ -168,6 +167,12 @@ public class BudgetFragment extends Fragment {
 
                     // Update the Firebase database
                     firebaseHelper.updateBudgetAmount(username, category, amount);
+
+                    // Toast to notify the user
+                    Toast.makeText(requireContext(), "Budget updated for " + category, Toast.LENGTH_SHORT).show();
+
+                    // Update the PieChart after updating the data
+                    setupPieChart();
                 }
             });
 
