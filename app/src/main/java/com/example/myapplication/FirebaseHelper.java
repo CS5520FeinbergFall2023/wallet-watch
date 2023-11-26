@@ -147,6 +147,9 @@ public class FirebaseHelper {
 
 
     // Budgets
+
+
+
     public void updateBudgetAmount(String username, String category, int amount) {
         // Navigate to the correct node in the Firebase database for the user
         DatabaseReference userBudgetRef = FirebaseDatabase.getInstance().getReference()

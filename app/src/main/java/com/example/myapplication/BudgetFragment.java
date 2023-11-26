@@ -1,8 +1,5 @@
 package com.example.myapplication;
 
-import static android.content.Context.MODE_PRIVATE;
-import static com.example.myapplication.MainActivity.PREFS_NAME;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -30,13 +27,16 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
+import static com.example.myapplication.MainActivity.PREFS_NAME;
 
 public class BudgetFragment extends Fragment {
 
@@ -49,12 +49,12 @@ public class BudgetFragment extends Fragment {
     private List<BarEntry> barEntries = new ArrayList<>();
     private BarChart barChart;
     private String[] categories = {"Food", "Entertainment", "Travel", "School", "Utilities"};
+    private List<Integer> userAmounts = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0)); // Default values
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         // Inflate the layout
         View view = inflater.inflate(R.layout.fragment_budget_page, container, false);
 
@@ -78,13 +78,52 @@ public class BudgetFragment extends Fragment {
         categoryRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         categoryRecyclerView.setAdapter(categoryAdapter);
 
+        // Fetch and display the existing budget amounts for the category when the fragment loads
+        firebaseHelper.getBudgetAmount(username, new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int totalAmount = 0;
+                userAmounts.clear(); // Clear the list to avoid duplication
+
+                for (String category : categories) {
+                    Integer amount = 0;
+
+                    for (DataSnapshot budgetSnapshot : snapshot.getChildren()) {
+                        String budgetCategory = budgetSnapshot.child("category").getValue(String.class);
+                        if (category.equals(budgetCategory)) {
+                            amount = budgetSnapshot.child("amount").getValue(Integer.class);
+                            if (amount != null) {
+                                totalAmount += amount;
+                            }
+                            break; // Exit loop once the category is found
+                        }
+                    }
+
+                    userAmounts.add(amount); // Store the user's initial amount
+                }
+
+                // Update the BarChart entries
+                updateBarChartEntries(categories, userAmounts);
+
+                // Update BarChart with the new entries
+                setupBarChart(); // Call setupBarChart to update the BarChart
+
+                // Notify the adapter that data has changed
+                categoryAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle the error
+            }
+        });
+
         return view;
     }
 
+
     // Custom adapter for the RecyclerView
     private class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder> {
-
-
 
         @NonNull
         @Override
@@ -118,7 +157,7 @@ public class BudgetFragment extends Fragment {
                     holder.totalBudgetTextView.setText("$" + totalAmount);
 
                     // Update the BarChart entries
-                    updateBarChartEntries(categories, snapshot);
+                    updateBarChartEntries(categories, userAmounts);
 
                     // Update BarChart with the new entries
                     updateBarChart();
@@ -165,8 +204,24 @@ public class BudgetFragment extends Fragment {
                     String amountStr = input.getText().toString();
                     int amount = TextUtils.isEmpty(amountStr) ? 0 : Integer.parseInt(amountStr);
 
+                    // Update the RecyclerView immediately
+                    holder.totalBudgetTextView.setText("$" + amount);
+
+                    // Update the temporary variable with proper bounds checking
+                    if (holder.getAdapterPosition() >= 0 && holder.getAdapterPosition() < userAmounts.size()) {
+                        userAmounts.set(holder.getAdapterPosition(), amount);
+                    }
+
+                    // Update the BarChart entries using the temporary variable
+                    updateBarChartEntries(categories, userAmounts);
+
+                    // Update BarChart with the new entries
+                    updateBarChart();
+
                     // Update the Firebase database
                     firebaseHelper.updateBudgetAmount(username, category, amount);
+
+                    Toast.makeText(requireContext(), "Amount for " + category + " changed to $" + amount, Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -182,8 +237,6 @@ public class BudgetFragment extends Fragment {
             builder.show();
         }
 
-
-
         // ViewHolder class
         class CategoryViewHolder extends RecyclerView.ViewHolder {
             TextView categoryNameTextView;
@@ -197,23 +250,13 @@ public class BudgetFragment extends Fragment {
         }
     }
 
-    private void updateBarChartEntries(String[] categories, DataSnapshot budgetSnapshot) {
+    private void updateBarChartEntries(String[] categories, List<Integer> amounts) {
         barEntries.clear();
 
-        for (String category : categories) {
-            int totalAmount = 0;
-
-            for (DataSnapshot snapshot : budgetSnapshot.getChildren()) {
-                String budgetCategory = snapshot.child("category").getValue(String.class);
-                if (category.equals(budgetCategory)) {
-                    Integer amount = snapshot.child("amount").getValue(Integer.class);
-                    if (amount != null) {
-                        totalAmount += amount;
-                    }
-                }
+        if (!amounts.isEmpty()) {
+            for (int i = 0; i < categories.length; i++) {
+                barEntries.add(new BarEntry((float) i, amounts.get(i)));
             }
-
-            barEntries.add(new BarEntry((float) barEntries.size(), totalAmount));
         }
     }
 
@@ -242,7 +285,6 @@ public class BudgetFragment extends Fragment {
         xAxis.setLabelCount(categories.length); // Set the number of labels
         //xAxis.setLabelRotationAngle(-45); // Rotate labels for better visibility
         xAxis.setXOffset(-10f); // Set a custom offset to adjust the position of labels
-
 
         // Remove description label text on the side
         barChart.getDescription().setEnabled(false);
@@ -286,4 +328,5 @@ public class BudgetFragment extends Fragment {
         }
         return labels;
     }
+
 }
