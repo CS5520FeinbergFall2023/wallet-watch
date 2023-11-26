@@ -41,6 +41,8 @@
         android:layout_marginTop="8dp" />
 
 
+
+
     <!-- RecyclerView for categories -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/categoryRecyclerView"
