@@ -290,11 +290,11 @@ public class BudgetFragment extends Fragment {
         barChart.getDescription().setEnabled(false);
 
         // Set up legends
-        Legend legend = barChart.getLegend();
-        legend.setForm(Legend.LegendForm.SQUARE);
-        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
-        legend.setTextSize(12f);
+//        Legend legend = barChart.getLegend();
+//        legend.setForm(Legend.LegendForm.SQUARE);
+//        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+//        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+//        legend.setTextSize(12f);
 
         barChart.invalidate();
     }
@@ -310,12 +310,12 @@ public class BudgetFragment extends Fragment {
         // Remove description label text on the side
         barChart.getDescription().setEnabled(false);
 
-        // Set up legends
-        Legend legend = barChart.getLegend();
-        legend.setForm(Legend.LegendForm.SQUARE);
-        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
-        legend.setTextSize(12f);
+//        // Set up legends
+//        Legend legend = barChart.getLegend();
+//        legend.setForm(Legend.LegendForm.SQUARE);
+//        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+//        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+//        legend.setTextSize(12f);
 
         barChart.invalidate();
     }
