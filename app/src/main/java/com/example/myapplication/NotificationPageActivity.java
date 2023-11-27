@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 
 import com.example.myapplication.dao.Category;
 
@@ -48,18 +49,18 @@ public class NotificationPageActivity extends AppCompatActivity {
     RecyclerView notificationRV;
     NotificationManager notificationManager;
 
-    private static final int NOTIFICATION_PERMISSION_CODE = 5520;
+    public static final int NOTIFICATION_PERMISSION_CODE = 5520;
 
-    private static final String CHANNEL_ID = "CHANNEL";
-    private NotificationAdapter adapter;
+    public static final String CHANNEL_ID = "CHANNEL";
+    public NotificationAdapter adapter;
     ArrayList<Notification> notificationList = new ArrayList<>();
-    private User user;
+    //public User user;
     //will hold category: aggregated expense amount
-    private HashMap<String, Long> dictExpense = new HashMap<>();
-    private HashMap<String, Long> dictBudget = new HashMap<>();
-    HashMap<String, Boolean> overBudgetTracker = new HashMap<>();
-    private Calendar currentCalendar = Calendar.getInstance();
-    private String username;
+    public HashMap<String, Long> dictExpense = new HashMap<>();
+    public HashMap<String, Long> dictBudget = new HashMap<>();
+    //HashMap<String, Boolean> overBudgetTracker = new HashMap<>();
+    public Calendar currentCalendar = Calendar.getInstance();
+    public String username;
     FirebaseHelper firebaseHelper = new FirebaseHelper();
     //counter
 
@@ -194,6 +195,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                 Long foodAmount = 0L;
                 Long utilitiesAmount = 0L;
                 Long travelAmount = 0L;
+                Long schoolAmount = 0L;
                 Long amount = 0L;
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -254,6 +256,16 @@ public class NotificationPageActivity extends AppCompatActivity {
 
                             }
                         }
+                        if ("category".equalsIgnoreCase(shot.getKey()) && "School".equalsIgnoreCase(shot.getValue().toString())) {
+                            if (inCurrentMonth((Long) snapshot.child("date").getValue())) {
+                                //System.out.println(shot.getValue());
+                                schoolAmount += amount;
+                                //utilitiesAmount += (Long) snapshot.child("amount").getValue();
+                                dictExpense.put((String) shot.getValue(), utilitiesAmount);
+                                //isOverBudget(dictBudget.get(shot.getKey()), utilitiesAmount);
+
+                            }
+                        }
 
 
                     }
@@ -263,6 +275,7 @@ public class NotificationPageActivity extends AppCompatActivity {
 
                 try {
                     overBudget(dictBudget, dictExpense);
+                    Log.d("NOTIFICATIONBUDGET", dictBudget.toString());
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 } catch (InstantiationException e) {
@@ -304,7 +317,7 @@ public class NotificationPageActivity extends AppCompatActivity {
 
                     long currentTimestamp = System.currentTimeMillis();
                     String message = "You are over-budget for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
-                    showNotification(message);
+                    //showNotification(message);
                     Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
                     NotificationType notificationType = NotificationType.OVER_BUDGET;
                     newNotification.setNotificationType(notificationType);
@@ -316,7 +329,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
                             //showNotification();
-                            showNotification(message); //IF ONLY CALLED HERE WILL ALERT USER ONLY ONCE
+                            //showNotification(message); //IF ONLY CALLED HERE WILL ALERT USER ONLY ONCE
 
                         }
                     }
@@ -341,7 +354,7 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != notification.getMonth((longDate)) && notification.getBudgetAmount()
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
-                            showNotification(message);
+                            //showNotification(message);
 
                         }
                     }
@@ -366,14 +379,11 @@ public class NotificationPageActivity extends AppCompatActivity {
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType()
                                 != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
-                            showNotification(message);
+                            //showNotification(message);
 
                         }
                     }
-                    //if (newNotification.getMonth(currentTimestamp) != )
 
-
-                    //return true;
                 }
 
 
@@ -392,6 +402,10 @@ public class NotificationPageActivity extends AppCompatActivity {
 
 
     public void showNotification(String message) throws IllegalAccessException, InstantiationException {
+        Random random = new Random();
+        int m = random.nextInt(9999 - 1000) + 1000;
+        //CHANNEL_ID = m;
+
         Intent intent = new Intent (getApplicationContext(), DataVisualizationFragment.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
@@ -436,7 +450,7 @@ public class NotificationPageActivity extends AppCompatActivity {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        notificationManager.notify(1, builder.build());
+        notificationManager.notify(m, builder.build());
         //managerCompat.notify(1, builder.build());
         if (builder == null) {
             Log.d("isNULLBUILDER", "isNULLBUILDER ");
@@ -494,6 +508,8 @@ public class NotificationPageActivity extends AppCompatActivity {
         // Concatenate month and year and return as a string
         return monthName + " " + year;
     }
+
+
 
 
 
