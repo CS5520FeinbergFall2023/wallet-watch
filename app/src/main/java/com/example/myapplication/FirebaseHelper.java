@@ -1,10 +1,13 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
+import com.bumptech.glide.Glide;
 import com.example.myapplication.callback.BudgetsCallback;
 import com.example.myapplication.callback.ExpensesCallback;
 import com.example.myapplication.callback.CategoriesCallback;
@@ -69,6 +72,19 @@ public class FirebaseHelper {
             }
             return riversRef.getDownloadUrl();
         }).addOnCompleteListener(onCompleteListener);
+    }
+
+    public void getImageFirebase(String imageName, ImageView imageView, Context context) {
+        storageReference.child(imageName).getDownloadUrl().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                Uri downloadUri = task.getResult();
+                Glide.with(context)
+                        .load(downloadUri.toString())
+                        .into(imageView);
+            } else {
+
+            }
+        });
     }
 
     public void loginUser(String username, String password, OnCompleteListener<Boolean> onCompleteListener) {
@@ -174,7 +190,6 @@ public class FirebaseHelper {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Handle the error
             }
         });
     }
