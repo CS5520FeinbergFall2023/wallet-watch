@@ -288,5 +288,19 @@ public class FirebaseHelper {
         DatabaseReference newExpenseRef = expensesRef.push();
         newExpenseRef.setValue(expense).addOnCompleteListener(onCompleteListener);
     }
+
+    public void createNotification(String username, Notification notification) {
+        DatabaseReference notificationRef = FirebaseDatabase.getInstance().getReference().child("notifications").child(username);
+
+        DatabaseReference newNotificationRef = notificationRef.push();
+        newNotificationRef.setValue(notification);
+
+
+
+    }
+
+
+
+
 }
 

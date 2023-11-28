@@ -39,6 +39,7 @@ public class HomePageFragment extends Fragment {
         return view;
     }
 
+
     //code for image launcher
     private final ActivityResultLauncher<String> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),

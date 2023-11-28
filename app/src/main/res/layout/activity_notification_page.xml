@@ -19,11 +19,12 @@
 
   <ScrollView
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+      android:layout_height="match_parent">
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/notifications_rv"
-        android:layout_width="409dp"
-        android:layout_height="670dp"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
   </ScrollView>
 
 </LinearLayout>
