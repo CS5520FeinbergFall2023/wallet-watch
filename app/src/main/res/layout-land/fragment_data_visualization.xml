@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="4dp">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineVerticalHalf"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.50"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPreviousMonth"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:minWidth="110dp"
+        android:text="@string/previous"
+        app:backgroundTint="@color/dark_green"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="21dp"
+        android:gravity="center"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toStartOf="@id/btnNextMonth"
+        app:layout_constraintStart_toEndOf="@id/btnPreviousMonth"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnNextMonth"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:minWidth="110dp"
+        android:text="@string/next"
+        app:backgroundTint="@color/dark_green"
+        app:layout_constraintEnd_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/viewPagerContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="@drawable/pager_background"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintTop_toBottomOf="@id/textDate">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/categoryViewPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/textBudgetLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/budget"
+        android:gravity="start"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintTop_toBottomOf="@id/viewPagerContainer" />
+
+    <TextView
+        android:id="@+id/textBudgetValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/formatted_currency_zero"
+        android:gravity="end"
+        android:layout_marginTop="8dp"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="@id/textBudgetLabel"
+        app:layout_constraintEnd_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintTop_toBottomOf="@id/viewPagerContainer" />
+
+    <TextView
+        android:id="@+id/textRemainingLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/remaining"
+        android:gravity="start"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintTop_toBottomOf="@id/textBudgetLabel" />
+
+    <TextView
+        android:id="@+id/textRemainingValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/formatted_currency_zero"
+        android:gravity="end"
+        android:layout_marginTop="8dp"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="@id/textRemainingLabel"
+        app:layout_constraintEnd_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintTop_toBottomOf="@id/textBudgetLabel" />
+
+    <TextView
+        android:id="@+id/textExpenseLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/expenses"
+        android:gravity="start"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintTop_toBottomOf="@id/textRemainingLabel" />
+
+    <TextView
+        android:id="@+id/textExpenseValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/formatted_currency_zero"
+        android:gravity="end"
+        android:layout_marginTop="8dp"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="@id/textExpenseLabel"
+        app:layout_constraintEnd_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintTop_toBottomOf="@id/textRemainingLabel" />
+
+    <TextView
+        android:id="@+id/textDetailExpenses"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="@string/expense_details"
+        android:textSize="28sp"
+        app:layout_constraintStart_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/expensesRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="32dp"
+        android:background="@drawable/expense_recycler_background"
+        app:layout_constraintTop_toBottomOf="@id/textDetailExpenses"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/guidelineVerticalHalf"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
