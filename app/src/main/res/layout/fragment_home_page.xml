@@ -5,11 +5,43 @@
     android:layout_height="match_parent"
     tools:context=".HomePageFragment">
 
-    <Button
-        android:id="@+id/buttonUpload"
+    <!-- Welcome Message -->
+
+    <!-- App Description -->
+
+    <!-- Instructions -->
+
+    <TextView
+        android:id="@+id/welcomeMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Upload"
-        android:layout_centerInParent="true" />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="95dp"
+        android:fontFamily="sans-serif-black"
+        android:text="Welcome to WalletWatch!"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/appDescription"
+        android:layout_width="313dp"
+        android:layout_height="63dp"
+        android:layout_below="@id/welcomeMessage"
+        android:layout_alignParentStart="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="55dp"
+        android:layout_marginTop="73dp"
+        android:text="WalletWatch is your personal finance assistant. Easily manage your budgets, track expenses, and achieve your financial goals." />
+
+    <TextView
+        android:id="@+id/instructions"
+        android:layout_width="318dp"
+        android:layout_height="135dp"
+        android:layout_below="@id/appDescription"
+        android:layout_alignParentStart="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="51dp"
+        android:layout_marginTop="67dp"
+        android:text="To get started:\n1. Set your budgets and categories in the Wallet icon.\n2. Add, edit, or delete expenses in the Budget Page.\n3. Capture expense bills using the Camera.\n4. Stay on top of your goals with Notifications." />
 
 </RelativeLayout>
