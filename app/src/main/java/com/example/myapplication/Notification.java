@@ -8,19 +8,30 @@ import android.os.Build;
 import androidx.core.app.NotificationCompat;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class Notification {
 
     private static final String CHANNEL_ID = "CHANNEL";
-    private String type;
+    private String type; //category
     private String message;
-    private Date date;
+    private String date;
+    private double budgetAmount;
+    private NotificationType notificationType;
 
-    public Notification(String type, String message, Date date) {
+
+    public Notification(String type, String message, String date, double budgetAmount) {
         this.type = type;
         this.message = message;
         this.date = date;
+        this.budgetAmount = budgetAmount;
+        this.notificationType = null;
+    }
+
+    public Notification() {
+
     }
 
     public String getType() {
@@ -31,9 +42,10 @@ public class Notification {
         return message;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
+    public double getBudgetAmount() {return budgetAmount;}
 
     // Add getters and setters
     public void setType(String type) {
@@ -44,12 +56,34 @@ public class Notification {
         this.message = message;
     }
 
-    private String formatDate(long timestamp) {
+    public void setNotificationType(NotificationType type) {
+        this.notificationType = type;
+    }
+
+    public NotificationType getNotificationType() {
+        return this.notificationType;
+    }
+
+    public String formatDate(long timestamp) {
         Date date = new Date(timestamp);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
         return dateFormat.format(date);
     }
+
+    public int getMonth(long timestamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+
+        // Get the month using the Calendar instance
+        return calendar.get(Calendar.MONTH);
+    }
+
+
+
+    public void setBudgetAmount(double budgetAmount) {this.budgetAmount = budgetAmount;}
+
+
 
     public static void showNotification(Context context, String title, String message) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
