@@ -58,6 +58,9 @@ public class BudgetFragment extends Fragment {
         // Inflate the layout
         View view = inflater.inflate(R.layout.fragment_budget_page, container, false);
 
+        TextView headerTitle = view.findViewById(R.id.headerTitle);
+        headerTitle.setText(getText(R.string.data_viz_header));
+
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         // Get username from local storage
         username = prefs.getString("username", "");
@@ -260,21 +263,12 @@ public class BudgetFragment extends Fragment {
         }
     }
 
-    private void setupBarChart() {
-        // BarChart Config
+    private void configureBarChart() {
+        // Disable the legend
+        Legend legend = barChart.getLegend();
+        legend.setEnabled(false);
 
-        // Create a BarDataSet
-        BarDataSet dataSet = new BarDataSet(barEntries, "");
-
-        // Set custom colors for each entry
-        dataSet.setColors(new int[]{Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.BLACK});
-
-        dataSet.setValueTextColor(Color.TRANSPARENT);
-
-        // Create a BarData object
-        BarData data = new BarData(dataSet);
-
-        barChart.setData(data);
+        barChart.setExtraBottomOffset(30f);
 
         // Customize X-axis
         XAxis xAxis = barChart.getXAxis();
@@ -282,41 +276,38 @@ public class BudgetFragment extends Fragment {
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1);
         xAxis.setCenterAxisLabels(false);
-        xAxis.setLabelCount(categories.length); // Set the number of labels
-        //xAxis.setLabelRotationAngle(-45); // Rotate labels for better visibility
-        xAxis.setXOffset(-10f); // Set a custom offset to adjust the position of labels
+        xAxis.setLabelCount(categories.length);
+        xAxis.setTextSize(15f);
+
+        // Customize Y-axis
+        barChart.getAxisLeft().setTextSize(15f);
+        barChart.getAxisRight().setEnabled(false);
 
         // Remove description label text on the side
         barChart.getDescription().setEnabled(false);
+    }
 
-        // Set up legends
-//        Legend legend = barChart.getLegend();
-//        legend.setForm(Legend.LegendForm.SQUARE);
-//        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-//        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
-//        legend.setTextSize(12f);
+    private void setupBarChart() {
+        BarDataSet dataSet = new BarDataSet(barEntries, "");
+        dataSet.setColors(new int[]{Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.BLACK});
+        dataSet.setDrawValues(false);
 
+        BarData data = new BarData(dataSet);
+        barChart.setData(data);
+
+        configureBarChart();
         barChart.invalidate();
     }
 
     private void updateBarChart() {
         BarDataSet dataSet = new BarDataSet(barEntries, "");
         dataSet.setColors(new int[]{Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.GRAY});
+        dataSet.setDrawValues(false);
 
         BarData data = new BarData(dataSet);
-
         barChart.setData(data);
 
-        // Remove description label text on the side
-        barChart.getDescription().setEnabled(false);
-
-//        // Set up legends
-//        Legend legend = barChart.getLegend();
-//        legend.setForm(Legend.LegendForm.SQUARE);
-//        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
-//        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
-//        legend.setTextSize(12f);
-
+        configureBarChart();
         barChart.invalidate();
     }
 
