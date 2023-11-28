@@ -64,6 +64,10 @@ public class ExpensePageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_expense_page, container, false);
 
+        // Text header
+        TextView headerTitle = view.findViewById(R.id.headerTitle);
+        headerTitle.setText(getText(R.string.add_expense_header));
+
         // Expense Model
         expense = new Expense();
 
@@ -114,7 +118,7 @@ public class ExpensePageFragment extends Fragment {
 
         // Date Field
         datePickerText = view.findViewById(R.id.add_expense_date_picker);
-        datePickerText.setOnClickListener(v -> showDatePickerDialog());
+        datePickerText.setOnClickListener(this::showDatePickerDialog);
         datePickerValue = 0;
 
         // Description Field
@@ -276,7 +280,13 @@ public class ExpensePageFragment extends Fragment {
         expense = new Expense();
     }
 
-    public void showDatePickerDialog() {
+    private void updateCategoryOptions(List<Category> options) {
+        adapter.clear();
+        adapter.addAll(options);
+        adapter.notifyDataSetChanged();
+    }
+
+    public void showDatePickerDialog(View view) {
         MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker().build();
         datePicker.addOnPositiveButtonClickListener(selection -> {
             datePickerValue = selection;
@@ -287,12 +297,6 @@ public class ExpensePageFragment extends Fragment {
 
         // show picker date
         datePicker.show(getParentFragmentManager(), "EXPENSE_PAGE_DATE_PICKER");
-    }
-
-    private void updateCategoryOptions(List<Category> options) {
-        adapter.clear();
-        adapter.addAll(options);
-        adapter.notifyDataSetChanged();
     }
 }
 
