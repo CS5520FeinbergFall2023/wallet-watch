@@ -4,6 +4,7 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.example.myapplication.MainActivity.PREFS_NAME;
 
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,8 +50,10 @@ public class DataVisualizationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_data_visualization, container, false);
 
-        TextView headerTitle = view.findViewById(R.id.headerTitle);
-        headerTitle.setText(getText(R.string.data_viz_header));
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            TextView headerTitle = view.findViewById(R.id.headerTitle);
+            headerTitle.setText(getText(R.string.data_viz_header));
+        }
 
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         this.username = prefs.getString("username","");
