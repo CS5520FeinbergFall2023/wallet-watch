@@ -5,6 +5,32 @@
     android:layout_height="match_parent"
     tools:context=".HomePageFragment">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/dark_green"
+        android:elevation="4dp"
+        android:theme="?attr/actionBarTheme">
+
+
+        <!-- Your other toolbar items -->
+
+        <ImageButton
+            android:id="@+id/button_notifications_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:onClick="onClickNotification"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:src="@drawable/baseline_notifications_icon"
+            android:text="Button"
+            android:textColor="@android:color/white" />
+
+    </androidx.appcompat.widget.Toolbar>
+
     <Button
         android:id="@+id/buttonUpload"
         android:layout_width="wrap_content"
