@@ -141,51 +141,8 @@ public class ExpensePageFragment extends Fragment {
         loadingMessage = view.findViewById(R.id.expense_progress_layout);
         loadingMessage.setVisibility(View.INVISIBLE);
 
-//        // Observe the LiveData in the fragment
-//        expenseViewModel.getExpenseData().observe(getViewLifecycleOwner(), expenseData -> {
-//            // Update UI with the observed data
-//            Log.d(logTag, "updating with current data (dummy 4 now)");
-//        });
-
         return view;
     }
-
-
-
-
-    public void restoreValues(@Nullable Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            int amount = savedInstanceState.getInt(ExpenseFieldKeys.AMOUNT);
-            String category = savedInstanceState.getString(ExpenseFieldKeys.CATEGORY);
-            long date_value = savedInstanceState.getLong(ExpenseFieldKeys.DATE_VALUE);
-            String date_text = savedInstanceState.getString(ExpenseFieldKeys.DATE_TEXT);
-            String description = savedInstanceState.getString(ExpenseFieldKeys.DESCRIPTION);
-            boolean isExpUploaded = savedInstanceState.getBoolean(ExpenseFieldKeys.IS_EXPENSE_UPLOADED);
-            boolean recurring = savedInstanceState.getBoolean(ExpenseFieldKeys.RECURRING);
-            String savedUri = savedInstanceState.getString(ExpenseFieldKeys.TEMP_URI);
-
-            Log.d(logTag, String.format(
-                    "Restoring view with values:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", amount, category, date_value,
-                    date_text, description, isExpUploaded, recurring, savedUri));
-
-            expenseAmountText.setText(String.valueOf(amount));
-            categoriesInput.setText(category);
-            datePickerValue = date_value;
-            datePickerText.setText(date_text);
-            descriptionText.setText(description);
-            isExpenseImageUploaded = isExpUploaded;
-            recurringExpenseToggle.setChecked(recurring);
-
-            if (savedUri != null && !savedUri.isEmpty()) {
-                tempUri = Uri.parse(savedUri);
-            }
-
-            expenseAmountText.invalidate();
-            categoriesInput.invalidate();
-        }
-    }
-
-
 
     private void dispatchTakePictureIntent() {
         requestCameraPermissionAndLaunchCamera();
@@ -344,51 +301,9 @@ public class ExpensePageFragment extends Fragment {
         datePicker.show(getParentFragmentManager(), "EXPENSE_PAGE_DATE_PICKER");
     }
 
-
-    private static class ExpenseFieldKeys {
-        public static final String AMOUNT = "amount";
-        public static final String CATEGORY = "category";
-        public static final String DESCRIPTION = "description";
-        public static final String DATE_VALUE = "date_value";
-        public static final String DATE_TEXT = "date_text";
-        public static final String RECURRING = "recurring";
-        public static final String TEMP_URI = "temp_uri";
-        public static final String IS_EXPENSE_UPLOADED = "is_expense_uploaded";
-    }
-
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-
-        String category = categoriesInput.getText().toString();
-        long date = datePickerValue;
-        String dateText = datePickerText.getText().toString();
-        String description = descriptionText.getText().toString();
-        boolean recurring = recurringExpenseToggle.isChecked();
-
-        int amount;
-        String amountStr = expenseAmountText.getText().toString();
-        if (amountStr.isEmpty()) {
-            amount = 0;
-        } else {
-            amount = Integer.parseInt(expenseAmountText.getText().toString());
-        }
-
-        String savedUri;
-        if (tempUri == null) {
-            savedUri = "";
-        } else {
-            savedUri = tempUri.toString();
-        }
-
-        outState.putInt(ExpenseFieldKeys.AMOUNT, amount);
-        outState.putString(ExpenseFieldKeys.CATEGORY, category);
-        outState.putLong(ExpenseFieldKeys.DATE_VALUE, date);
-        outState.putString(ExpenseFieldKeys.DATE_TEXT, dateText);
-        outState.putString(ExpenseFieldKeys.DESCRIPTION, description);
-        outState.putBoolean(ExpenseFieldKeys.IS_EXPENSE_UPLOADED, isExpenseImageUploaded);
-        outState.putBoolean(ExpenseFieldKeys.RECURRING, recurring);
-        outState.putString(ExpenseFieldKeys.TEMP_URI, savedUri);
     }
 
 }
