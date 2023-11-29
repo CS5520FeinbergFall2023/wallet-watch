@@ -75,7 +75,7 @@ public class DataVisualizationFragment extends Fragment {
         this.expensesRecyclerView = view.findViewById(R.id.expensesRecyclerView);
         this.expensesRecyclerView.setHasFixedSize(true);
         this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        this.expensesAdapter = new ExpensesAdapter(new ArrayList<>(), getContext());
+        this.expensesAdapter = new ExpensesAdapter(new ArrayList<>(), getContext(), username);
         this.expensesRecyclerView.setAdapter(this.expensesAdapter);
 
         this.viewModel.getCategoryList().observe(getViewLifecycleOwner(), categories -> {
@@ -95,6 +95,8 @@ public class DataVisualizationFragment extends Fragment {
 
             addCategoriesToPager();
         });
+
+
 
         retrieveData();
         setupMonthIterationButtons(view);
