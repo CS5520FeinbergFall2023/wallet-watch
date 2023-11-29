@@ -3,8 +3,10 @@ package com.example.myapplication;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +32,15 @@ public class LoginPageActivity extends AppCompatActivity {
         usernameEditText = findViewById(R.id.editTextUsernameLogin);
         passwordEditText = findViewById(R.id.editTextPasswordLogin);
         Button loginButton = findViewById(R.id.buttonLogin);
+
+        TextView registerLink = findViewById(R.id.registerLink);
+
+        // Set OnClickListener for the Register TextView
+        registerLink.setOnClickListener(v -> {
+            // Navigate to the RegistrationActivity (replace with your actual registration activity)
+            Intent intent = new Intent(LoginPageActivity.this, RegisterPageActivity.class);
+            startActivity(intent);
+        });
         loginButton.setOnClickListener(v -> {
             String username = usernameEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
