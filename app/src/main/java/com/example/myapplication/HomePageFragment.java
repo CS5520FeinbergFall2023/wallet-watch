@@ -35,26 +35,6 @@ public class HomePageFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
 
-
         return view;
-    }
-
-
-    //code for image launcher
-    private final ActivityResultLauncher<String> pickImageLauncher = registerForActivityResult(
-            new ActivityResultContracts.GetContent(),
-            result -> {
-                if (result != null) {
-                    FirebaseHelper firebaseHelper = new FirebaseHelper();
-                    firebaseHelper.uploadImage(result, v -> {
-                        Toast.makeText(getContext(), "Image Uploaded!", Toast.LENGTH_SHORT).show();
-                    });
-                }
-            }
-    );
-
-    //code for image launcher
-    private void openImageChooser() {
-        pickImageLauncher.launch("image/*");
     }
 }

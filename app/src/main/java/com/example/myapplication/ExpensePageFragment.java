@@ -4,6 +4,7 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.example.myapplication.MainActivity.PREFS_NAME;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -19,6 +20,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -52,7 +55,10 @@ public class ExpensePageFragment extends Fragment {
     private String username;
 
     private ActivityResultLauncher<String> photoPermissionRequest;
+    //    private ActivityResultLauncher<String> photoGalleryPermissionRequest;
     private ActivityResultLauncher<Uri> takePictureLauncher;
+    private ActivityResultLauncher<String> pickImageLauncher;
+
     private Uri tempUri;
     private boolean isExpenseImageUploaded;
 
@@ -102,12 +108,40 @@ public class ExpensePageFragment extends Fragment {
             }
         });
 
+//        // Initialize the launchers in your onCreate or onCreateView method:
+//        photoGalleryPermissionRequest = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
+//            if (result) {
+//                // Camera permission granted, proceed with taking a picture
+//                launchGallery();
+//            } else {
+//                Snackbar.make(requireView(), "Gallery permission is required!", Snackbar.LENGTH_SHORT).show();
+//            }
+//        });
+
         takePictureLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
             if (result) {
+                // Camera result
                 isExpenseImageUploaded = true;
                 imageCapturedMsgView.setVisibility(View.VISIBLE);
+            } else {
+                // Gallery result
+                Log.d(logTag, "Gallery Result");
             }
         });
+
+        pickImageLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                selectedImageUri -> {
+                    if (selectedImageUri != null) {
+                        isExpenseImageUploaded = true;
+                        imageCapturedMsgView.setVisibility(View.VISIBLE);
+
+                        tempUri = selectedImageUri;
+                    } else {
+                        Snackbar.make(requireView(), "Failed to pick image", Snackbar.LENGTH_SHORT).show();
+                    }
+                }
+        );
 
         // Upload Button
         MaterialButton uploadExpenseButton = view.findViewById(R.id.add_expense_upload_button);
@@ -141,16 +175,66 @@ public class ExpensePageFragment extends Fragment {
         loadingMessage = view.findViewById(R.id.expense_progress_layout);
         loadingMessage.setVisibility(View.INVISIBLE);
 
+        // restore instance state
         if (savedInstanceState != null) {
             restoreValues(savedInstanceState);
         }
+
+
+
+        // back button check
+        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                builder.setMessage("Are you sure you want to exit?\nYou will lose any values entered.");
+
+                builder.setPositiveButton("Exit", (dialog, which) -> {
+                    requireActivity().finish();
+                });
+                builder.setNegativeButton("Dismiss", (dialog, which) -> {
+                    dialog.dismiss();
+                });
+                builder.show();
+            }
+        };
+
+        OnBackPressedDispatcher onBackPressedDispatcher = requireActivity().getOnBackPressedDispatcher();
+        onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
 
         return view;
     }
 
     private void dispatchTakePictureIntent() {
-        requestCameraPermissionAndLaunchCamera();
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("How would you like to upload an Expense ?")
+                .setItems(new CharSequence[]{"Take Photo", "Upload Photo"}, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            // Take Photo
+                            requestCameraPermissionAndLaunchCamera();
+                            break;
+                        case 1:
+                            // Upload Photo
+                            launchGallery();
+                            break;
+                    }
+                });
+        builder.show();
     }
+
+    // ** apparently can just skip the permission req ?
+    // Function to request camera permission and launch the gallery
+//    private void requestCameraPermissionAndLaunchGallery() {
+//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+//                == PackageManager.PERMISSION_GRANTED) {
+//            // Camera permission is already granted, proceed with taking a picture
+//            launchGallery();
+//        } else {
+//            // Request camera permission
+//            photoGalleryPermissionRequest.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+//        }
+//    }
 
     // Function to request camera permission and launch the camera
     private void requestCameraPermissionAndLaunchCamera() {
@@ -162,6 +246,10 @@ public class ExpensePageFragment extends Fragment {
             // Request camera permission
             photoPermissionRequest.launch(Manifest.permission.CAMERA);
         }
+    }
+
+    private void launchGallery() {
+        pickImageLauncher.launch("image/*");
     }
 
     private void launchCamera() {
@@ -230,11 +318,23 @@ public class ExpensePageFragment extends Fragment {
         String description = descriptionText.getText().toString();
         Long date = datePickerValue;
         boolean recurring = recurringExpenseToggle.isChecked();
-        String imageUrl = "";
+        String imageUrl;
 
         if (isExpenseImageUploaded) {
             imageUrl = WalletWatchStorageUtil.expenseImageFileName(expense);
+
+            // tempUri and imageUrl when taking photo
+            // expense-c29cb015-f9d8-41ca-9d65-7230f2052410.jpg
+
+            // tempUri when uploading
+            // content://media/picker/0/com.android.providers.media.photopicker/media/1000000027
+
+            // so, use imageUrl as file name
+        } else {
+            imageUrl = "";
         }
+
+        String imageFileName = imageUrl;
 
         // set expense values
         expense.setValues(category, amount, description, date, imageUrl, recurring);
@@ -244,7 +344,8 @@ public class ExpensePageFragment extends Fragment {
 
         firebaseHelper.createExpense(username, expense, v -> {
             if (isExpenseImageUploaded) {
-                firebaseHelper.uploadImage(tempUri, e -> {
+
+                firebaseHelper.uploadImage(tempUri, imageFileName, e -> {
                     Toast.makeText(getContext(), "Expense Created!", Toast.LENGTH_SHORT).show();
                     onClear();
                 });
