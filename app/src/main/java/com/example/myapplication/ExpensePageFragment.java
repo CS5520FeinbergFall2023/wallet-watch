@@ -182,7 +182,7 @@ public class ExpensePageFragment extends Fragment {
 
     private void dispatchTakePictureIntent() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Choose an option")
+        builder.setTitle("How would you like to upload an Expense ?")
                 .setItems(new CharSequence[]{"Take Photo", "Upload Photo"}, (dialog, which) -> {
                     switch (which) {
                         case 0:
