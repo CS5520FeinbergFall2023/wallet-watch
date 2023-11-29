@@ -35,8 +35,6 @@ public class HomePageFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
 
-        Button chooseImageButton = view.findViewById(R.id.buttonUpload);
-        chooseImageButton.setOnClickListener(v -> openImageChooser());
 
         return view;
     }
