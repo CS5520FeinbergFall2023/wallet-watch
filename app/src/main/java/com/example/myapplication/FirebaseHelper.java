@@ -58,12 +58,12 @@ public class FirebaseHelper {
                 .addOnCompleteListener(onCompleteListener);
     }
 
-    public void uploadImage(Uri imageUri, OnCompleteListener<Uri> onCompleteListener) {
+    public void uploadImage(Uri imageUri, String imageName, OnCompleteListener<Uri> onCompleteListener) {
         if (imageUri == null) {
             return;
         }
 
-        StorageReference riversRef = storageReference.child("" + imageUri.getLastPathSegment());
+        StorageReference riversRef = storageReference.child("" + imageName);
         UploadTask uploadTask = riversRef.putFile(imageUri);
 
         uploadTask.continueWithTask(task -> {
