@@ -94,15 +94,12 @@ public class MainFragmentActivity extends AppCompatActivity {
         //NEW NOTIFICATION
         // Get username from local storage
         SharedPreferences prefs = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        username = prefs.getString("username","");
+        username = prefs.getString("username", "");
 
         nestFunction();
 
 
-
-
     }
-
 
 
     @Override
@@ -121,25 +118,40 @@ public class MainFragmentActivity extends AppCompatActivity {
         this.bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int itemId = item.getItemId();
+            String fragmentTag = "";
 
             // This does not work as a switch... don't waste your time
             if (itemId == R.id.home) {
                 selectedFragment = new HomePageFragment();
+                fragmentTag = "home";
             } else if (itemId == R.id.budget) {
                 selectedFragment = new BudgetFragment();
+                fragmentTag = "budget";
             } else if (itemId == R.id.expense) {
-                selectedFragment = new ExpensePageFragment();
+                fragmentTag = "expense";
+
+                Fragment existingFragment = getSupportFragmentManager().findFragmentByTag(fragmentTag);
+
+                if (existingFragment == null) {
+                    // Fragment not found, create a new instance
+                    selectedFragment = new ExpensePageFragment();
+                } else {
+                    // Reuse existing fragment
+                    selectedFragment = existingFragment;
+                }
             } else if (itemId == R.id.data) {
                 selectedFragment = new DataVisualizationFragment();
+                fragmentTag = "data";
             } else if (itemId == R.id.account) {
                 selectedFragment = new AccountPageFragment();
+                fragmentTag = "account";
             }
 
             if (selectedFragment != null) {
                 this.selectedFragment = itemId;
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fragment_container, selectedFragment)
+                        .replace(R.id.fragment_container, selectedFragment, fragmentTag)
                         .commit();
             }
             return true;
@@ -150,7 +162,7 @@ public class MainFragmentActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_top_toolbar, menu);
-        return  true;
+        return true;
     }
 
 
@@ -192,7 +204,6 @@ public class MainFragmentActivity extends AppCompatActivity {
                     Log.d("notice of overbudget", remaining.toString());
                     isOverBudget.put(entry.getKey(), true);
                     //OLD LOCATION OF showNotification()
-
 
 
                     long currentTimestamp = System.currentTimeMillis();
@@ -264,10 +275,7 @@ public class MainFragmentActivity extends AppCompatActivity {
                         }
                     }
 
-                }
-
-
-                else {
+                } else {
                     isOverBudget.put(entry.getKey(), false);
 
                 }
@@ -282,12 +290,11 @@ public class MainFragmentActivity extends AppCompatActivity {
     public void showNotification(String message) throws IllegalAccessException, InstantiationException {
         Random random = new Random();
         int m = random.nextInt(9999 - 1000) + 1000;
-        Intent intent = new Intent (getApplicationContext(), DataVisualizationFragment.class);
+        Intent intent = new Intent(getApplicationContext(), DataVisualizationFragment.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
         //NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
-
 
 
         //NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -518,7 +525,6 @@ public class MainFragmentActivity extends AppCompatActivity {
                         }
 
 
-
                     }
 
                     @Override
@@ -529,8 +535,6 @@ public class MainFragmentActivity extends AppCompatActivity {
 
 
             }
-
-
 
 
             @Override
