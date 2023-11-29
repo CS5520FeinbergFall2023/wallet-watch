@@ -3,6 +3,7 @@ package com.example.myapplication;
 import static com.example.myapplication.MainActivity.PREFS_NAME;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -70,6 +71,9 @@ public class MainFragmentActivity extends AppCompatActivity {
     //FirebaseHelper firebaseHelper = new FirebaseHelper();
     HashMap<String, Long> copiedDictBudget = new HashMap<>();
 
+    String fragmentTag;
+    String previousFragmentTag;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,9 +120,11 @@ public class MainFragmentActivity extends AppCompatActivity {
 
     private void setupBottomNavigation() {
         this.bottomNavigationView.setOnItemSelectedListener(item -> {
-            Fragment selectedFragment = null;
+            Fragment selectedFragment;
             int itemId = item.getItemId();
-            String fragmentTag = "";
+            previousFragmentTag = fragmentTag;
+            fragmentTag = "";
+
 
             // This does not work as a switch... don't waste your time
             if (itemId == R.id.home) {
@@ -145,14 +151,37 @@ public class MainFragmentActivity extends AppCompatActivity {
             } else if (itemId == R.id.account) {
                 selectedFragment = new AccountPageFragment();
                 fragmentTag = "account";
+            } else {
+                selectedFragment = null;
             }
+
 
             if (selectedFragment != null) {
                 this.selectedFragment = itemId;
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, selectedFragment, fragmentTag)
-                        .commit();
+
+                if (previousFragmentTag != null && previousFragmentTag.equals("expense") && !fragmentTag.equals("expense")) {
+                    // alert for when navigating away from the Expense Page
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainFragmentActivity.this);
+                    builder.setMessage("Are you sure you want to Navigate away?\nYou will lose all saved values.");
+
+                    builder.setPositiveButton("Exit", (dialog, which) -> {
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container, selectedFragment, fragmentTag)
+                                .commit();
+                    });
+                    builder.setNegativeButton("Dismiss", (dialog, which) -> {
+                        dialog.dismiss();
+                        bottomNavigationView.setSelectedItemId(R.id.expense);
+                    });
+
+                    builder.show();
+                } else {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_container, selectedFragment, fragmentTag)
+                            .commit();
+                }
             }
             return true;
         });

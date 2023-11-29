@@ -20,6 +20,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -173,9 +175,32 @@ public class ExpensePageFragment extends Fragment {
         loadingMessage = view.findViewById(R.id.expense_progress_layout);
         loadingMessage.setVisibility(View.INVISIBLE);
 
+        // restore instance state
         if (savedInstanceState != null) {
             restoreValues(savedInstanceState);
         }
+
+
+
+        // back button check
+        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                builder.setMessage("Are you sure you want to exit?\nYou will lose any values entered.");
+
+                builder.setPositiveButton("Exit", (dialog, which) -> {
+                    requireActivity().finish();
+                });
+                builder.setNegativeButton("Dismiss", (dialog, which) -> {
+                    dialog.dismiss();
+                });
+                builder.show();
+            }
+        };
+
+        OnBackPressedDispatcher onBackPressedDispatcher = requireActivity().getOnBackPressedDispatcher();
+        onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
 
         return view;
     }
