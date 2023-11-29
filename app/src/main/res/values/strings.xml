@@ -16,7 +16,7 @@
     <string name="add_expense_category_hint">Category</string>
     <string name="add_expense_amount_hint">Expense Amount</string>
     <string name="dollar_sign_icon_description">dollar sign</string>
-    <string name="add_expense_header_text">Add Expense</string>
+    <string name="add_expense_header">Add Expense</string>
     <string name="clear_expense_button">clear</string>
 
     <string name="logout_button">Logout</string>
