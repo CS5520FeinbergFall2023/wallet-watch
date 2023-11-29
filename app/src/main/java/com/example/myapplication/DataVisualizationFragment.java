@@ -4,6 +4,7 @@ import static android.content.Context.MODE_PRIVATE;
 import static com.example.myapplication.MainActivity.PREFS_NAME;
 
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +21,6 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.myapplication.dao.Budget;
 import com.example.myapplication.dao.Category;
 import com.example.myapplication.dao.Expense;
-import com.example.myapplication.dao.ExpenseItem;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,7 +39,7 @@ public class DataVisualizationFragment extends Fragment {
     private Calendar currentCalendar = Calendar.getInstance();
     private FirebaseHelper firebaseHelper;
     private List<Expense> expensesList;
-    private List<ExpenseItem> expensesForMonth;
+    private List<Expense> expensesForMonth;
     private List<Budget> budgetList;
     private List<Category> categoryList;
     private ExpensesAdapter expensesAdapter;
@@ -50,8 +50,10 @@ public class DataVisualizationFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_data_visualization, container, false);
 
-        TextView headerTitle = view.findViewById(R.id.headerTitle);
-        headerTitle.setText(getText(R.string.data_viz_header));
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            TextView headerTitle = view.findViewById(R.id.headerTitle);
+            headerTitle.setText(getText(R.string.data_viz_header));
+        }
 
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         this.username = prefs.getString("username","");
@@ -73,11 +75,24 @@ public class DataVisualizationFragment extends Fragment {
         this.expensesRecyclerView = view.findViewById(R.id.expensesRecyclerView);
         this.expensesRecyclerView.setHasFixedSize(true);
         this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        this.expensesAdapter = new ExpensesAdapter(new ArrayList<>());
+        this.expensesAdapter = new ExpensesAdapter(new ArrayList<>(), getContext());
         this.expensesRecyclerView.setAdapter(this.expensesAdapter);
 
         this.viewModel.getCategoryList().observe(getViewLifecycleOwner(), categories -> {
             this.categoryList = categories;
+
+            boolean hasSpecialCategory = false;
+            for (Category category : this.categoryList) {
+                if ("Swipe for categories >>>".equals(category.getCategory())) {
+                    hasSpecialCategory = true;
+                    break;
+                }
+            }
+
+            if (!hasSpecialCategory) {
+                this.categoryList.add(0, new Category("Swipe for categories >>>"));
+            }
+
             addCategoriesToPager();
         });
 
@@ -151,7 +166,7 @@ public class DataVisualizationFragment extends Fragment {
 
         for (Expense expense : this.expensesList) {
             if (inCurrentMonth(expense.getDate()) && isCategorySame(expense)) {
-                this.expensesForMonth.add(new ExpenseItem(expense.getDescription(), expense.getAmount()));
+                this.expensesForMonth.add(expense);
             }
         }
 
