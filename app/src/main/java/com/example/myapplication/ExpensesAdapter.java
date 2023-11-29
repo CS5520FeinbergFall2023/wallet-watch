@@ -1,15 +1,16 @@
 package com.example.myapplication;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,10 +25,12 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.Expens
     private List<Expense> expenses;
     private Context context;
     private FirebaseHelper firebaseHelper = new FirebaseHelper();
+    private String username;
 
-    public ExpensesAdapter(List<Expense> expenses, Context context) {
+    public ExpensesAdapter(List<Expense> expenses, Context context, String username) {
         this.expenses = expenses;
         this.context = context;
+        this.username = username;
     }
 
     @NonNull
@@ -50,8 +53,28 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.Expens
 //                showImageDialog(expense.getImageUrl(), this.context);
             });
         } else {
-            holder.photoIcon.setVisibility(View.GONE);
+            holder.photoIcon.setVisibility(View.INVISIBLE);
         }
+
+        holder.deleteIcon.setOnClickListener(v -> {
+
+            // alert for when navigating away from the Expense Page
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setMessage("Are you sure you want to Delete?\n\nThis action cannot be undone.");
+
+            builder.setPositiveButton("Delete", (dialog, which) -> {
+                firebaseHelper.deleteExpense(username, expense, x -> {
+                    expenses.remove(expense);
+                    notifyDataSetChanged();
+                    Toast.makeText(context, "Expense Deleted", Toast.LENGTH_SHORT).show();
+                });
+            });
+            builder.setNegativeButton("Dismiss", (dialog, which) -> {
+                dialog.dismiss();
+            });
+
+            builder.show();
+        });
     }
 
     private void showImageDialog(String imageUrl, Context context) {
@@ -86,13 +109,16 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.Expens
     }
 
     static class ExpenseViewHolder extends RecyclerView.ViewHolder {
-        private TextView descriptionText, amountText;
-        private ImageView photoIcon;
+        private final TextView descriptionText;
+        private final TextView amountText;
+        private final ImageView photoIcon;
+        private final ImageView deleteIcon;
 
         ExpenseViewHolder(@NonNull View itemView) {
             super(itemView);
             this.descriptionText = itemView.findViewById(R.id.descriptionText);
             this.photoIcon = itemView.findViewById(R.id.photoIcon);
+            this.deleteIcon = itemView.findViewById(R.id.deleteIcon);
             this.amountText = itemView.findViewById(R.id.amountText);
         }
     }
