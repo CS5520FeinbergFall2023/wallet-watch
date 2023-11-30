@@ -165,7 +165,6 @@ public class FirebaseHelper {
     // Budgets
 
 
-
     public void updateBudgetAmount(String username, String category, int amount) {
         // Navigate to the correct node in the Firebase database for the user
         DatabaseReference userBudgetRef = FirebaseDatabase.getInstance().getReference()
@@ -227,32 +226,53 @@ public class FirebaseHelper {
             }
         });
     }
-//
-//    public Task<Void> addExpense(String userId, Expense expense) {
-//        DatabaseReference expenseRef = getUserExpensesReference(userId).push();
-//        return expenseRef.setValue(expense);
-//    }
-//
-//    public Task<Void> updateExpense(String userId, String expenseId, Expense updatedExpense) {
-//        DatabaseReference expenseRef = getUserExpensesReference(userId).child(expenseId);
-//        return expenseRef.setValue(updatedExpense);
-//    }
-//
-//    public Task<Void> deleteExpense(String userId, String expenseId) {
-//        DatabaseReference expenseRef = getUserExpensesReference(userId).child(expenseId);
-//        return expenseRef.removeValue();
-//    }
-//
-//    // Notification methods
-//
-//    public DatabaseReference getUserNotificationsReference(String userId) {
-//        return databaseReference.child("notifications").child(userId);
-//    }
-//
-//    public Task<Void> addNotification(String userId, Notification notification) {
-//        DatabaseReference notificationRef = getUserNotificationsReference(userId).push();
-//        return notificationRef.setValue(notification);
-//    }
+
+    /**
+     * Delete an expense for a user.
+     *
+     * @param expense            Expense
+     * @param username           user to create the expense for
+     * @param onCompleteListener listener for after expense is created
+     */
+    public void deleteExpense(String username, Expense expense, OnCompleteListener<Void> onCompleteListener) {
+        DatabaseReference expensesRef = FirebaseDatabase.getInstance().getReference("expenses").child(username);
+
+        String expenseId = expense.getId();
+        String expenseImageName = expense.getImageUrl();
+
+        // Find the expense by id
+        Query expenseQuery = expensesRef.orderByChild("id").equalTo(expenseId);
+
+        expenseQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // Expense id exists, delete the expense
+                    // Iterate through the results (though there should be only one)
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        // Get the key of the expense node
+                        String expenseKey = dataSnapshot.getKey();
+
+                        if (expenseKey != null) {
+                            expensesRef.child(expenseKey).removeValue()
+                                    .addOnCompleteListener(task -> {
+                                        if (expenseImageName.isEmpty()) {
+                                            onCompleteListener.onComplete(task);
+                                        } else {
+                                            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images/" + expenseImageName);
+                                            storageReference.delete().addOnCompleteListener(onCompleteListener);
+                                        }
+                                    });
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
 
 
     // Categories
@@ -312,10 +332,7 @@ public class FirebaseHelper {
         Log.d("THIS IS NEW", "it's creating new notification");
 
 
-
     }
-
-
 
 
 }
