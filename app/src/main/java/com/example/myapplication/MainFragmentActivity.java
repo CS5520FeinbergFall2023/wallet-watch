@@ -197,7 +197,7 @@ public class MainFragmentActivity extends AppCompatActivity {
 
                     long currentTimestamp = System.currentTimeMillis();
                     String message = "You are over-budget for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
-                    showNotification(message);
+                    //showNotification(message);
                     Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
                     NotificationType notificationType = NotificationType.OVER_BUDGET;
                     newNotification.setNotificationType(notificationType);
@@ -209,6 +209,7 @@ public class MainFragmentActivity extends AppCompatActivity {
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
                             //showNotification();
+                            Log.d("FIREBASEHELPER MAIN CALLED", "fire is called");
                             showNotification(message); //IF ONLY CALLED HERE WILL ALERT USER ONLY ONCE
 
                         }
@@ -235,6 +236,7 @@ public class MainFragmentActivity extends AppCompatActivity {
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
                             showNotification(message);
+                            Log.d("FIREBASEHELPER MAIN CALLED LIMIT", "fire is called");
 
                         }
                     }
@@ -260,6 +262,7 @@ public class MainFragmentActivity extends AppCompatActivity {
                                 != notification.getNotificationType()) {
                             firebaseHelper.createNotification(username, newNotification);
                             showNotification(message);
+                            Log.d("FIREBASEHELPER MAIN CALLED 20", "fire is called");
 
                         }
                     }

@@ -309,6 +309,7 @@ public class FirebaseHelper {
 
         DatabaseReference newNotificationRef = notificationRef.push();
         newNotificationRef.setValue(notification);
+        Log.d("THIS IS NEW", "it's creating new notification");
 
 
 
