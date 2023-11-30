@@ -81,19 +81,17 @@ public class DataVisualizationFragment extends Fragment {
         this.viewModel.getCategoryList().observe(getViewLifecycleOwner(), categories -> {
             this.categoryList = categories;
 
-            boolean hasSpecialCategory = false;
+            List<Category> tempList = new ArrayList<>();
+
             for (Category category : this.categoryList) {
-                if ("Swipe for categories >>>".equals(category.getCategory())) {
-                    hasSpecialCategory = true;
-                    break;
-                }
+                tempList.add(new Category(category.getCategory()));
             }
 
-            if (!hasSpecialCategory) {
-                this.categoryList.add(0, new Category("Swipe for categories >>>"));
+            if (!tempList.contains(new Category("Swipe for categories >>>"))) {
+                tempList.add(0, new Category("Swipe for categories >>>"));
             }
 
-            addCategoriesToPager();
+            addCategoriesToPager(tempList);
         });
 
         retrieveData();
@@ -103,8 +101,8 @@ public class DataVisualizationFragment extends Fragment {
         return view;
     }
 
-    private void addCategoriesToPager() {
-        this.categoryViewPager.setAdapter(new CategoryAdapter(this.categoryList));
+    private void addCategoriesToPager(List<Category> tempList) {
+        this.categoryViewPager.setAdapter(new CategoryAdapter(tempList));
 
         this.categoryViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
