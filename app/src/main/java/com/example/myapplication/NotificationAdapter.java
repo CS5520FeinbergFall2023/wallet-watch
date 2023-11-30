@@ -52,18 +52,18 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
         holder.date.setText(notification.formatDate(date));
         //holder.imageView.setImageDrawable(R.drawable.budget_limit_nearing_icon);
-        /*
+
         int resourceId = holder
                 .itemView
                 .getContext()
                 .getResources()
                 .getIdentifier(
-                        convertToLogoName(sticker.getStickerID()),
+                        convertToLogoName(notification),
                         "drawable",
                         holder.itemView.getContext().getPackageName());
         holder.imageView.setImageResource(resourceId);
 
-         */
+
 
         //holder.imageView.setImageDrawable(R.drawable.budget_limit_nearing_icon);
 
@@ -75,6 +75,23 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
         return dateFormat.format(date);
+    }
+
+    public String convertToLogoName(Notification notification) {
+        switch (notification.getType()) {
+            case "Entertainment":
+                return "entertainment_icon";
+            case "Food":
+                return "food_icon";
+            case "Travel":
+                return "travel_icon";
+            case "School":
+                return "school_icon";
+            case "Utilities":
+                return "utilities_icon";
+            default:
+                throw new IllegalArgumentException("Unknown category: " + notification.getType());
+        }
     }
 
     @Override
@@ -102,6 +119,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.categoryImageIcon);
+            //write if condition based on image type
             header = itemView.findViewById(R.id.header_rv_text);
             message = itemView.findViewById(R.id.notification_message_rv_text);
             date = itemView.findViewById(R.id.date_rv_text);
