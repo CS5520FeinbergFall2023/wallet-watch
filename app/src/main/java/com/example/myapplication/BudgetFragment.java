@@ -59,7 +59,7 @@ public class BudgetFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_budget_page, container, false);
 
         TextView headerTitle = view.findViewById(R.id.headerTitle);
-        headerTitle.setText(getText(R.string.data_viz_header));
+        headerTitle.setText(getText(R.string.budget_header));
 
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         // Get username from local storage
@@ -268,9 +268,9 @@ public class BudgetFragment extends Fragment {
         Legend legend = barChart.getLegend();
         legend.setEnabled(false);
 
-        barChart.setExtraBottomOffset(30f);
+        barChart.setExtraBottomOffset(35f);
 
-        // Customize X-axis
+        // X-axis Customization
         XAxis xAxis = barChart.getXAxis();
         xAxis.setValueFormatter(new IndexAxisValueFormatter(getCategoryLabels()));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -280,7 +280,7 @@ public class BudgetFragment extends Fragment {
         xAxis.setTextSize(15f);
 
         // Customize Y-axis
-        barChart.getAxisLeft().setTextSize(15f);
+        barChart.getAxisLeft().setTextSize(20f);
         barChart.getAxisRight().setEnabled(false);
 
         // Remove description label text on the side
@@ -288,8 +288,9 @@ public class BudgetFragment extends Fragment {
     }
 
     private void setupBarChart() {
+
         BarDataSet dataSet = new BarDataSet(barEntries, "");
-        dataSet.setColors(new int[]{Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.BLACK});
+        dataSet.setColors(new int[]{Color.BLUE, Color.YELLOW, Color.RED, Color.GREEN, Color.BLACK});
         dataSet.setDrawValues(false);
 
         BarData data = new BarData(dataSet);
@@ -301,7 +302,7 @@ public class BudgetFragment extends Fragment {
 
     private void updateBarChart() {
         BarDataSet dataSet = new BarDataSet(barEntries, "");
-        dataSet.setColors(new int[]{Color.BLUE, Color.GREEN, Color.RED, Color.YELLOW, Color.GRAY});
+        dataSet.setColors(new int[]{Color.BLUE, Color.YELLOW, Color.RED, Color.GREEN, Color.BLACK});
         dataSet.setDrawValues(false);
 
         BarData data = new BarData(dataSet);
