@@ -160,7 +160,7 @@ public class MainFragmentActivity extends AppCompatActivity {
             if (selectedFragment != null) {
                 this.selectedFragment = itemId;
 
-                if (previousFragmentTag != null && previousFragmentTag.equals("expense") && !fragmentTag.equals("expense")) {
+                if (previousFragmentTag != null && previousFragmentTag.equals("expense") && !fragmentTag.equals("expense") && !((ExpensePageFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentByTag(previousFragmentTag))).isFormClear()) {
                     // alert for when navigating away from the Expense Page
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainFragmentActivity.this);
                     builder.setMessage("Are you sure you want to Navigate away?\nYou will lose all saved values.");
