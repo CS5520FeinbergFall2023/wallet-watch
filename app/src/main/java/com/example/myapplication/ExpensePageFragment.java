@@ -109,16 +109,6 @@ public class ExpensePageFragment extends Fragment {
             }
         });
 
-//        // Initialize the launchers in your onCreate or onCreateView method:
-//        photoGalleryPermissionRequest = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
-//            if (result) {
-//                // Camera permission granted, proceed with taking a picture
-//                launchGallery();
-//            } else {
-//                Snackbar.make(requireView(), "Gallery permission is required!", Snackbar.LENGTH_SHORT).show();
-//            }
-//        });
-
         takePictureLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
             if (result) {
                 // Camera result
@@ -181,12 +171,15 @@ public class ExpensePageFragment extends Fragment {
             restoreValues(savedInstanceState);
         }
 
-
-
         // back button check
         OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                // finish action if form is clear
+                if (isFormClear()) {
+                    requireActivity().finish();
+                }
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                 builder.setMessage("Are you sure you want to exit?\nYou will lose any values entered.");
 
@@ -196,6 +189,7 @@ public class ExpensePageFragment extends Fragment {
                 builder.setNegativeButton("Dismiss", (dialog, which) -> {
                     dialog.dismiss();
                 });
+
                 builder.show();
             }
         };
@@ -204,6 +198,23 @@ public class ExpensePageFragment extends Fragment {
         onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
 
         return view;
+    }
+
+
+    public boolean isFormClear() {
+        String amountText = expenseAmountText.getText().toString();
+        String category = categoriesInput.getText().toString();
+        String description = descriptionText.getText().toString();
+        String dateText = datePickerText.getText().toString();
+        boolean recurring = recurringExpenseToggle.isChecked();
+
+        return
+                amountText.isEmpty()
+                && category.isEmpty()
+                && description.isEmpty()
+                && dateText.isEmpty()
+                && !recurring &&
+                !isExpenseImageUploaded;
     }
 
     private void dispatchTakePictureIntent() {
@@ -224,19 +235,6 @@ public class ExpensePageFragment extends Fragment {
         builder.show();
     }
 
-    // ** apparently can just skip the permission req ?
-    // Function to request camera permission and launch the gallery
-//    private void requestCameraPermissionAndLaunchGallery() {
-//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-//                == PackageManager.PERMISSION_GRANTED) {
-//            // Camera permission is already granted, proceed with taking a picture
-//            launchGallery();
-//        } else {
-//            // Request camera permission
-//            photoGalleryPermissionRequest.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
-//        }
-//    }
-
     // Function to request camera permission and launch the camera
     private void requestCameraPermissionAndLaunchCamera() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
@@ -255,7 +253,6 @@ public class ExpensePageFragment extends Fragment {
 
     private void launchCamera() {
         tempUri = createImageUri();
-
 
         if (tempUri != null) {
             takePictureLauncher.launch(tempUri);
