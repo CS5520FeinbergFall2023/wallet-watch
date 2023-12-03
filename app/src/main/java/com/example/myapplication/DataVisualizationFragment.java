@@ -6,6 +6,7 @@ import static com.example.myapplication.MainActivity.PREFS_NAME;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +45,8 @@ public class DataVisualizationFragment extends Fragment implements ExpenseDelete
     private ExpensesAdapter expensesAdapter;
     private String username;
     private CategoriesViewModel viewModel;
+    private int savedCategoryPosition;
+    private long savedDate;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -83,11 +86,37 @@ public class DataVisualizationFragment extends Fragment implements ExpenseDelete
             addCategoriesToPager(this.categoryList);
         });
 
+        if (savedInstanceState != null) {
+            this.savedCategoryPosition = savedInstanceState.getInt("savedCategoryPosition", -1);
+            this.savedDate = savedInstanceState.getLong("savedDate", -1);
+
+            if (this.savedDate != -1) {
+                currentCalendar.setTimeInMillis(this.savedDate);
+                updateDateDisplay();
+            }
+        }
+
         retrieveData();
         setupMonthIterationButtons(view);
         updateDateDisplay();
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("savedCategoryPosition", this.categoryViewPager.getCurrentItem());
+        outState.putLong("savedDate", this.currentCalendar.getTimeInMillis());
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (this.savedCategoryPosition != -1) {
+            this.categoryViewPager.post(() -> this.categoryViewPager.setCurrentItem(this.savedCategoryPosition, false));
+        }
     }
 
     private void addCategoriesToPager(List<Category> tempList) {
