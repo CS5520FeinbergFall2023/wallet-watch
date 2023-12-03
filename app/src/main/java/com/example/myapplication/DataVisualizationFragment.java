@@ -6,12 +6,15 @@ import static com.example.myapplication.MainActivity.PREFS_NAME;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,16 +25,13 @@ import com.example.myapplication.dao.Budget;
 import com.example.myapplication.dao.Category;
 import com.example.myapplication.dao.Expense;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-public class DataVisualizationFragment extends Fragment {
+public class DataVisualizationFragment extends Fragment implements ExpenseDeleteCallback {
 
     private TextView textDate, textBudget, textRemaining, textExpenses;
     private ViewPager2 categoryViewPager;
@@ -45,6 +45,8 @@ public class DataVisualizationFragment extends Fragment {
     private ExpensesAdapter expensesAdapter;
     private String username;
     private CategoriesViewModel viewModel;
+    private int savedCategoryPosition;
+    private long savedDate;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,32 +77,46 @@ public class DataVisualizationFragment extends Fragment {
         this.expensesRecyclerView = view.findViewById(R.id.expensesRecyclerView);
         this.expensesRecyclerView.setHasFixedSize(true);
         this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        this.expensesAdapter = new ExpensesAdapter(new ArrayList<>(), getContext(), username);
+        this.expensesAdapter = new ExpensesAdapter(new ArrayList<>(), getContext(), username, this);
         this.expensesRecyclerView.setAdapter(this.expensesAdapter);
 
         this.viewModel.getCategoryList().observe(getViewLifecycleOwner(), categories -> {
             this.categoryList = categories;
 
-            List<Category> tempList = new ArrayList<>();
-
-            for (Category category : this.categoryList) {
-                tempList.add(new Category(category.getCategory()));
-            }
-
-            if (!tempList.contains(new Category("Swipe for categories >>>"))) {
-                tempList.add(0, new Category("Swipe for categories >>>"));
-            }
-
-            addCategoriesToPager(tempList);
+            addCategoriesToPager(this.categoryList);
         });
 
+        if (savedInstanceState != null) {
+            this.savedCategoryPosition = savedInstanceState.getInt("savedCategoryPosition", -1);
+            this.savedDate = savedInstanceState.getLong("savedDate", -1);
 
+            if (this.savedDate != -1) {
+                currentCalendar.setTimeInMillis(this.savedDate);
+                updateDateDisplay();
+            }
+        }
 
         retrieveData();
         setupMonthIterationButtons(view);
         updateDateDisplay();
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("savedCategoryPosition", this.categoryViewPager.getCurrentItem());
+        outState.putLong("savedDate", this.currentCalendar.getTimeInMillis());
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (this.savedCategoryPosition != -1) {
+            this.categoryViewPager.post(() -> this.categoryViewPager.setCurrentItem(this.savedCategoryPosition, false));
+        }
     }
 
     private void addCategoriesToPager(List<Category> tempList) {
@@ -115,29 +131,24 @@ public class DataVisualizationFragment extends Fragment {
         });
     }
 
-    private boolean isCategorySame(Object obj) {
-        try {
-            String category = this.categoryList.get(this.categoryViewPager.getCurrentItem()).getCategory();
-            Method getCategoryMethod = obj.getClass().getMethod("getCategory");
-            return Objects.equals(getCategoryMethod.invoke(obj), category);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-
-        return false;
+    private boolean isCategorySame(String category) {
+        return this.categoryList
+                .get(this.categoryViewPager.getCurrentItem())
+                .getCategory()
+                .equals(category);
     }
 
     private double updateBudget() {
         double budget = 0;
 
         for (Budget categoryBudget : this.budgetList) {
-            if (isCategorySame(categoryBudget)) {
+            if (isCategorySame(categoryBudget.getCategory())) {
                 budget = categoryBudget.getAmount();
-                String formattedBudget = String.format(getResources().getString(R.string.formatted_currency), budget);
-                this.textBudget.setText(formattedBudget);
                 break;
             }
         }
+        String formattedBudget = String.format(getResources().getString(R.string.formatted_currency), budget);
+        this.textBudget.setText(formattedBudget);
 
         return budget;
     }
@@ -146,7 +157,8 @@ public class DataVisualizationFragment extends Fragment {
         double totalExpenses = 0;
 
         for (Expense expense : this.expensesList) {
-            if (inCurrentMonth(expense.getDate()) && isCategorySame(expense)) {
+            if (includeDetailedExpense(expense.getDate(), expense.getRecurring())
+                    && isCategorySame(expense.getCategory())) {
                 totalExpenses += expense.getAmount();
             }
         }
@@ -165,7 +177,8 @@ public class DataVisualizationFragment extends Fragment {
         this.expensesForMonth.clear();
 
         for (Expense expense : this.expensesList) {
-            if (inCurrentMonth(expense.getDate()) && isCategorySame(expense)) {
+            if (includeDetailedExpense(expense.getDate(), expense.getRecurring())
+                    && isCategorySame(expense.getCategory())) {
                 this.expensesForMonth.add(expense);
             }
         }
@@ -242,7 +255,7 @@ public class DataVisualizationFragment extends Fragment {
         });
     }
 
-    private boolean inCurrentMonth(long epochTime) {
+    private boolean includeDetailedExpense(long epochTime, boolean recurring) {
         Calendar epochCalendar = Calendar.getInstance();
         epochCalendar.setTimeInMillis(epochTime);
 
@@ -252,6 +265,15 @@ public class DataVisualizationFragment extends Fragment {
         int currentMonth = this.currentCalendar.get(Calendar.MONTH);
         int currentYear = this.currentCalendar.get(Calendar.YEAR);
 
-        return epochMonth == currentMonth && epochYear == currentYear;
+        if (recurring) {
+            return epochYear < currentYear || (epochYear == currentYear && epochMonth <= currentMonth);
+        } else {
+            return epochMonth == currentMonth && epochYear == currentYear;
+        }
+    }
+
+    @Override
+    public void onExpenseDeleted() {
+        updateMonetaryValues();
     }
 }
