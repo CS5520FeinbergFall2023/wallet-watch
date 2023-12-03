@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import com.example.myapplication.dao.Expense;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.ExpenseViewHolder> {
 
@@ -26,11 +28,13 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.Expens
     private Context context;
     private FirebaseHelper firebaseHelper = new FirebaseHelper();
     private String username;
+    private ExpenseDeleteCallback expenseDeleteCallback;
 
-    public ExpensesAdapter(List<Expense> expenses, Context context, String username) {
+    public ExpensesAdapter(List<Expense> expenses, Context context, String username, ExpenseDeleteCallback callback) {
         this.expenses = expenses;
         this.context = context;
         this.username = username;
+        this.expenseDeleteCallback = callback;
     }
 
     @NonNull
@@ -46,35 +50,34 @@ public class ExpensesAdapter extends RecyclerView.Adapter<ExpensesAdapter.Expens
         holder.descriptionText.setText(expense.getDescription());
         holder.amountText.setText(formatCurrency(expense.getAmount()));
 
-        if (expense.getImageUrl() != null) {
+        if (!Objects.equals(expense.getImageUrl(), "")) {
             holder.photoIcon.setVisibility(View.VISIBLE);
-            holder.photoIcon.setOnClickListener(v -> {
-                showImageDialog("expense-403cedf7-2bbd-4a43-b562-d8aefe93c0d6.jpg", this.context);
-//                showImageDialog(expense.getImageUrl(), this.context);
-            });
+            holder.photoIcon.setOnClickListener(v -> showImageDialog(expense.getImageUrl(), this.context));
         } else {
             holder.photoIcon.setVisibility(View.INVISIBLE);
         }
 
-        holder.deleteIcon.setOnClickListener(v -> {
+        holder.deleteIcon.setOnClickListener(v -> deleteExpense(expense));
+    }
 
-            // alert for when navigating away from the Expense Page
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setMessage("Are you sure you want to Delete?\n\nThis action cannot be undone.");
+    private void deleteExpense(Expense expense) {
+        // Alert for when navigating away from the Expense Page
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage("Are you sure you want to Delete?\n\nThis action cannot be undone.");
 
-            builder.setPositiveButton("Delete", (dialog, which) -> {
-                firebaseHelper.deleteExpense(username, expense, x -> {
-                    expenses.remove(expense);
-                    notifyDataSetChanged();
-                    Toast.makeText(context, "Expense Deleted", Toast.LENGTH_SHORT).show();
-                });
+        builder.setPositiveButton("Delete", (dialog, which) -> {
+            firebaseHelper.deleteExpense(username, expense, x -> {
+                expenses.remove(expense);
+                notifyDataSetChanged();
+                Toast.makeText(context, "Expense Deleted", Toast.LENGTH_SHORT).show();
+                this.expenseDeleteCallback.onExpenseDeleted();
             });
-            builder.setNegativeButton("Dismiss", (dialog, which) -> {
-                dialog.dismiss();
-            });
-
-            builder.show();
         });
+        builder.setNegativeButton("Dismiss", (dialog, which) -> {
+            dialog.dismiss();
+        });
+
+        builder.show();
     }
 
     private void showImageDialog(String imageUrl, Context context) {

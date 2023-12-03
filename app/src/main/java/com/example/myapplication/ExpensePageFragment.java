@@ -42,6 +42,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ExpensePageFragment extends Fragment {
 
@@ -388,8 +389,16 @@ public class ExpensePageFragment extends Fragment {
     }
 
     private void updateCategoryOptions(List<Category> options) {
+        List<Category> tempList = new ArrayList<>();
+
+        for (Category category : options) {
+            if (!Objects.equals(category.getCategory(), "Swipe for categories >>>")) {
+                tempList.add(category);
+            }
+        }
+
         adapter.clear();
-        adapter.addAll(options);
+        adapter.addAll(tempList);
         adapter.notifyDataSetChanged();
     }
 
