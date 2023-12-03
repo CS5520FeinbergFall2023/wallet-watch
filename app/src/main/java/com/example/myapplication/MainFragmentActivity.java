@@ -99,7 +99,7 @@ public class MainFragmentActivity extends AppCompatActivity {
         // Get username from local storage
         SharedPreferences prefs = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         username = prefs.getString("username", "");
-
+        //readNotifications();
         nestFunction();
 
 
@@ -218,6 +218,9 @@ public class MainFragmentActivity extends AppCompatActivity {
     }
 
     private HashMap<String, Boolean> overBudget(HashMap<String, Long> dictBudget, HashMap<String, Long> dictExpense) throws IllegalAccessException, InstantiationException {
+        //readNotifications();
+        Log.d("notice of overbudget", String.valueOf(notificationList.size()));
+        Log.d("notice of overbudget", notificationList.toString());
         HashMap<String, Boolean> isOverBudget = new HashMap<>();
         if (dictBudget.isEmpty() || dictExpense.isEmpty()) {
             Log.d("notice of overbudget", "isEMPTY: ");
@@ -230,7 +233,7 @@ public class MainFragmentActivity extends AppCompatActivity {
 
 
                 if (remaining < 0) {
-                    Log.d("notice of overbudget", remaining.toString());
+                    Log.d("notice of overbudget", entry.getKey());
                     isOverBudget.put(entry.getKey(), true);
                     //OLD LOCATION OF showNotification()
 
@@ -241,18 +244,53 @@ public class MainFragmentActivity extends AppCompatActivity {
                     Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
                     NotificationType notificationType = NotificationType.OVER_BUDGET;
                     newNotification.setNotificationType(notificationType);
+                    boolean add = true;
+                    /*
+                    if (notificationList.isEmpty()) {
+                        notificationList.add(newNotification);
+                        firebaseHelper.createNotification(username, newNotification);
+                        showNotification(message);
+                        add = false;
+                    }
+                    */
+
+                    Log.d("noce of overbudget", notificationList.toString());
                     for (Notification notification : notificationList) {
+                        //Log.d("CATEGORY NAME NOITFICATION", entry.getKey());
+                        Log.d("notice of overbudget", notification.toString());
                         String stringDate = notification.getDate();
                         Long longDate = Long.valueOf(stringDate);
+                        Log.d("notice of overbudget", String.valueOf(newNotification.getMonth(currentTimestamp)));
+                        Log.d("notice of overbudget", String.valueOf(notification.getMonth(longDate)));
+                        Log.d("notice of overbudget", newNotification.getType());
+                        Log.d("notice of overbudget", notification.getType());
+                        if (newNotification.getType().equals(notification.getType()) && newNotification.getMonth(currentTimestamp) == notification.getMonth((longDate))) {
+                            //firebaseHelper.createNotification(username, newNotification);
+                            //showNotification();
+                            add = false;
+                            break;
+                            //Log.d("notice of overbudget", "fire is called");
+                            //showNotification(message); //IF ONLY CALLED HERE WILL ALERT USER ONLY ONCE
+
+                        }
+                        /*
                         if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
                                 != notification.getMonth((longDate)) && notification.getBudgetAmount()
                                 != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
-                            firebaseHelper.createNotification(username, newNotification);
+                            //firebaseHelper.createNotification(username, newNotification);
                             //showNotification();
                             Log.d("FIREBASEHELPER MAIN CALLED", "fire is called");
                             showNotification(message); //IF ONLY CALLED HERE WILL ALERT USER ONLY ONCE
 
                         }
+                        */
+                    }
+                    if (add) {
+
+                        firebaseHelper.createNotification(username, newNotification);
+                        //showNotification();
+                        Log.d("notice of overbudget", "fire is called");
+                        showNotification(message); //IF ONLY CALLED HERE WILL ALERT USER ONLY ONCE
                     }
 
                 }
@@ -387,6 +425,53 @@ public class MainFragmentActivity extends AppCompatActivity {
 
         // Concatenate month and year and return as a string
         return monthName + " " + year;
+    }
+
+    public void readNotifications() {
+        String notes = "notifications/" + username;
+
+        DatabaseReference notificationsReference = FirebaseDatabase.getInstance().getReference(notes);
+
+        notificationsReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                notificationList.clear();
+                ArrayList<Notification> newNotificationReceived = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Log.d("notice", snapshot.toString());
+
+                    Notification notification = snapshot.getValue(Notification.class);
+                    Log.d("notice of notification", notification.toString());
+
+
+                    if (notification != null) {
+                        newNotificationReceived.add(notification);
+                        notificationList.add(notification);
+                        Log.d("notice of notification2", notificationList.toString());
+
+
+                    }
+
+
+                }
+                //adapter.setNotificationsReceived(notificationList);
+                //adapter.notifyDataSetChanged();
+                try {
+                    overBudget(dictBudget, dictExpense);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                } catch (InstantiationException e) {
+                    throw new RuntimeException(e);
+                }
+                Log.d("NOTIFICATIONLISTADAPTER", notificationList.toString());
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainFragmentActivity.this, "Error fetching data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+
+            }
+        });
     }
 
     public void nestFunction() {
@@ -542,11 +627,12 @@ public class MainFragmentActivity extends AppCompatActivity {
                             }
 
                         }
-
-
+                        readNotifications();
+                        /*
                         try {
                             //TROUBLESHOOT dictBudget is EMPTY, DON"T KNOW WHY
-                            overBudget(dictBudget, dictExpense);
+                            readNotifications();
+                            //overBudget(dictBudget, dictExpense);
                             //overBudget(copiedDictBudget, dictExpense);
                             Log.d("MAINBUDGETCOPIED", dictBudget.toString());
                             Log.d("MAINBUDGET", dictExpense.toString());
@@ -555,6 +641,7 @@ public class MainFragmentActivity extends AppCompatActivity {
                         } catch (InstantiationException e) {
                             throw new RuntimeException(e);
                         }
+                        */
 
 
                     }
@@ -574,6 +661,15 @@ public class MainFragmentActivity extends AppCompatActivity {
                 copiedDictBudget.putAll(dictBudget);
             }
         });
+
+
+
+
+
+    }
+
+    public void convertToNotification(HashMap<String, Long> dictBudget, HashMap<String, Long> dictExpense) {
+
 
     }
 }

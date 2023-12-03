@@ -83,7 +83,7 @@ public class NotificationPageActivity extends AppCompatActivity {
 
         adapter = new NotificationAdapter(this, receivednotifications);
         notificationRV.setAdapter(adapter);
-        /*
+
         String notes = "notifications/" + username;
 
         DatabaseReference notificationsReference = FirebaseDatabase.getInstance().getReference(notes);
@@ -120,7 +120,8 @@ public class NotificationPageActivity extends AppCompatActivity {
 
             }
         });
-        */
+
+
 
 
         TextView headerTitle = findViewById(R.id.headerTitle);
@@ -298,6 +299,7 @@ public class NotificationPageActivity extends AppCompatActivity {
         });
         */
 
+
     }
 
 
@@ -425,6 +427,7 @@ public class NotificationPageActivity extends AppCompatActivity {
         Log.d("notice of overbudget", dictBudget.toString());
         Log.d("notice of overbudget", dictExpense.toString());
         return isOverBudget;
+
     }
 
 
