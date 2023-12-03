@@ -126,7 +126,7 @@ public class NotificationPageActivity extends AppCompatActivity {
         TextView headerTitle = findViewById(R.id.headerTitle);
         //may change string to Notification Center
         headerTitle.setText(R.string.notification_history_string);
-        nestFunction();
+        //nestFunction();
         /*
         FirebaseHelper helper = new FirebaseHelper();
         DatabaseReference budgetDatabaseRef = FirebaseDatabase.getInstance().getReference()
