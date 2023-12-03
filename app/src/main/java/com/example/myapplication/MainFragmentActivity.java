@@ -101,10 +101,7 @@ public class MainFragmentActivity extends AppCompatActivity {
         username = prefs.getString("username", "");
         //readNotifications();
         nestFunction();
-
-
     }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -125,7 +122,6 @@ public class MainFragmentActivity extends AppCompatActivity {
             previousFragmentTag = fragmentTag;
             fragmentTag = "";
 
-
             // This does not work as a switch... don't waste your time
             if (itemId == R.id.home) {
                 selectedFragment = new HomePageFragment();
@@ -139,15 +135,20 @@ public class MainFragmentActivity extends AppCompatActivity {
                 Fragment existingFragment = getSupportFragmentManager().findFragmentByTag(fragmentTag);
 
                 if (existingFragment == null) {
-                    // Fragment not found, create a new instance
                     selectedFragment = new ExpensePageFragment();
                 } else {
-                    // Reuse existing fragment
                     selectedFragment = existingFragment;
                 }
             } else if (itemId == R.id.data) {
-                selectedFragment = new DataVisualizationFragment();
                 fragmentTag = "data";
+
+                Fragment existingFragment = getSupportFragmentManager().findFragmentByTag(fragmentTag);
+
+                if (existingFragment == null) {
+                    selectedFragment = new DataVisualizationFragment();
+                } else {
+                    selectedFragment = existingFragment;
+                }
             } else if (itemId == R.id.account) {
                 selectedFragment = new AccountPageFragment();
                 fragmentTag = "account";
@@ -200,8 +201,6 @@ public class MainFragmentActivity extends AppCompatActivity {
         if (clickedId == R.id.button_notifications_center) {
             startActivity(new Intent(MainFragmentActivity.this, NotificationPageActivity.class));
         }
-
-
     }
 
     private boolean inCurrentMonth(long epochTime) {
