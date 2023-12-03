@@ -61,8 +61,6 @@ public class Budget {
         return "Budget{" +
                 "category='" + category + '\'' +
                 ", amount=" + amount +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
                 '}';
     }
 }
