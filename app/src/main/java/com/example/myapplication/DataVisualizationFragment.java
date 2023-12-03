@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,16 +24,13 @@ import com.example.myapplication.dao.Budget;
 import com.example.myapplication.dao.Category;
 import com.example.myapplication.dao.Expense;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
-public class DataVisualizationFragment extends Fragment {
+public class DataVisualizationFragment extends Fragment implements ExpenseDeleteCallback {
 
     private TextView textDate, textBudget, textRemaining, textExpenses;
     private ViewPager2 categoryViewPager;
@@ -75,26 +74,14 @@ public class DataVisualizationFragment extends Fragment {
         this.expensesRecyclerView = view.findViewById(R.id.expensesRecyclerView);
         this.expensesRecyclerView.setHasFixedSize(true);
         this.expensesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        this.expensesAdapter = new ExpensesAdapter(new ArrayList<>(), getContext(), username);
+        this.expensesAdapter = new ExpensesAdapter(new ArrayList<>(), getContext(), username, this);
         this.expensesRecyclerView.setAdapter(this.expensesAdapter);
 
         this.viewModel.getCategoryList().observe(getViewLifecycleOwner(), categories -> {
             this.categoryList = categories;
 
-            List<Category> tempList = new ArrayList<>();
-
-            for (Category category : this.categoryList) {
-                tempList.add(new Category(category.getCategory()));
-            }
-
-            if (!tempList.contains(new Category("Swipe for categories >>>"))) {
-                tempList.add(0, new Category("Swipe for categories >>>"));
-            }
-
-            addCategoriesToPager(tempList);
+            addCategoriesToPager(this.categoryList);
         });
-
-
 
         retrieveData();
         setupMonthIterationButtons(view);
@@ -115,29 +102,24 @@ public class DataVisualizationFragment extends Fragment {
         });
     }
 
-    private boolean isCategorySame(Object obj) {
-        try {
-            String category = this.categoryList.get(this.categoryViewPager.getCurrentItem()).getCategory();
-            Method getCategoryMethod = obj.getClass().getMethod("getCategory");
-            return Objects.equals(getCategoryMethod.invoke(obj), category);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-
-        return false;
+    private boolean isCategorySame(String category) {
+        return this.categoryList
+                .get(this.categoryViewPager.getCurrentItem())
+                .getCategory()
+                .equals(category);
     }
 
     private double updateBudget() {
         double budget = 0;
 
         for (Budget categoryBudget : this.budgetList) {
-            if (isCategorySame(categoryBudget)) {
+            if (isCategorySame(categoryBudget.getCategory())) {
                 budget = categoryBudget.getAmount();
-                String formattedBudget = String.format(getResources().getString(R.string.formatted_currency), budget);
-                this.textBudget.setText(formattedBudget);
                 break;
             }
         }
+        String formattedBudget = String.format(getResources().getString(R.string.formatted_currency), budget);
+        this.textBudget.setText(formattedBudget);
 
         return budget;
     }
@@ -146,7 +128,8 @@ public class DataVisualizationFragment extends Fragment {
         double totalExpenses = 0;
 
         for (Expense expense : this.expensesList) {
-            if (inCurrentMonth(expense.getDate()) && isCategorySame(expense)) {
+            if (includeDetailedExpense(expense.getDate(), expense.getRecurring())
+                    && isCategorySame(expense.getCategory())) {
                 totalExpenses += expense.getAmount();
             }
         }
@@ -165,7 +148,8 @@ public class DataVisualizationFragment extends Fragment {
         this.expensesForMonth.clear();
 
         for (Expense expense : this.expensesList) {
-            if (inCurrentMonth(expense.getDate()) && isCategorySame(expense)) {
+            if (includeDetailedExpense(expense.getDate(), expense.getRecurring())
+                    && isCategorySame(expense.getCategory())) {
                 this.expensesForMonth.add(expense);
             }
         }
@@ -242,7 +226,7 @@ public class DataVisualizationFragment extends Fragment {
         });
     }
 
-    private boolean inCurrentMonth(long epochTime) {
+    private boolean includeDetailedExpense(long epochTime, boolean recurring) {
         Calendar epochCalendar = Calendar.getInstance();
         epochCalendar.setTimeInMillis(epochTime);
 
@@ -252,6 +236,15 @@ public class DataVisualizationFragment extends Fragment {
         int currentMonth = this.currentCalendar.get(Calendar.MONTH);
         int currentYear = this.currentCalendar.get(Calendar.YEAR);
 
-        return epochMonth == currentMonth && epochYear == currentYear;
+        if (recurring) {
+            return epochYear < currentYear || (epochYear == currentYear && epochMonth <= currentMonth);
+        } else {
+            return epochMonth == currentMonth && epochYear == currentYear;
+        }
+    }
+
+    @Override
+    public void onExpenseDeleted() {
+        updateMonetaryValues();
     }
 }
