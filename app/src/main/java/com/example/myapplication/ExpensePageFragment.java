@@ -63,6 +63,7 @@ public class ExpensePageFragment extends Fragment {
     private boolean isExpenseImageUploaded;
 
     private CategoriesViewModel categoriesViewModel;
+    public List<Category> categoryList;
 
     private Expense expense;
 
@@ -200,6 +201,15 @@ public class ExpensePageFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Observe the categories view model data
+        categoriesViewModel.getCategoryList().observe(getViewLifecycleOwner(), v -> {
+            updateCategoryOptions(v);
+        });
+    }
 
     public boolean isFormClear() {
         String amountText = expenseAmountText.getText().toString();
@@ -394,6 +404,8 @@ public class ExpensePageFragment extends Fragment {
             }
         }
 
+        categoryList = tempList;
+
         categoryAdapter.clear();
         categoryAdapter.addAll(tempList);
         categoryAdapter.notifyDataSetChanged();
@@ -439,6 +451,13 @@ public class ExpensePageFragment extends Fragment {
             if (isExpenseImageUploaded) {
                 imageCapturedMsgView.setVisibility(View.VISIBLE);
             }
+
+            if (categories != null) {
+                updateCategoryOptions(categories);
+            }
+
+            expenseAmountText.invalidate();
+            categoriesInput.invalidate();
         }
     }
 
@@ -451,7 +470,7 @@ public class ExpensePageFragment extends Fragment {
         public static final String RECURRING = "recurring";
         public static final String TEMP_URI = "temp_uri";
         public static final String IS_EXPENSE_UPLOADED = "is_expense_uploaded";
-        public static final String CATEGORY_LIST = "is_expense_uploaded";
+        public static final String CATEGORY_LIST = "category_list";
     }
 
     @Override
@@ -463,6 +482,7 @@ public class ExpensePageFragment extends Fragment {
         String dateText = datePickerText.getText().toString();
         String description = descriptionText.getText().toString();
         boolean recurring = recurringExpenseToggle.isChecked();
+        ArrayList<Category> categories = new ArrayList<>(categoryList);
 
         int amount;
         String amountStr = expenseAmountText.getText().toString();
@@ -487,6 +507,7 @@ public class ExpensePageFragment extends Fragment {
         outState.putBoolean(ExpenseFieldKeys.IS_EXPENSE_UPLOADED, isExpenseImageUploaded);
         outState.putBoolean(ExpenseFieldKeys.RECURRING, recurring);
         outState.putString(ExpenseFieldKeys.TEMP_URI, savedUri);
+        outState.putParcelableArrayList(ExpenseFieldKeys.CATEGORY_LIST, categories);
     }
 
 }
