@@ -327,11 +327,10 @@ public class FirebaseHelper {
     public void createNotification(String username, Notification notification) {
         DatabaseReference notificationRef = FirebaseDatabase.getInstance().getReference().child("notifications").child(username);
 
-        DatabaseReference newNotificationRef = notificationRef.push();
+        String notificationId = notification.getType();
+        DatabaseReference newNotificationRef = notificationRef.child(notificationId);
+
         newNotificationRef.setValue(notification);
-        Log.d("THIS IS NEW", "it's creating new notification");
-
-
     }
 
 
