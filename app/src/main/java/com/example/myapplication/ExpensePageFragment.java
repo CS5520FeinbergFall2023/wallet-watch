@@ -47,7 +47,7 @@ import java.util.Objects;
 public class ExpensePageFragment extends Fragment {
 
     private AutoCompleteTextView categoriesInput;
-    private ArrayAdapter<Category> adapter;
+    private ArrayAdapter<Category> categoryAdapter;
     private EditText expenseAmountText, datePickerText, descriptionText;
     private long datePickerValue;
     private TextView imageCapturedMsgView;
@@ -56,12 +56,13 @@ public class ExpensePageFragment extends Fragment {
     private String username;
 
     private ActivityResultLauncher<String> photoPermissionRequest;
-    //    private ActivityResultLauncher<String> photoGalleryPermissionRequest;
     private ActivityResultLauncher<Uri> takePictureLauncher;
     private ActivityResultLauncher<String> pickImageLauncher;
 
     private Uri tempUri;
     private boolean isExpenseImageUploaded;
+
+    private CategoriesViewModel categoriesViewModel;
 
     private Expense expense;
 
@@ -92,11 +93,10 @@ public class ExpensePageFragment extends Fragment {
 
         // Categories Field, Values
         categoriesInput = view.findViewById(R.id.add_expense_category_text);
-        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
-        categoriesInput.setAdapter(adapter);
+        categoryAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        categoriesInput.setAdapter(categoryAdapter);
 
-        CategoriesViewModel categoriesViewModel = new ViewModelProvider(requireActivity()).get(CategoriesViewModel.class);
-
+        categoriesViewModel = new ViewModelProvider(requireActivity()).get(CategoriesViewModel.class);
         categoriesViewModel.getCategoryList().observe(getViewLifecycleOwner(), this::updateCategoryOptions);
 
         // Initialize the launchers in your onCreate or onCreateView method:
@@ -160,7 +160,7 @@ public class ExpensePageFragment extends Fragment {
 
         // Submit Button
         MaterialButton addExpenseButton = view.findViewById(R.id.add_expense_submit_button);
-        addExpenseButton.setOnClickListener(v -> checkValues());
+        addExpenseButton.setOnClickListener(v -> checkFormValues());
 
         // Loading Message
         loadingMessage = view.findViewById(R.id.expense_progress_layout);
@@ -210,11 +210,11 @@ public class ExpensePageFragment extends Fragment {
 
         return
                 amountText.isEmpty()
-                && category.isEmpty()
-                && description.isEmpty()
-                && dateText.isEmpty()
-                && !recurring &&
-                !isExpenseImageUploaded;
+                        && category.isEmpty()
+                        && description.isEmpty()
+                        && dateText.isEmpty()
+                        && !recurring &&
+                        !isExpenseImageUploaded;
     }
 
     private void dispatchTakePictureIntent() {
@@ -287,7 +287,7 @@ public class ExpensePageFragment extends Fragment {
     /**
      * Check appropriate fields for validity. Submit if all valid.
      */
-    private void checkValues() {
+    private void checkFormValues() {
         if (checkValidField(expenseAmountText) && checkValidField(categoriesInput) &&
                 checkValidField(datePickerText) && checkValidField(descriptionText)) {
             onSubmit();
@@ -394,9 +394,9 @@ public class ExpensePageFragment extends Fragment {
             }
         }
 
-        adapter.clear();
-        adapter.addAll(tempList);
-        adapter.notifyDataSetChanged();
+        categoryAdapter.clear();
+        categoryAdapter.addAll(tempList);
+        categoryAdapter.notifyDataSetChanged();
     }
 
     public void showDatePickerDialog(View view) {
@@ -422,10 +422,7 @@ public class ExpensePageFragment extends Fragment {
             boolean isExpUploaded = savedInstanceState.getBoolean(ExpenseFieldKeys.IS_EXPENSE_UPLOADED);
             boolean recurring = savedInstanceState.getBoolean(ExpenseFieldKeys.RECURRING);
             String savedUri = savedInstanceState.getString(ExpenseFieldKeys.TEMP_URI);
-
-            Log.d(logTag, String.format(
-                    "Restoring view with values:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", amount, category, date_value,
-                    date_text, description, isExpUploaded, recurring, savedUri));
+            ArrayList<Category> categories = savedInstanceState.getParcelableArrayList(ExpenseFieldKeys.CATEGORY_LIST);
 
             expenseAmountText.setText(String.valueOf(amount));
             categoriesInput.setText(category);
@@ -442,9 +439,6 @@ public class ExpensePageFragment extends Fragment {
             if (isExpenseImageUploaded) {
                 imageCapturedMsgView.setVisibility(View.VISIBLE);
             }
-
-            expenseAmountText.invalidate();
-            categoriesInput.invalidate();
         }
     }
 
@@ -457,6 +451,7 @@ public class ExpensePageFragment extends Fragment {
         public static final String RECURRING = "recurring";
         public static final String TEMP_URI = "temp_uri";
         public static final String IS_EXPENSE_UPLOADED = "is_expense_uploaded";
+        public static final String CATEGORY_LIST = "is_expense_uploaded";
     }
 
     @Override
