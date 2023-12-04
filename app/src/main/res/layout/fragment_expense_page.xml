@@ -63,7 +63,8 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/add_expense_category"
                 style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                android:layout_width="150dp"
+                android:layout_width="wrap_content"
+                android:minWidth="150dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
