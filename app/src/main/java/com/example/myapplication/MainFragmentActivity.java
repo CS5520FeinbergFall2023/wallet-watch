@@ -340,69 +340,6 @@ public class MainFragmentActivity extends AppCompatActivity {
 
     }
 
-//    public String getMonthYearFromTimestamp(long timestamp) {
-//        // Create a Calendar instance and set the time based on the provided timestamp
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTimeInMillis(timestamp);
-//
-//        // Get the month and year using the Calendar instance
-//        int monthNumber = calendar.get(Calendar.MONTH);
-//        int year = calendar.get(Calendar.YEAR);
-//
-//        // Convert the month number to a month name (using Locale for proper localization)
-//        String monthName = new SimpleDateFormat("MMMM", Locale.getDefault()).format(calendar.getTime());
-//
-//        // Concatenate month and year and return as a string
-//        return monthName + " " + year;
-//    }
-
-//    public void readNotifications() {
-//        String notes = "notifications/" + username;
-//
-//        DatabaseReference notificationsReference = FirebaseDatabase.getInstance().getReference(notes);
-//
-//        notificationsReference.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                notificationList.clear();
-//                ArrayList<Notification> newNotificationReceived = new ArrayList<>();
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//                    Log.d("notice", snapshot.toString());
-//
-//                    Notification notification = snapshot.getValue(Notification.class);
-//                    Log.d("notice of notification", notification.toString());
-//
-//
-//                    if (notification != null) {
-//                        newNotificationReceived.add(notification);
-//                        notificationList.add(notification);
-//                        Log.d("notice of notification2", notificationList.toString());
-//
-//
-//                    }
-//
-//
-//                }
-//                //adapter.setNotificationsReceived(notificationList);
-//                //adapter.notifyDataSetChanged();
-//                try {
-//                    overBudget(dictBudget, dictExpense);
-//                } catch (IllegalAccessException e) {
-//                    throw new RuntimeException(e);
-//                } catch (InstantiationException e) {
-//                    throw new RuntimeException(e);
-//                }
-//                Log.d("NOTIFICATIONLISTADAPTER", notificationList.toString());
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//                Toast.makeText(MainFragmentActivity.this, "Error fetching data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-//
-//            }
-//        });
-//    }
-
     public void nestFunction() {
         DatabaseReference budgetDatabaseRef = getDatabaseReference("budgets");
         DatabaseReference expensesDatabaseRef = getDatabaseReference("expenses");
