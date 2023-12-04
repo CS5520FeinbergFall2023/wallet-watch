@@ -135,6 +135,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/add_expense_description"
                 android:layout_width="match_parent"
+                android:maxLength="50"
                 android:layout_height="wrap_content"
                 android:autofillHints="text"
                 android:hint="@string/add_expense_description_hint"
