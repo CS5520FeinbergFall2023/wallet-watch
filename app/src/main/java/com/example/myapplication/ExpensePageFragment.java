@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +47,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class ExpensePageFragment extends Fragment {
+    private final int MAX_EXPENSE_AMOUNT = 99999;
+    private final String logTag = "EXP-PAGE";
 
     private AutoCompleteTextView categoriesInput;
     private ArrayAdapter<Category> categoryAdapter;
@@ -69,8 +73,6 @@ public class ExpensePageFragment extends Fragment {
 
     private LinearLayout loadingMessage;
 
-    private final String logTag = "EXP-PAGE";
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_expense_page, container, false);
@@ -91,6 +93,29 @@ public class ExpensePageFragment extends Fragment {
 
         // Expense Field
         expenseAmountText = view.findViewById(R.id.add_expense_amount);
+
+        // Constrain text amount
+        expenseAmountText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int before, int count) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.toString().isEmpty()) {
+                    return;
+                }
+
+                if (Integer.parseInt(editable.toString()) > MAX_EXPENSE_AMOUNT) {
+                    expenseAmountText.setText(String.valueOf(MAX_EXPENSE_AMOUNT));
+                    Snackbar.make(requireView(), String.format("Max Budget amount is %s", MAX_EXPENSE_AMOUNT), Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         // Categories Field, Values
         categoriesInput = view.findViewById(R.id.add_expense_category_text);
