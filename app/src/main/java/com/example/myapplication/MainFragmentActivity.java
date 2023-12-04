@@ -10,6 +10,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -273,13 +274,19 @@ public class MainFragmentActivity extends AppCompatActivity {
             }
         } else {
             // Delete said notification if it exists
+            Log.d("REMOVE-handleNotification", "handleNotification: ");
+            firebaseHelper.removeNotification(username, newNotification);
+
+
+
+
         }
     }
 
     public void showNotification(String message) throws IllegalAccessException, InstantiationException {
         Random random = new Random();
         int m = random.nextInt(9999 - 1000) + 1000;
-        Intent intent = new Intent(getApplicationContext(), DataVisualizationFragment.class);
+        Intent intent = new Intent(getApplicationContext(), NotificationPageActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
@@ -300,11 +307,14 @@ public class MainFragmentActivity extends AppCompatActivity {
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                //.setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.ic_stat_name)
+                .setColor(Color.GREEN)
                 .setContentTitle("Budget Alert")
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
         builder.setContentIntent(pendingIntent);
+        builder.setAutoCancel(true);
 
         // Show the notification
 

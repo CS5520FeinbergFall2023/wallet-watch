@@ -333,6 +333,14 @@ public class FirebaseHelper {
         newNotificationRef.setValue(notification);
     }
 
+    public void removeNotification(String username, Notification notification) {
+        DatabaseReference notificationRef = FirebaseDatabase.getInstance().getReference().child("notifications").child(username);
+        String notificationId = notification.getType();
+
+        notificationRef.child(notificationId).removeValue();
+
+    }
+
 
 }
 
