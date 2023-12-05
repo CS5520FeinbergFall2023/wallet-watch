@@ -207,6 +207,7 @@ public class ExpensePageFragment extends Fragment {
                 // finish action if form is clear
                 if (isFormClear()) {
                     requireActivity().finish();
+                    return;
                 }
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
