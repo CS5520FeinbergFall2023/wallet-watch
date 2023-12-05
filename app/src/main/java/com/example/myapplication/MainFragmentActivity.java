@@ -10,6 +10,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -65,6 +66,7 @@ public class MainFragmentActivity extends AppCompatActivity {
     //will hold category: aggregated expense amount
     public HashMap<String, Long> dictExpense = new HashMap<>();
     public HashMap<String, Long> dictBudget = new HashMap<>();
+    public HashMap<String, Boolean> overBudget = new HashMap<>();
     //HashMap<String, Boolean> overBudgetTracker = new HashMap<>();
     public Calendar currentCalendar = Calendar.getInstance();
     public String username;
@@ -99,7 +101,7 @@ public class MainFragmentActivity extends AppCompatActivity {
         // Get username from local storage
         SharedPreferences prefs = this.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         username = prefs.getString("username", "");
-
+        //readNotifications();
         nestFunction();
     }
 
@@ -156,12 +158,11 @@ public class MainFragmentActivity extends AppCompatActivity {
                 selectedFragment = null;
             }
 
-
             if (selectedFragment != null) {
                 this.selectedFragment = itemId;
 
                 if (previousFragmentTag != null && previousFragmentTag.equals("expense") && !fragmentTag.equals("expense") && !((ExpensePageFragment) Objects.requireNonNull(getSupportFragmentManager().findFragmentByTag(previousFragmentTag))).isFormClear()) {
-                    // alert for when navigating away from the Expense Page
+                    // Alert for when navigating away from the Expense Page
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainFragmentActivity.this);
                     builder.setMessage("Are you sure you want to Navigate away?\nYou will lose all saved values.");
 
@@ -221,112 +222,76 @@ public class MainFragmentActivity extends AppCompatActivity {
         return epochMonth == currentMonth && epochYear == currentYear;
     }
 
-    private HashMap<String, Boolean> overBudget(HashMap<String, Long> dictBudget, HashMap<String, Long> dictExpense) throws IllegalAccessException, InstantiationException {
-        HashMap<String, Boolean> isOverBudget = new HashMap<>();
-        if (dictBudget.isEmpty() || dictExpense.isEmpty()) {
-            Log.d("notice of overbudget", "isEMPTY: ");
-            return isOverBudget;
-        }
-        Long remaining = 0L;
-        for (Map.Entry<String, Long> entry : dictBudget.entrySet()) {
-            if (dictExpense.get(entry.getKey()) != null) {
-                remaining = entry.getValue() - dictExpense.get(entry.getKey());
+    private void overBudget() {
+        this.overBudget.clear();
 
+        for (Map.Entry<String, Long> entry : this.dictBudget.entrySet()) {
+            Log.v("Entry", String.valueOf(entry));
 
-                if (remaining < 0) {
-                    Log.d("notice of overbudget", remaining.toString());
-                    isOverBudget.put(entry.getKey(), true);
-                    //OLD LOCATION OF showNotification()
+            Long remaining = entry.getValue() - this.dictExpense.getOrDefault(entry.getKey(), 0L);
+            String category = entry.getKey();
+            Long budgetAmount = entry.getValue();
 
-
-                    long currentTimestamp = System.currentTimeMillis();
-                    String message = "You are over-budget for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
-                    //showNotification(message);
-                    Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
-                    NotificationType notificationType = NotificationType.OVER_BUDGET;
-                    newNotification.setNotificationType(notificationType);
-                    for (Notification notification : notificationList) {
-                        String stringDate = notification.getDate();
-                        Long longDate = Long.valueOf(stringDate);
-                        if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
-                                != notification.getMonth((longDate)) && notification.getBudgetAmount()
-                                != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
-                            firebaseHelper.createNotification(username, newNotification);
-                            //showNotification();
-                            Log.d("FIREBASEHELPER MAIN CALLED", "fire is called");
-                            showNotification(message); //IF ONLY CALLED HERE WILL ALERT USER ONLY ONCE
-
-                        }
-                    }
-
-                }
-
-                if (remaining == 0) {
-                    Log.d("notice of overbudget", remaining.toString());
-                    isOverBudget.put(entry.getKey(), true);
-                    //OLD LOCATION OF showNotification()
-
-
-                    long currentTimestamp = System.currentTimeMillis();
-                    String message = "You have reached your budget limit for" + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
-                    Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
-                    NotificationType notificationType = NotificationType.AT_LIMIT;
-                    newNotification.setNotificationType(notificationType);
-                    for (Notification notification : notificationList) {
-                        String stringDate = notification.getDate();
-                        Long longDate = Long.valueOf(stringDate);
-                        if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
-                                != notification.getMonth((longDate)) && notification.getBudgetAmount()
-                                != newNotification.getBudgetAmount() && newNotification.getNotificationType() != notification.getNotificationType()) {
-                            firebaseHelper.createNotification(username, newNotification);
-                            showNotification(message);
-                            Log.d("FIREBASEHELPER MAIN CALLED LIMIT", "fire is called");
-
-                        }
-                    }
-
-                }
-
-                if (remaining <= 0.20 * (entry.getValue()) && remaining > 0) {
-                    Log.d("notice of overbudget", remaining.toString());
-                    isOverBudget.put(entry.getKey(), true);
-                    //OLD LOCATION OF showNotification()
-
-                    long currentTimestamp = System.currentTimeMillis();
-                    String message = "You are at most 20% away from reaching your budget for " + " " + entry.getKey() + " in" + " " + this.getMonthYearFromTimestamp(currentTimestamp);
-                    Notification newNotification = new Notification(entry.getKey(), message, String.valueOf(currentTimestamp), entry.getValue());
-                    NotificationType notificationType = NotificationType.LIMIT_APPROACHING;
-                    newNotification.setNotificationType(notificationType);
-                    for (Notification notification : notificationList) {
-                        String stringDate = notification.getDate();
-                        Long longDate = Long.valueOf(stringDate);
-                        if (newNotification.getType() != notification.getType() && newNotification.getMonth(currentTimestamp)
-                                != notification.getMonth((longDate)) && notification.getBudgetAmount()
-                                != newNotification.getBudgetAmount() && newNotification.getNotificationType()
-                                != notification.getNotificationType()) {
-                            firebaseHelper.createNotification(username, newNotification);
-                            showNotification(message);
-                            Log.d("FIREBASEHELPER MAIN CALLED 20", "fire is called");
-
-                        }
-                    }
-
-                } else {
-                    isOverBudget.put(entry.getKey(), false);
-
-                }
+            if (remaining < 0) {
+                handleNotification(
+                        category,
+                        budgetAmount,
+                        NotificationType.OVER_BUDGET,
+                        "You are over-budget for: " + category);
+                overBudget.put(category, true);
+            } else if (remaining == 0) {
+                handleNotification(
+                        category,
+                        budgetAmount,
+                        NotificationType.AT_LIMIT,
+                        "Budget limit reached for: " + category);
+                overBudget.put(category, true);
+            } else if (remaining <= 0.20 * budgetAmount) {
+                handleNotification(
+                        category,
+                        budgetAmount,
+                        NotificationType.LIMIT_APPROACHING,
+                        "Nearing budget limit for: " + category);
+                overBudget.put(category, true);
+            } else {
+                handleNotification(
+                        category,
+                        budgetAmount,
+                        NotificationType.REMOVE,
+                        "N/A");
+                overBudget.put(category, false);
             }
+        }
+
+        Log.v("Overbudget", String.valueOf(this.overBudget));
+    }
+
+    private void handleNotification(String category, Long budgetAmount, NotificationType type, String message) {
+        Notification newNotification = new Notification(category, message, String.valueOf(System.currentTimeMillis()), budgetAmount);
+        newNotification.setNotificationType(type);
+
+        if (newNotification.getNotificationType() != NotificationType.REMOVE) {
+            firebaseHelper.createNotification(username, newNotification);
+            try {
+                showNotification(newNotification.getMessage());
+            } catch (IllegalAccessException | InstantiationException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            // Delete said notification if it exists
+            Log.d("REMOVE-handleNotification", "handleNotification: ");
+            firebaseHelper.removeNotification(username, newNotification);
+
+
+
 
         }
-        Log.d("notice of overbudget", dictBudget.toString());
-        Log.d("notice of overbudget", dictExpense.toString());
-        return isOverBudget;
     }
 
     public void showNotification(String message) throws IllegalAccessException, InstantiationException {
         Random random = new Random();
         int m = random.nextInt(9999 - 1000) + 1000;
-        Intent intent = new Intent(getApplicationContext(), DataVisualizationFragment.class);
+        Intent intent = new Intent(getApplicationContext(), NotificationPageActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 1, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
@@ -347,11 +312,14 @@ public class MainFragmentActivity extends AppCompatActivity {
 
         // Build the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                //.setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.ic_stat_name)
+                .setColor(Color.GREEN)
                 .setContentTitle("Budget Alert")
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
         builder.setContentIntent(pendingIntent);
+        builder.setAutoCancel(true);
 
         // Show the notification
 
@@ -377,207 +345,72 @@ public class MainFragmentActivity extends AppCompatActivity {
 
     }
 
-    public String getMonthYearFromTimestamp(long timestamp) {
-        // Create a Calendar instance and set the time based on the provided timestamp
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timestamp);
-
-        // Get the month and year using the Calendar instance
-        int monthNumber = calendar.get(Calendar.MONTH);
-        int year = calendar.get(Calendar.YEAR);
-
-        // Convert the month number to a month name (using Locale for proper localization)
-        String monthName = new SimpleDateFormat("MMMM", Locale.getDefault()).format(calendar.getTime());
-
-        // Concatenate month and year and return as a string
-        return monthName + " " + year;
-    }
-
     public void nestFunction() {
-        //FirebaseHelper helper = new FirebaseHelper();
-        DatabaseReference budgetDatabaseRef = FirebaseDatabase.getInstance().getReference()
-                .child("budgets")
-                .child(username);
-        //dictBudget = new HashMap<>();
-
-        DatabaseReference expensesDatabaseRef = FirebaseDatabase.getInstance().getReference()
-                .child("expenses")
-                //.child(user.getUsername)
-                .child(username);
-
+        DatabaseReference budgetDatabaseRef = getDatabaseReference("budgets");
+        DatabaseReference expensesDatabaseRef = getDatabaseReference("expenses");
 
         budgetDatabaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Long amount = 0L;
-                Long utilitiesAmount = 0L;
-                Long foodAmount = 0L;
-                Long entertainmentAmount = 0L;
-                Long schoolAmount = 0L;
-                Long travelAmount = 0L;
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    for (DataSnapshot shot : snapshot.getChildren()) {
-                        if (Objects.requireNonNull(shot.getKey()).equalsIgnoreCase("amount")) {
-                            amount = (Long) shot.getValue();
-                        }
-                        if ("category".equalsIgnoreCase(shot.getKey()) && "Food".equalsIgnoreCase(shot.getValue().toString())) {
-
-                            foodAmount += amount;
-                            dictBudget.put((String) shot.getValue(), foodAmount);
-                            continue;
-                        }
-                        if ("category".equalsIgnoreCase(shot.getKey()) && "Entertainment".equalsIgnoreCase(shot.getValue().toString())) {
-                            entertainmentAmount += amount;
-                            Log.d("MAINBUDGETBUDGET", shot.getValue().toString());
-                            dictBudget.put((String) shot.getValue(), entertainmentAmount);
-                            Log.d("MAINBUDGETBUDGET", dictBudget.toString());
-                            continue;
-                        }
-                        if ("category".equalsIgnoreCase(shot.getKey()) && "Travel".equalsIgnoreCase(shot.getValue().toString())) {
-                            travelAmount += amount;
-                            dictBudget.put((String) shot.getValue(), travelAmount);
-                            continue;
-                        }
-                        if ("category".equalsIgnoreCase(shot.getKey()) && "School".equalsIgnoreCase(shot.getValue().toString())) {
-                            schoolAmount += amount;
-                            dictBudget.put((String) shot.getValue(), schoolAmount);
-                            continue;
-                        }
-                        if ("category".equalsIgnoreCase(shot.getKey()) && "Utilities".equalsIgnoreCase(shot.getValue().toString())) {
-                            utilitiesAmount += amount;
-                            dictBudget.put((String) shot.getValue(), utilitiesAmount);
-                            continue;
-                        }
-
-
-                    }
-                }
-                Log.d("notice of dict Budget", dictBudget.toString());
-                copiedDictBudget.putAll(dictBudget);
-                //Log.d("noice of dict Budget COPIED", copiedDictBudget.toString());
-
-
-                //System.out.println(dictBudget);
-                //START EXPENSE HERE
-                Log.d("MAINBUDGETBUDGETBUDGET", dictBudget.toString());
-                //use thread
-                expensesDatabaseRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        //Log.d("notice of dict", dataSnapshot.toString());
-                        Long entertainmentAmount = 0L;
-                        Long foodAmount = 0L;
-                        Long utilitiesAmount = 0L;
-                        Long travelAmount = 0L;
-                        Long schoolAmount = 0L;
-                        Long amount = 0L;
-
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                            for (DataSnapshot shot : snapshot.getChildren()) {
-
-                                if ("amount".equalsIgnoreCase(shot.getKey())) {
-                                    //Log.d("amountKEY", shot.getValue().toString());
-                                    amount = (Long) shot.getValue();
-
-                                }
-
-                                if ("category".equalsIgnoreCase(shot.getKey()) && "Entertainment".equalsIgnoreCase(shot.getValue().toString())) {
-                                    //System.out.println(shot.getValue());
-                                    if (inCurrentMonth((Long) snapshot.child("date").getValue())) {
-                                        entertainmentAmount += amount;
-                                        //entertainmentAmount += (Long) snapshot.child("amount").getValue();
-                                        Log.d("MAINBUDGET", shot.getValue().toString());
-                                        dictExpense.put((String) shot.getValue(), entertainmentAmount);
-                                        Log.d("notice of time", "true: ");
-
-
-                                    }
-                                    continue;
-
-                                }
-                                if ("category".equalsIgnoreCase(shot.getKey()) && "Food".equalsIgnoreCase(shot.getValue().toString())) {
-                                    if (inCurrentMonth((Long) snapshot.child("date").getValue())) {
-                                        //System.out.println(shot.getValue());
-                                        foodAmount += amount;
-                                        //foodAmount += (Long) snapshot.child("amount").getValue();
-                                        dictExpense.put((String) shot.getValue(), foodAmount);
-                                        //isOverBudget(dictBudget.get(shot.getKey()), foodAmount);
-
-                                        continue;
-
-                                    }
-
-                                }
-                                if ("category".equalsIgnoreCase(shot.getKey()) && "Travel".equalsIgnoreCase(shot.getValue().toString())) {
-                                    if (inCurrentMonth((Long) snapshot.child("date").getValue())) {
-                                        //System.out.println(shot.getValue());
-                                        travelAmount += amount;
-                                        //foodAmount += (Long) snapshot.child("amount").getValue();
-                                        dictExpense.put((String) shot.getValue(), amount);
-                                        //isOverBudget(dictBudget.get(shot.getKey()), travelAmount);
-                                        continue;
-                                    }
-
-
-                                }
-                                if ("category".equalsIgnoreCase(shot.getKey()) && "Utilities".equalsIgnoreCase(shot.getValue().toString())) {
-                                    if (inCurrentMonth((Long) snapshot.child("date").getValue())) {
-                                        //System.out.println(shot.getValue());
-                                        utilitiesAmount += amount;
-                                        //utilitiesAmount += (Long) snapshot.child("amount").getValue();
-                                        dictExpense.put((String) shot.getValue(), utilitiesAmount);
-                                        //isOverBudget(dictBudget.get(shot.getKey()), utilitiesAmount);
-
-                                    }
-                                }
-                                if ("category".equalsIgnoreCase(shot.getKey()) && "School".equalsIgnoreCase(shot.getValue().toString())) {
-                                    if (inCurrentMonth((Long) snapshot.child("date").getValue())) {
-                                        //System.out.println(shot.getValue());
-                                        schoolAmount += amount;
-                                        //utilitiesAmount += (Long) snapshot.child("amount").getValue();
-                                        dictExpense.put((String) shot.getValue(), utilitiesAmount);
-                                        //isOverBudget(dictBudget.get(shot.getKey()), utilitiesAmount);
-
-                                    }
-                                }
-
-
-                            }
-
-                        }
-
-
-                        try {
-                            //TROUBLESHOOT dictBudget is EMPTY, DON"T KNOW WHY
-                            overBudget(dictBudget, dictExpense);
-                            //overBudget(copiedDictBudget, dictExpense);
-                            Log.d("MAINBUDGETCOPIED", dictBudget.toString());
-                            Log.d("MAINBUDGET", dictExpense.toString());
-                        } catch (IllegalAccessException e) {
-                            throw new RuntimeException(e);
-                        } catch (InstantiationException e) {
-                            throw new RuntimeException(e);
-                        }
-
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-
+                processBudgetData(dataSnapshot);
+                Log.v("Budget", "Budget");
+                overBudget();
             }
-
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                copiedDictBudget.putAll(dictBudget);
             }
         });
 
+        expensesDatabaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                processExpenseData(dataSnapshot);
+                Log.v("Expense", "Expense");
+                overBudget();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+    }
+
+    private DatabaseReference getDatabaseReference(String childName) {
+        return FirebaseDatabase.getInstance().getReference()
+                .child(childName)
+                .child(username);
+    }
+
+    private void processBudgetData(DataSnapshot dataSnapshot) {
+        this.dictBudget.clear();
+
+        // Iterate for each category
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            String category = snapshot.child("category").getValue(String.class);
+            Long amount = snapshot.child("amount").getValue(Long.class);
+
+            if (category != null && amount != null) {
+                Long updatedAmount = this.dictBudget.getOrDefault(category, 0L) + amount;
+                this.dictBudget.put(category, updatedAmount);
+            }
+        }
+        Log.d("Dict Budget:", this.dictBudget.toString());
+    }
+
+    private void processExpenseData(DataSnapshot dataSnapshot) {
+        this.dictExpense.clear();
+
+        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+            String category = snapshot.child("category").getValue(String.class);
+            Long amount = snapshot.child("amount").getValue(Long.class);
+
+            if (category != null && amount != null && inCurrentMonth((Long) snapshot.child("date").getValue())) {
+                Long currentTotal = this.dictExpense.getOrDefault(category, 0L);
+                this.dictExpense.put(category, currentTotal + amount);
+            }
+        }
+
+        Log.d("Expense Budget:", this.dictExpense.toString());
     }
 }
