@@ -5,6 +5,7 @@ import static com.example.myapplication.MainActivity.PREFS_NAME;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,7 +53,7 @@ public class ExpensePageFragment extends Fragment {
     private final String logTag = "EXP-PAGE";
 
     private AutoCompleteTextView categoriesInput;
-    private ArrayAdapter<Category> categoryAdapter;
+    private NoFilterArrayAdapter categoryAdapter;
     private EditText expenseAmountText, datePickerText, descriptionText;
     private long datePickerValue;
     private TextView imageCapturedMsgView;
@@ -119,7 +121,8 @@ public class ExpensePageFragment extends Fragment {
 
         // Categories Field, Values
         categoriesInput = view.findViewById(R.id.add_expense_category_text);
-        categoryAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        categoriesInput.setFreezesText(false);
+        categoryAdapter = new NoFilterArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
         categoriesInput.setAdapter(categoryAdapter);
 
         categoriesViewModel = new ViewModelProvider(requireActivity()).get(CategoriesViewModel.class);
@@ -231,9 +234,7 @@ public class ExpensePageFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Observe the categories view model data
-        categoriesViewModel.getCategoryList().observe(getViewLifecycleOwner(), v -> {
-            updateCategoryOptions(v);
-        });
+        categoriesViewModel.getCategoryList().observe(getViewLifecycleOwner(), this::updateCategoryOptions);
     }
 
     public boolean isFormClear() {
@@ -534,6 +535,35 @@ public class ExpensePageFragment extends Fragment {
         outState.putString(ExpenseFieldKeys.TEMP_URI, savedUri);
         outState.putParcelableArrayList(ExpenseFieldKeys.CATEGORY_LIST, categories);
     }
+
+    // https://github.com/material-components/material-components-android/issues/1464
+    // Workaround because known open issue in Java where selected items filter down on rotation
+    private static class NoFilterArrayAdapter extends ArrayAdapter<Object> {
+
+        public NoFilterArrayAdapter(Context context, int resource) {
+            super(context, resource);
+        }
+
+        public NoFilterArrayAdapter(Context context, int resource, List<Object> objects) {
+            super(context, resource, objects);
+        }
+
+        @NonNull
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+                    return null;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                }
+            };
+        }
+    }
+
 
 }
 
