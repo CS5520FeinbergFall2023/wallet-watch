@@ -176,7 +176,12 @@ public class MainFragmentActivity extends AppCompatActivity {
                         bottomNavigationView.setSelectedItemId(R.id.expense);
                     });
 
-                    builder.show();
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.setOnDismissListener(dialog -> {
+                        bottomNavigationView.setSelectedItemId(R.id.expense);
+                    });
+
+                    alertDialog.show();
                 } else {
                     getSupportFragmentManager()
                             .beginTransaction()
