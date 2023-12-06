@@ -17,9 +17,8 @@
     <string name="add_expense_amount_hint">Expense Amount</string>
     <string name="dollar_sign_icon_description">dollar sign</string>
     <string name="add_expense_header">Add Expense</string>
-    <string name="clear_expense_button">clear</string>
+    <string name="clear_expense_button">Clear</string>
     <string name="budget_header">Budget</string>
-
     <string name="logout_button">Logout</string>
     <string name="budget_text">Budget</string>
     <string name="username">Username</string>

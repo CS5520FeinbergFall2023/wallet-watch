@@ -5,10 +5,13 @@ import static com.example.myapplication.MainActivity.PREFS_NAME;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.Filter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,9 +49,11 @@ import java.util.List;
 import java.util.Objects;
 
 public class ExpensePageFragment extends Fragment {
+    private final int MAX_EXPENSE_AMOUNT = 99999;
+    private final String logTag = "EXP-PAGE";
 
     private AutoCompleteTextView categoriesInput;
-    private ArrayAdapter<Category> adapter;
+    private NoFilterArrayAdapter categoryAdapter;
     private EditText expenseAmountText, datePickerText, descriptionText;
     private long datePickerValue;
     private TextView imageCapturedMsgView;
@@ -56,18 +62,18 @@ public class ExpensePageFragment extends Fragment {
     private String username;
 
     private ActivityResultLauncher<String> photoPermissionRequest;
-    //    private ActivityResultLauncher<String> photoGalleryPermissionRequest;
     private ActivityResultLauncher<Uri> takePictureLauncher;
     private ActivityResultLauncher<String> pickImageLauncher;
 
     private Uri tempUri;
     private boolean isExpenseImageUploaded;
 
+    private CategoriesViewModel categoriesViewModel;
+    public List<Category> categoryList;
+
     private Expense expense;
 
     private LinearLayout loadingMessage;
-
-    private final String logTag = "EXP-PAGE";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -90,13 +96,36 @@ public class ExpensePageFragment extends Fragment {
         // Expense Field
         expenseAmountText = view.findViewById(R.id.add_expense_amount);
 
+        // Constrain text amount
+        expenseAmountText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int before, int count) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.toString().isEmpty()) {
+                    return;
+                }
+
+                if (Integer.parseInt(editable.toString()) > MAX_EXPENSE_AMOUNT) {
+                    expenseAmountText.setText(String.valueOf(MAX_EXPENSE_AMOUNT));
+                    Snackbar.make(requireView(), String.format("Max Budget amount is %s", MAX_EXPENSE_AMOUNT), Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         // Categories Field, Values
         categoriesInput = view.findViewById(R.id.add_expense_category_text);
-        adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
-        categoriesInput.setAdapter(adapter);
+        categoriesInput.setFreezesText(false);
+        categoryAdapter = new NoFilterArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        categoriesInput.setAdapter(categoryAdapter);
 
-        CategoriesViewModel categoriesViewModel = new ViewModelProvider(requireActivity()).get(CategoriesViewModel.class);
-
+        categoriesViewModel = new ViewModelProvider(requireActivity()).get(CategoriesViewModel.class);
         categoriesViewModel.getCategoryList().observe(getViewLifecycleOwner(), this::updateCategoryOptions);
 
         // Initialize the launchers in your onCreate or onCreateView method:
@@ -108,16 +137,6 @@ public class ExpensePageFragment extends Fragment {
                 Snackbar.make(requireView(), "Camera permission is required!", Snackbar.LENGTH_SHORT).show();
             }
         });
-
-//        // Initialize the launchers in your onCreate or onCreateView method:
-//        photoGalleryPermissionRequest = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
-//            if (result) {
-//                // Camera permission granted, proceed with taking a picture
-//                launchGallery();
-//            } else {
-//                Snackbar.make(requireView(), "Gallery permission is required!", Snackbar.LENGTH_SHORT).show();
-//            }
-//        });
 
         takePictureLauncher = registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
             if (result) {
@@ -170,7 +189,7 @@ public class ExpensePageFragment extends Fragment {
 
         // Submit Button
         MaterialButton addExpenseButton = view.findViewById(R.id.add_expense_submit_button);
-        addExpenseButton.setOnClickListener(v -> checkValues());
+        addExpenseButton.setOnClickListener(v -> checkFormValues());
 
         // Loading Message
         loadingMessage = view.findViewById(R.id.expense_progress_layout);
@@ -181,12 +200,16 @@ public class ExpensePageFragment extends Fragment {
             restoreValues(savedInstanceState);
         }
 
-
-
         // back button check
         OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                // finish action if form is clear
+                if (isFormClear()) {
+                    requireActivity().finish();
+                    return;
+                }
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                 builder.setMessage("Are you sure you want to exit?\nYou will lose any values entered.");
 
@@ -196,6 +219,7 @@ public class ExpensePageFragment extends Fragment {
                 builder.setNegativeButton("Dismiss", (dialog, which) -> {
                     dialog.dismiss();
                 });
+
                 builder.show();
             }
         };
@@ -204,6 +228,30 @@ public class ExpensePageFragment extends Fragment {
         onBackPressedDispatcher.addCallback(getViewLifecycleOwner(), onBackPressedCallback);
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Observe the categories view model data
+        categoriesViewModel.getCategoryList().observe(getViewLifecycleOwner(), this::updateCategoryOptions);
+    }
+
+    public boolean isFormClear() {
+        String amountText = expenseAmountText.getText().toString();
+        String category = categoriesInput.getText().toString();
+        String description = descriptionText.getText().toString();
+        String dateText = datePickerText.getText().toString();
+        boolean recurring = recurringExpenseToggle.isChecked();
+
+        return
+                amountText.isEmpty()
+                        && category.isEmpty()
+                        && description.isEmpty()
+                        && dateText.isEmpty()
+                        && !recurring &&
+                        !isExpenseImageUploaded;
     }
 
     private void dispatchTakePictureIntent() {
@@ -224,19 +272,6 @@ public class ExpensePageFragment extends Fragment {
         builder.show();
     }
 
-    // ** apparently can just skip the permission req ?
-    // Function to request camera permission and launch the gallery
-//    private void requestCameraPermissionAndLaunchGallery() {
-//        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-//                == PackageManager.PERMISSION_GRANTED) {
-//            // Camera permission is already granted, proceed with taking a picture
-//            launchGallery();
-//        } else {
-//            // Request camera permission
-//            photoGalleryPermissionRequest.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
-//        }
-//    }
-
     // Function to request camera permission and launch the camera
     private void requestCameraPermissionAndLaunchCamera() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
@@ -255,7 +290,6 @@ public class ExpensePageFragment extends Fragment {
 
     private void launchCamera() {
         tempUri = createImageUri();
-
 
         if (tempUri != null) {
             takePictureLauncher.launch(tempUri);
@@ -290,7 +324,7 @@ public class ExpensePageFragment extends Fragment {
     /**
      * Check appropriate fields for validity. Submit if all valid.
      */
-    private void checkValues() {
+    private void checkFormValues() {
         if (checkValidField(expenseAmountText) && checkValidField(categoriesInput) &&
                 checkValidField(datePickerText) && checkValidField(descriptionText)) {
             onSubmit();
@@ -397,9 +431,11 @@ public class ExpensePageFragment extends Fragment {
             }
         }
 
-        adapter.clear();
-        adapter.addAll(tempList);
-        adapter.notifyDataSetChanged();
+        categoryList = tempList;
+
+        categoryAdapter.clear();
+        categoryAdapter.addAll(tempList);
+        categoryAdapter.notifyDataSetChanged();
     }
 
     public void showDatePickerDialog(View view) {
@@ -425,10 +461,7 @@ public class ExpensePageFragment extends Fragment {
             boolean isExpUploaded = savedInstanceState.getBoolean(ExpenseFieldKeys.IS_EXPENSE_UPLOADED);
             boolean recurring = savedInstanceState.getBoolean(ExpenseFieldKeys.RECURRING);
             String savedUri = savedInstanceState.getString(ExpenseFieldKeys.TEMP_URI);
-
-            Log.d(logTag, String.format(
-                    "Restoring view with values:\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s", amount, category, date_value,
-                    date_text, description, isExpUploaded, recurring, savedUri));
+            ArrayList<Category> categories = savedInstanceState.getParcelableArrayList(ExpenseFieldKeys.CATEGORY_LIST);
 
             expenseAmountText.setText(String.valueOf(amount));
             categoriesInput.setText(category);
@@ -446,6 +479,10 @@ public class ExpensePageFragment extends Fragment {
                 imageCapturedMsgView.setVisibility(View.VISIBLE);
             }
 
+            if (categories != null) {
+                updateCategoryOptions(categories);
+            }
+
             expenseAmountText.invalidate();
             categoriesInput.invalidate();
         }
@@ -460,6 +497,7 @@ public class ExpensePageFragment extends Fragment {
         public static final String RECURRING = "recurring";
         public static final String TEMP_URI = "temp_uri";
         public static final String IS_EXPENSE_UPLOADED = "is_expense_uploaded";
+        public static final String CATEGORY_LIST = "category_list";
     }
 
     @Override
@@ -471,6 +509,7 @@ public class ExpensePageFragment extends Fragment {
         String dateText = datePickerText.getText().toString();
         String description = descriptionText.getText().toString();
         boolean recurring = recurringExpenseToggle.isChecked();
+        ArrayList<Category> categories = new ArrayList<>(categoryList);
 
         int amount;
         String amountStr = expenseAmountText.getText().toString();
@@ -495,7 +534,37 @@ public class ExpensePageFragment extends Fragment {
         outState.putBoolean(ExpenseFieldKeys.IS_EXPENSE_UPLOADED, isExpenseImageUploaded);
         outState.putBoolean(ExpenseFieldKeys.RECURRING, recurring);
         outState.putString(ExpenseFieldKeys.TEMP_URI, savedUri);
+        outState.putParcelableArrayList(ExpenseFieldKeys.CATEGORY_LIST, categories);
     }
+
+    // https://github.com/material-components/material-components-android/issues/1464
+    // Workaround because known open issue in Java where selected items filter down on rotation
+    private static class NoFilterArrayAdapter extends ArrayAdapter<Object> {
+
+        public NoFilterArrayAdapter(Context context, int resource) {
+            super(context, resource);
+        }
+
+        public NoFilterArrayAdapter(Context context, int resource, List<Object> objects) {
+            super(context, resource, objects);
+        }
+
+        @NonNull
+        @Override
+        public Filter getFilter() {
+            return new Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+                    return null;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                }
+            };
+        }
+    }
+
 
 }
 

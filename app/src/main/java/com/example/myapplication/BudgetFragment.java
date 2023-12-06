@@ -48,8 +48,16 @@ public class BudgetFragment extends Fragment {
 
     private List<BarEntry> barEntries = new ArrayList<>();
     private BarChart barChart;
-    private String[] categories = {"Food", "Entertainment", "Travel", "School", "Utilities"};
+    private final String[] categories = {"Food", "Entertainment", "Travel", "School", "Utilities"};
     private List<Integer> userAmounts = new ArrayList<>(Arrays.asList(0, 0, 0, 0, 0)); // Default values
+
+    private final int[] BAR_COLORS = new int[]{
+            Color.rgb(88, 146, 78),
+            Color.rgb(123, 164, 103),
+            Color.rgb(158, 186, 129),
+            Color.rgb(194, 209, 148),
+            Color.rgb(229, 235, 173)
+    };
 
     @Nullable
     @Override
@@ -280,7 +288,7 @@ public class BudgetFragment extends Fragment {
         xAxis.setTextSize(15f);
 
         // Customize Y-axis
-        barChart.getAxisLeft().setTextSize(20f);
+        barChart.getAxisLeft().setTextSize(15f);
         barChart.getAxisRight().setEnabled(false);
 
         // Remove description label text on the side
@@ -290,7 +298,7 @@ public class BudgetFragment extends Fragment {
     private void setupBarChart() {
 
         BarDataSet dataSet = new BarDataSet(barEntries, "");
-        dataSet.setColors(new int[]{Color.BLUE, Color.YELLOW, Color.RED, Color.GREEN, Color.BLACK});
+        dataSet.setColors(BAR_COLORS);
         dataSet.setDrawValues(false);
 
         BarData data = new BarData(dataSet);
@@ -302,7 +310,7 @@ public class BudgetFragment extends Fragment {
 
     private void updateBarChart() {
         BarDataSet dataSet = new BarDataSet(barEntries, "");
-        dataSet.setColors(new int[]{Color.BLUE, Color.YELLOW, Color.RED, Color.GREEN, Color.BLACK});
+        dataSet.setColors(BAR_COLORS);
         dataSet.setDrawValues(false);
 
         BarData data = new BarData(dataSet);
