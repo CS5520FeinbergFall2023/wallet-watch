@@ -2,7 +2,7 @@ Wallet Watch
 Date: 12/10/2023
 
 Link to GitHub Repository: https://github.com/CS5520FeinbergFall2023/wallet-watch
-
+Link to Demo Video: https://drive.google.com/file/d/1z8MTfFraJxOkekD2oFeR5gNuOk4z5sUn/view?usp=drive_link
 
 Team Members:
 
