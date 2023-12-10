@@ -1,0 +1,29 @@
+Wallet Watch
+Date: 12/10/2023
+
+Link to GitHub Repository: https://github.com/CS5520FeinbergFall2023/wallet-watch
+
+
+Team Members:
+
+David Dada: dada-tech
+Contributions: Add Expense Page. Image capture via Camera, Photo storage and deletion in DB, Deleting Expenses (in View Expenses Page)
+
+Saugat Malla: Saugat-1
+Contributions: Budget Page, Editing budget amounts
+
+Kerry Owusu: kerry-ama
+Contributions: Notifications (in app and in phone). Theming
+
+Kartik Tickoo: tickoo1993
+Contributions: Login/Logout, User Registration, Image capture via Photo upload
+
+Jonathan Trailor: jjtrailor
+Contributions: View Expenses page, View expense photo functionality
+
+
+
+Test users:
+kartik
+kerry
+Username: david, Password: d
